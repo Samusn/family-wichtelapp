@@ -1,21 +1,34 @@
 import Image from "next/image";
-import santaImg from './images/santa.png';
-import Countdown from './components/Countdown';
+import Link from "next/link"; 
+import santaImg from "./images/santa.png";
+import Countdown from "./components/Countdown";
+import "./background.css";
 
-export default function Home() {
+export default function IndexPage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
+    <div className="background font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        {/* <h1 className="text-2xl font-bold my-4 text-red-600">
+           Christmas
+        </h1>
+        */}
         <Image
-          src={santaImg} 
+          src={santaImg}
           alt="Santa Image"
           width={300}
           priority
         />
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-         <Countdown />
-        </div>
+
+        <Countdown />
+
+        <Link
+          href="/login"
+          className="inline-block bg-red-600 text-white font-semibold w-[85%] px-6 py-3 text-lg rounded-lg shadow-lg transition duration-300 text-center"
+        >
+          Hier geht’s weiter →
+        </Link>
       </main>
+
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"

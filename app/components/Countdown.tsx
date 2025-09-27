@@ -22,14 +22,14 @@ const Countdown: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center">
-      <h1 className='text-2xl font-bold my-4'>Christmas</h1>
-      <div className="card border rounded-lg shadow-md p-4 bg-white text-black">
-        <p className="text-xl font-semibold">
-          <span>{zeitBisWeihnachten}</span>{" "}
+    <div className="w-[85%] text-center">
+      <div className="rounded-lg shadow-md p-4 bg-red-600 text-white">
+        <p className="text-2xl font-semibold text-center">
+          <span className="text-lg italic">Noch</span>
+          {" "}<span>{zeitBisWeihnachten}</span>{" "}
           <span className="text-lg italic">bis</span>
         </p>
-        <p className="text-lg">Donnerstag, 25. Dezember</p>
+        <p className="text-lg">wir gemeinsam feiern!</p>
       </div>
     </div>
   );
