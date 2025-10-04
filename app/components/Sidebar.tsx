@@ -3,59 +3,77 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
 import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
+import HomeIcon from '@mui/icons-material/Home';
+import HelpIcon from '@mui/icons-material/Help';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import SettingsIcon from '@mui/icons-material/Settings';
+import Link from 'next/link';
 
-export default function TemporaryDrawer() {
+export default function SimpleDrawer() {
   const [open, setOpen] = React.useState(false);
 
-  const toggleDrawer = (newOpen: boolean) => () => {
-    setOpen(newOpen);
+  const toggleDrawer = (value: boolean) => () => {
+    setOpen(value);
   };
-
-  const DrawerList = (
-    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
-      <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
 
   return (
     <div>
-      <MenuIcon className="text-red-600" onClick={toggleDrawer(true)} />
-      <Drawer open={open} onClose={toggleDrawer(false)}>
-        {DrawerList}
+      <MenuIcon
+        className='text-red-600 cursor-pointer'
+        onClick={toggleDrawer(true)}
+      />
+
+      <Drawer anchor='left' open={open} onClose={toggleDrawer(false)}>
+        <Box
+          className='bg-green-600 h-[100%] w-[250]'
+          role='presentation'
+          onClick={toggleDrawer(false)}
+        >
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} href='/'>
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText primary='Startseite' />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding>
+              <ListItemButton component={Link} href='/'>
+                <ListItemIcon>
+                  <SettingsIcon />
+                </ListItemIcon>
+                <ListItemText primary='Einstellungen' />
+              </ListItemButton>
+            </ListItem>
+      
+            <ListItem disablePadding>
+              <ListItemButton component={Link} href='/'>
+                <ListItemIcon>
+                  <AddShoppingCartIcon />
+                </ListItemIcon>
+                <ListItemText primary='Wunschliste' />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding>
+              <ListItemButton component={Link} href='/'>
+                <ListItemIcon>
+                  <HelpIcon />
+                </ListItemIcon>
+                <ListItemText primary='Hilfe' />
+              </ListItemButton>
+            </ListItem>
+            
+          </List>
+        </Box>
       </Drawer>
     </div>
   );

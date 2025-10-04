@@ -19,9 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
-      "@components/*": ["app/components/*"]
-      "@images/*": ["app/images/*"]
+      "@/*": ["./*"],
+      "@components/*": ["app/components/*"],
+      "@images/*": ["app/images/*"],
       "@auth/*": ["app/login/*"]
     }
   },

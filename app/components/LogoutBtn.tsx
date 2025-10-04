@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { logout } from "@/firebase/auth";
+import { useRouter } from 'next/navigation';
+import { logout } from '@/firebase/auth';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -9,18 +10,18 @@ export default function LogoutButton() {
   const handleLogout = async () => {
     try {
       await logout();
-      router.push("/login");
+      router.push('/login');
     } catch (err) {
-      console.error("Logout fehlgeschlagen", err);
+      console.error('Logout fehlgeschlagen', err);
     }
   };
 
   return (
     <button
       onClick={handleLogout}
-      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+      className='text-red-600 px-4 py-2 rounded hover:bg-red-700 transition'
     >
-      Logout
+     <LogoutIcon /> 
     </button>
   );
 }
