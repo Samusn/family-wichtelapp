@@ -8,10 +8,6 @@ export default function IndexPage() {
   return (
     <div className="background font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        {/* <h1 className="text-2xl font-bold my-4 text-red-600">
-           Christmas
-        </h1>
-        */}
         <Image src={santaImg} alt="Santa Image" width={300} priority />
 
         <Countdown />
