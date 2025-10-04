@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link"; 
+import Link from "next/link";
 import santaImg from "./images/santa.png";
 import Countdown from "./components/Countdown";
 import "./background.css";
@@ -12,12 +12,7 @@ export default function IndexPage() {
            Christmas
         </h1>
         */}
-        <Image
-          src={santaImg}
-          alt="Santa Image"
-          width={300}
-          priority
-        />
+        <Image src={santaImg} alt="Santa Image" width={300} priority />
 
         <Countdown />
 

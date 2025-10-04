@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/firebase/auth";
-import "../background.css"
+import "../background.css";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     try {
       await login(email, password);
-      router.push("/home"); 
+      router.push("/home");
     } catch (err) {
       setError("Login fehlgeschlagen");
     }
@@ -49,4 +49,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

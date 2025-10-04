@@ -25,8 +25,8 @@ const Countdown: React.FC = () => {
     <div className="w-[85%] text-center">
       <div className="rounded-lg shadow-md p-4 bg-red-600 text-white">
         <p className="text-2xl font-semibold text-center">
-          <span className="text-lg italic">Noch</span>
-          {" "}<span>{zeitBisWeihnachten}</span>{" "}
+          <span className="text-lg italic">Noch</span>{" "}
+          <span>{zeitBisWeihnachten}</span>{" "}
           <span className="text-lg italic">bis</span>
         </p>
         <p className="text-lg">wir gemeinsam feiern!</p>
