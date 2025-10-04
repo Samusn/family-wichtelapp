@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import santaImg from "./images/santa.png";
-import Countdown from "./components/Countdown";
-import "./background.css";
+import santaImg from "@images/santa.png";
+import Countdown from "@components/Countdown";
+import "@components/background.css";
 
 export default function IndexPage() {
   return (

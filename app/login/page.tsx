@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/firebase/auth";
-import "../background.css";
+import "@components/background.css";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

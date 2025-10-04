@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import "../background.css";
-import LogoutButton from "./Logout.tsx";
-import ProtectedRoute from "../login/ProtectedRoute";
+import "@components/background.css";
+import LogoutButton from "@components/LogoutBtn";
+import ProtectedRoute from "@auth/ProtectedRoute";
 
 export default function HomePage() {
   return (
