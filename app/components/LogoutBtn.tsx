@@ -4,7 +4,12 @@ import { useRouter } from 'next/navigation';
 import { logout } from '@/firebase/auth';
 import LogoutIcon from '@mui/icons-material/Logout';
 
-export default function LogoutButton() {
+interface LogoutButtonProps {
+  className?: string;
+  label?: string;
+}
+
+export default function LogoutButton({ className, label = 'Abmelden' }: LogoutButtonProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -17,13 +22,8 @@ export default function LogoutButton() {
   };
 
   return (
-    <button
-      onClick={handleLogout}
-      className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-red-700 active:scale-95 transition-transform font-medium"
-    >
-      <LogoutIcon fontSize="medium" />
-      Abmelden
+    <button onClick={handleLogout} className={className}>
+      <LogoutIcon className="mr-2" /> {label}
     </button>
   );
 }
-
