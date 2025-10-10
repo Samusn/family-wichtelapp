@@ -24,7 +24,7 @@ const Countdown: React.FC<CountdownProps> = ({ variant = "boxed" }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // 🎁 Boxed-Version (Startseite)
+  // Boxed-Variante (Startseite)
   if (variant === "boxed") {
     return (
       <div className="w-[85%] text-center">
@@ -40,7 +40,7 @@ const Countdown: React.FC<CountdownProps> = ({ variant = "boxed" }) => {
     );
   }
 
-  // 📱 Plain-Version (Header)
+  // Plain-Variante (Header)
   return (
     <p
       className="

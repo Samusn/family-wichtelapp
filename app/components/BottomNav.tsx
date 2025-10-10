@@ -12,7 +12,7 @@ import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
 
 const navItems = [
   { label: 'Home', icon: <HomeRoundedIcon />, path: '/home' },
-  { label: 'Wunschliste', icon: <CardGiftcardRoundedIcon />, path: '/wishlist' },
+  { label: 'Wunschliste', icon: <CardGiftcardRoundedIcon />, path: '/wishpage' },
   { label: 'Los', icon: <ConfirmationNumberRoundedIcon />, path: '/draw' },
   { label: 'Mehr', icon: <MoreHorizRoundedIcon />, path: '/settings' },
 ];
