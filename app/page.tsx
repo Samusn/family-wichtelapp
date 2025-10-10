@@ -10,7 +10,7 @@ export default function IndexPage() {
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <Image src={santaImg} alt="Santa Image" width={300} priority />
 
-        <Countdown />
+        <Countdown variant='boxed'/>
 
         <Link
           href="/login"
