@@ -1,9 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import '@components/background.css';
-import LogoutButton from '@components/LogoutBtn';
 import ProtectedRoute from '@auth/ProtectedRoute';
-import Sidebar from '@components/Sidebar';
 import Header from '@components/Header';
 import BottomNav from '@components/BottomNav';
 
