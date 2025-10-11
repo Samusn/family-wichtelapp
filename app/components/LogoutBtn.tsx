@@ -15,7 +15,7 @@ export default function LogoutButton({ className, label = 'Abmelden' }: LogoutBu
   const handleLogout = async () => {
     try {
       await logout();
-      router.push('/login');
+      router.push('/');
     } catch (err) {
       console.error('Logout fehlgeschlagen', err);
     }
