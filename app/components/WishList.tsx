@@ -1,23 +1,55 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import GiftIcon from '@mui/icons-material/CardGiftcard';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState, useEffect } from "react";
+import GiftIcon from "@mui/icons-material/CardGiftcard";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { auth } from "@/firebase/auth";
+import { getWishlist, saveWishlist } from "@/firebase/firestore";
 
 export default function WishList() {
   const [items, setItems] = useState<string[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const addItem = () => {
-    if (input.trim() === '') return;
-    setItems([...items, input.trim()]);
-    setInput('');
+  // Daten beim Laden abrufen
+  useEffect(() => {
+    const fetchData = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      const savedItems = await getWishlist(user.uid);
+      setItems(savedItems);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  // Item hinzufügen
+  const addItem = async () => {
+    if (input.trim() === "") return;
+
+    const newItems = [...items, input.trim()];
+    setItems(newItems);
+    setInput("");
+
+    const user = auth.currentUser;
+    if (user) {
+      await saveWishlist(user.uid, newItems);
+    }
   };
 
-  const removeItem = (index: number) => {
-    setItems(items.filter((_, i) => i !== index));
+  // Item löschen
+  const removeItem = async (index: number) => {
+    const newItems = items.filter((_, i) => i !== index);
+    setItems(newItems);
+
+    const user = auth.currentUser;
+    if (user) {
+      await saveWishlist(user.uid, newItems);
+    }
   };
+
+  if (loading) return <p className="text-center mt-4">Lädt...</p>;
 
   return (
     <div className="flex justify-center w-full">
@@ -44,9 +76,7 @@ export default function WishList() {
 
         <div className="space-y-3">
           {items.length === 0 && (
-            <p className="text-center text-gray-500 italic">
-              Noch keine Wünsche ✨
-            </p>
+            <p className="text-center text-gray-500 italic">Noch keine Wünsche ✨</p>
           )}
 
           {items.map((item, index) => (
