@@ -1,17 +1,20 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import '@components/background.css';
 import ProtectedRoute from '@auth/ProtectedRoute';
 import Header from '@components/Header';
 import BottomNav from '@components/BottomNav';
+import HomeCardsContainer from './HomeCardsContainer';
 
 export default function HomePage() {
   return (
     <ProtectedRoute>
       <div className="background font-sans min-h-screen flex flex-col relative">
         <Header />
-        <main className="flex-1 mt-20 mb-20 p-8 sm:p-20 flex flex-col gap-8 items-center sm:items-start z-10">
-         {/* info und liste der teilnehmer sowie navigation ... */}
+        <main className="flex-1 mt-20 mb-20 p-8 sm:p-20 flex flex-col gap-12 items-center sm:items-start z-10">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">
+            Willkommen zum Weihnachtswichteln 🎄
+          </h1>
+          <HomeCardsContainer />
         </main>
         <div className="fixed bottom-0 left-0 right-0 z-50">
           <BottomNav />
@@ -20,4 +23,3 @@ export default function HomePage() {
     </ProtectedRoute>
   );
 }
-
