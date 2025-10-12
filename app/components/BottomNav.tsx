@@ -8,11 +8,13 @@ import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import CardGiftcardRoundedIcon from '@mui/icons-material/CardGiftcardRounded';
 import ConfirmationNumberRoundedIcon from '@mui/icons-material/ConfirmationNumberRounded';
+import GroupsIcon from '@mui/icons-material/Groups';
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
 import BottomSheet from './BottomSheet';
 
 const navItems = [
   { label: 'Home', icon: <HomeRoundedIcon />, path: '/home' },
+  { label: 'Liste', icon: <GroupsIcon />, path: '/participant' },
   { label: 'Wunschliste', icon: <CardGiftcardRoundedIcon />, path: '/wishpage' },
   { label: 'Los', icon: <ConfirmationNumberRoundedIcon />, path: '/draw' },
   { label: 'Mehr', icon: <MoreHorizRoundedIcon />, path: null }, // öffnet Sidebar
