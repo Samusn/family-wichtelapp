@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import '@components/background.css';
 import ProtectedRoute from '@auth/ProtectedRoute';
 import WishList from '@components/WishList';
 import Header from '@components/Header';
@@ -9,7 +8,7 @@ import BottomNav from '@components/BottomNav';
 export default function WishPage() {
   return (
     <ProtectedRoute>
-      <div className="background font-sans min-h-screen flex flex-col relative">
+      <div className="font-sans min-h-screen flex flex-col relative">
         <Header />
         <main className="flex-1 mt-20 mb-20 p-8 sm:p-20 flex flex-col gap-8 items-center justify-center z-10">
           <div className="w-full max-w-sm">

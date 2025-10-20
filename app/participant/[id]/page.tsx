@@ -6,7 +6,6 @@ import { db } from '@/firebase/config';
 import ProtectedRoute from '@auth/ProtectedRoute';
 import Header from '@components/Header';
 import BottomNav from '@components/BottomNav';
-import '@components/background.css';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
@@ -51,7 +50,7 @@ export default function UserWishlist(props: PageProps) {
 
   return (
     <ProtectedRoute>
-      <div className="background font-sans min-h-screen flex flex-col relative">
+      <div className="font-sans min-h-screen flex flex-col relative">
         <Header />
         <main className="flex-1 mt-20 mb-20 p-8 sm:p-20 flex flex-col gap-8 items-start justify-start z-10 w-full max-w-3xl mx-auto">
           {loading ? (
