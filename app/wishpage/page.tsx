@@ -1,9 +1,9 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import ProtectedRoute from '@auth/ProtectedRoute';
-import WishList from '@components/WishList';
-import Header from '@components/Header';
-import BottomNav from '@components/BottomNav';
+import Image from "next/image";
+import Link from "next/link";
+import ProtectedRoute from "@auth/ProtectedRoute";
+import WishList from "@components/WishList";
+import Header from "@components/Header";
+import BottomNav from "@components/BottomNav";
 
 export default function WishPage() {
   return (

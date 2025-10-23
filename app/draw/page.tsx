@@ -1,9 +1,9 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import ProtectedRoute from '@auth/ProtectedRoute';
-import Header from '@components/Header';
-import BottomNav from '@components/BottomNav';
-import DrawField from './drawfield.tsx';
+import Image from "next/image";
+import Link from "next/link";
+import ProtectedRoute from "@auth/ProtectedRoute";
+import Header from "@components/Header";
+import BottomNav from "@components/BottomNav";
+import DrawField from "./drawfield.tsx";
 
 export default function DrawPage() {
   return (

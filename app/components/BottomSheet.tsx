@@ -28,7 +28,9 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
 
   return (
     <>
-      {open && <div className="fixed inset-0 bg-black/25 z-55" onClick={onClose} />}
+      {open && (
+        <div className="fixed inset-0 bg-black/25 z-55" onClick={onClose} />
+      )}
 
       <div
         className={`fixed bottom-0 left-0 right-0 z-60 bg-white rounded-t-3xl shadow-xl transition-transform duration-300 ${
@@ -36,14 +38,18 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
         }`}
       >
         <div className="flex justify-end p-4">
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-700"
+          >
             <CloseIcon fontSize="medium" />
           </button>
         </div>
 
         <div className="flex flex-col w-full gap-3 p-6">
           <button className="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-100 hover:bg-indigo-200 transition font-medium text-gray-900">
-            <PersonIcon className="text-indigo-600" /> {userData ? userData.name : "Profil"}
+            <PersonIcon className="text-indigo-600" />{" "}
+            {userData ? userData.name : "Profil"}
           </button>
 
           <button className="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-100 hover:bg-indigo-200 transition font-medium text-gray-900">

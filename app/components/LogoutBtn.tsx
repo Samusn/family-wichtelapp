@@ -1,23 +1,26 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { logout } from '@/firebase/auth';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { useRouter } from "next/navigation";
+import { logout } from "@/firebase/auth";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 interface LogoutButtonProps {
   className?: string;
   label?: string;
 }
 
-export default function LogoutButton({ className, label = 'Abmelden' }: LogoutButtonProps) {
+export default function LogoutButton({
+  className,
+  label = "Abmelden",
+}: LogoutButtonProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
       await logout();
-      router.push('/');
+      router.push("/");
     } catch (err) {
-      console.error('Logout fehlgeschlagen', err);
+      console.error("Logout fehlgeschlagen", err);
     }
   };
 

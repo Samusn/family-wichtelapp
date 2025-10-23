@@ -1,20 +1,20 @@
-'use client'
-import React from 'react'
+"use client";
+import React from "react";
 
 interface GlowTitleProps {
-  text: string
-  color?: string
-  size?: string
-  shadowColor?: string
-  className?: string
+  text: string;
+  color?: string;
+  size?: string;
+  shadowColor?: string;
+  className?: string;
 }
 
 export default function GlowTitle({
   text,
-  color = '#00a000',
-  size = 'text-3xl',
-  shadowColor = '#00ff00',
-  className = '',
+  color = "#00a000",
+  size = "text-3xl",
+  shadowColor = "#00ff00",
+  className = "",
 }: GlowTitleProps) {
   return (
     <h1
@@ -30,5 +30,5 @@ export default function GlowTitle({
     >
       {text}
     </h1>
-  )
+  );
 }
