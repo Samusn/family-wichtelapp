@@ -2,7 +2,15 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { collection, doc, getDocs, getDoc, query, updateDoc, where } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  query,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
 import { db, auth } from '@/firebase/config'
 import { onAuthStateChanged } from 'firebase/auth'
 import PersonIcon from '@mui/icons-material/Person'
@@ -86,32 +94,44 @@ export default function ParticipantList() {
     )
 
   if (participants.length === 0)
-    return <p className='text-center text-green-600 mt-4'>Keine Teilnehmer gefunden.</p>
+    return (
+      <p className='text-center text-green-600 mt-4'>
+        Keine Teilnehmer gefunden.
+      </p>
+    )
 
   return (
-    <div className='flex justify-center w-full px-4 py-6'>
-      <ul className='w-full max-w-md flex flex-col gap-5'>
+    <div className='flex justify-center w-full'>
+      <ul className='w-full max-w-4xl flex flex-col gap-5 px-4 sm:px-0'>
         <li className='text-center mb-4'>
-          <GlowTitle text='Teilnehmerliste' size='text-3xl' color='#00a000' shadowColor='#99ff66' />
+          <GlowTitle
+            text='Teilnehmerliste'
+            size='text-3xl'
+            color='#00a000'
+            shadowColor='#99ff66'
+          />
         </li>
 
         {sortedParticipants.map((user) => (
           <li
             key={user.id}
-            className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 shadow-sm border ${
+            className={`flex items-center justify-between w-full px-6 py-4 rounded-2xl transition-all duration-200 shadow-sm border ${
               pinned.includes(user.id)
                 ? 'bg-green-50 border-yellow-400'
                 : 'bg-white/80 border-gray-200'
             }`}
           >
-            <Link href={`/participant/${user.id}`} className='flex items-center gap-3 flex-grow'>
+            <Link
+              href={`/participant/${user.id}`}
+              className='flex items-center gap-4 flex-grow'
+            >
               <PersonIcon
                 className={`${
                   pinned.includes(user.id) ? 'text-green-600' : 'text-green-800'
                 }`}
               />
               <span
-                className={`font-semibold text-sm sm:text-base ${
+                className={`font-semibold text-base ${
                   pinned.includes(user.id) ? 'text-green-700' : 'text-gray-800'
                 }`}
               >
@@ -125,7 +145,9 @@ export default function ParticipantList() {
               title={pinned.includes(user.id) ? 'Unpin' : 'Anheften'}
             >
               <PushPinIcon
-                className={pinned.includes(user.id) ? 'text-yellow-500' : 'text-gray-500'}
+                className={
+                  pinned.includes(user.id) ? 'text-yellow-500' : 'text-gray-500'
+                }
               />
             </button>
           </li>

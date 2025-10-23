@@ -1,100 +1,102 @@
-"use client";
+'use client'
 
-import React, { useState, useEffect } from "react";
-import GiftIcon from "@mui/icons-material/CardGiftcard";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { auth } from "@/firebase/auth";
-import { getWishlist, saveWishlist } from "@/firebase/firestore";
+import React, { useState, useEffect } from 'react'
+import GiftIcon from '@mui/icons-material/CardGiftcard'
+import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
+import { auth } from '@/firebase/auth'
+import { getWishlist, saveWishlist } from '@/firebase/firestore'
+import GlowTitle from '@components/GlowTitle'
 
 export default function WishList() {
-  const [items, setItems] = useState<string[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<string[]>([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(true)
 
-  // Daten beim Laden abrufen
   useEffect(() => {
     const fetchData = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-      const savedItems = await getWishlist(user.uid);
-      setItems(savedItems);
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
+      const user = auth.currentUser
+      if (!user) return
+      const savedItems = await getWishlist(user.uid)
+      setItems(savedItems)
+      setLoading(false)
+    }
+    fetchData()
+  }, [])
 
-  // Item hinzufügen
   const addItem = async () => {
-    if (input.trim() === "") return;
-
-    const newItems = [...items, input.trim()];
-    setItems(newItems);
-    setInput("");
-
-    const user = auth.currentUser;
+    if (input.trim() === '') return
+    const newItems = [...items, input.trim()]
+    setItems(newItems)
+    setInput('')
+    const user = auth.currentUser
     if (user) {
-      await saveWishlist(user.uid, newItems);
+      await saveWishlist(user.uid, newItems)
     }
-  };
+  }
 
-  // Item löschen
   const removeItem = async (index: number) => {
-    const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
-
-    const user = auth.currentUser;
+    const newItems = items.filter((_, i) => i !== index)
+    setItems(newItems)
+    const user = auth.currentUser
     if (user) {
-      await saveWishlist(user.uid, newItems);
+      await saveWishlist(user.uid, newItems)
     }
-  };
+  }
 
-  if (loading) return <p className="text-center mt-4">Lädt...</p>;
+  if (loading) return <p className='text-center mt-4 text-white'>Lädt...</p>
 
   return (
-    <div className="flex justify-center w-full">
-      <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-5 text-red-600 flex items-center justify-center gap-2">
-          <GiftIcon fontSize="medium" className="text-red-600" /> Wunschliste
-        </h1>
+    <div className='flex justify-center w-full'>
+      <div className='w-full max-w-4xl flex flex-col gap-5 px-4 sm:px-0'>
+        <div className='text-center mb-4'>
+          <GlowTitle
+            text='Wunschliste'
+            size='text-3xl'
+            color='#00a000'
+            shadowColor='#99ff66'
+          />
+        </div>
 
-        <div className="flex gap-2 mb-4">
+        <div className='flex gap-2 mb-4'>
           <input
-            type="text"
+            type='text'
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Wunsch hinzufügen..."
-            className="flex-1 p-3 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 placeholder-gray-400"
+            placeholder='Wunsch hinzufügen...'
+            className='flex-1 p-3 border border-gray-600 rounded-2xl text-white bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400'
           />
           <button
             onClick={addItem}
-            className="bg-red-600 text-white p-3 rounded-xl hover:bg-red-700 active:scale-95 transition-all flex items-center justify-center"
+            className='bg-green-600 text-white p-3 rounded-2xl hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center'
           >
-            <AddIcon fontSize="small" />
+            <AddIcon fontSize='small' />
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className='flex flex-col gap-4'>
           {items.length === 0 && (
-            <p className="text-center text-gray-500 italic">Noch keine Wünsche ✨</p>
+            <p className='text-center text-gray-400 italic'>
+              Noch keine Wünsche ✨
+            </p>
           )}
 
           {items.map((item, index) => (
             <div
               key={index}
-              className="flex justify-between items-center bg-green-50 border-l-4 border-green-500 p-3 rounded-xl shadow-sm hover:scale-[1.02] transition-transform"
+              className='flex justify-between items-center w-full px-6 py-4 rounded-2xl transition-all duration-200 shadow-sm border bg-gray-900 border-gray-700 hover:scale-[1.02]'
             >
-              <span className="text-gray-900 font-medium truncate">{item}</span>
+              <span className='text-white font-medium truncate'>{item}</span>
               <button
                 onClick={() => removeItem(index)}
-                className="text-red-500 hover:text-red-700 active:scale-90 transition-transform"
+                className='text-red-500 hover:text-red-700 active:scale-90 transition-transform'
               >
-                <DeleteIcon fontSize="small" />
+                <DeleteIcon fontSize='small' />
               </button>
             </div>
           ))}
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,9 +1,9 @@
-'use client';
-import React from 'react';
-import HomeCard from './HomeCard';
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import PeopleIcon from '@mui/icons-material/People';
+"use client";
+import React from "react";
+import HomeCard from "./HomeCard";
+import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import PeopleIcon from "@mui/icons-material/People";
 
 export default function HomeCardsContainer() {
   return (

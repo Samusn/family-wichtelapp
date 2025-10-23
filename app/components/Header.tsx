@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Countdown from '@components/Countdown';
+import React from "react";
+import Countdown from "@components/Countdown";
 
 export default function Header() {
   return (
@@ -12,4 +12,3 @@ export default function Header() {
     </header>
   );
 }
-
