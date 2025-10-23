@@ -9,7 +9,6 @@ export default function ParticipantPage() {
   return (
     <ProtectedRoute>
       <div className="font-sans min-h-screen flex flex-col relative">
-        <Header />
         <main className="flex-1 mt-20 mb-20 p-8 sm:p-20 flex flex-col gap-8 items-center justify-center z-10">
            <ParticipantList />
         </main>

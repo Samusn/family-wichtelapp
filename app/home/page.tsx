@@ -7,8 +7,6 @@ export default function HomePage() {
   return (
     <ProtectedRoute>
       <div className="font-sans min-h-screen flex flex-col relative">
-        <Header />
-
         <main className="flex-1 mt-24 mb-24 px-6 sm:px-20 flex flex-col gap-10 items-center z-10">
           <div className="text-center">
             <div className="flex justify-center items-center gap-3 mb-3">
