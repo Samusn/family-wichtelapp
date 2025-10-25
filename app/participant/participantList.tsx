@@ -7,14 +7,12 @@ import {
   doc,
   getDocs,
   getDoc,
-  query,
-  updateDoc,
-  where,
 } from 'firebase/firestore'
 import { db, auth } from '@/firebase/config'
 import { onAuthStateChanged } from 'firebase/auth'
 import PersonIcon from '@mui/icons-material/Person'
-import PushPinIcon from '@mui/icons-material/PushPin'
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import GlowTitle from '@components/GlowTitle'
 
 interface UserData {
@@ -27,21 +25,26 @@ export default function ParticipantList() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [participants, setParticipants] = useState<UserData[]>([])
   const [loading, setLoading] = useState(true)
-  const [pinned, setPinned] = useState<string[]>([])
+  const [drawnUserId, setDrawnUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUserId(user.uid)
-        const userRef = doc(db, 'users', user.uid)
-        const userSnap = await getDoc(userRef)
-        if (userSnap.exists()) {
-          const userData = userSnap.data()
-          setPinned(userData.pinnedParticipants || [])
+        const drawRef = doc(db, 'draws', user.uid)
+        const drawSnap = await getDoc(drawRef)
+        if (drawSnap.exists()) {
+          const drawnNames: string[] = drawSnap.data()?.drawnNames || []
+          const lastDrawnName = drawnNames[drawnNames.length - 1] || null
+          if (lastDrawnName) {
+            const usersRef = collection(db, 'users')
+            const snapshot = await getDocs(usersRef)
+            const drawnUser = snapshot.docs
+              .map(doc => ({ id: doc.id, ...(doc.data() as UserData) }))
+              .find(u => u.name === lastDrawnName)
+            if (drawnUser) setDrawnUserId(drawnUser.id)
+          }
         }
-      } else {
-        setCurrentUserId(null)
-        setPinned([])
       }
     })
     return () => unsubscribe()
@@ -51,15 +54,13 @@ export default function ParticipantList() {
     const fetchParticipants = async () => {
       try {
         const usersRef = collection(db, 'users')
-        const q = query(usersRef, where('role', '==', 'user'))
-        const snapshot = await getDocs(q)
-        const users = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as UserData),
-        }))
+        const snapshot = await getDocs(usersRef)
+        const users = snapshot.docs
+          .map(doc => ({ id: doc.id, ...(doc.data() as UserData) }))
+          .filter(u => u.role === 'user')
         setParticipants(users)
       } catch (err) {
-        console.error('Fehler beim Laden der Teilnehmer:', err)
+        console.error(err)
       } finally {
         setLoading(false)
       }
@@ -67,24 +68,11 @@ export default function ParticipantList() {
     fetchParticipants()
   }, [])
 
-  const togglePin = async (participantId: string) => {
-    if (!currentUserId) return
-    const newPinned = pinned.includes(participantId)
-      ? pinned.filter((id) => id !== participantId)
-      : [...pinned, participantId]
-    setPinned(newPinned)
-    try {
-      const userRef = doc(db, 'users', currentUserId)
-      await updateDoc(userRef, { pinnedParticipants: newPinned })
-    } catch (err) {
-      console.error('Fehler beim Speichern des Pins:', err)
-    }
-  }
-
-  const sortedParticipants = [
-    ...participants.filter((u) => pinned.includes(u.id)),
-    ...participants.filter((u) => !pinned.includes(u.id)),
-  ]
+  const sortedParticipants = participants
+    .filter(p => p.id !== drawnUserId)
+    .sort((a, b) => a.name.localeCompare(b.name))
+  const drawnUser = participants.find(p => p.id === drawnUserId)
+  const finalList = drawnUser ? [drawnUser, ...sortedParticipants] : sortedParticipants
 
   if (loading)
     return (
@@ -102,54 +90,48 @@ export default function ParticipantList() {
 
   return (
     <div className='flex justify-center w-full'>
-      <ul className='w-full max-w-4xl flex flex-col gap-5 px-4 sm:px-0'>
-        <li className='text-center mb-4'>
+      <ul className='w-full max-w-4xl flex flex-col gap-6 px-4 sm:px-0'>
+        <li className='text-center mb-6'>
           <GlowTitle
             text='Teilnehmerliste'
-            size='text-3xl'
+            size='text-3xl sm:text-4xl'
             color='#00a000'
             shadowColor='#99ff66'
           />
         </li>
 
-        {sortedParticipants.map((user) => (
+        {finalList.map(user => (
           <li
             key={user.id}
-            className={`flex items-center justify-between w-full px-6 py-4 rounded-2xl transition-all duration-200 shadow-sm border ${
-              pinned.includes(user.id)
-                ? 'bg-green-50 border-yellow-400'
-                : 'bg-white/80 border-gray-200'
+            className={`relative flex items-center justify-between w-full px-6 py-4 rounded-3xl shadow-xl border transition-transform duration-300 hover:scale-[1.02] ${
+              user.id === drawnUserId
+                ? 'bg-yellow-50 border-yellow-400'
+                : 'bg-red-50 border-red-400'
             }`}
           >
             <Link
               href={`/participant/${user.id}`}
-              className='flex items-center gap-4 flex-grow'
+              className='relative flex items-center gap-4 flex-grow z-10'
             >
-              <PersonIcon
-                className={`${
-                  pinned.includes(user.id) ? 'text-green-600' : 'text-green-800'
-                }`}
-              />
+              {user.id === drawnUserId ? (
+                <CardGiftcardIcon className='text-yellow-500' />
+              ) : (
+                <PersonIcon className='text-red-700' />
+              )}
               <span
-                className={`font-semibold text-base ${
-                  pinned.includes(user.id) ? 'text-green-700' : 'text-gray-800'
+                className={`font-semibold text-base sm:text-lg ${
+                  user.id === drawnUserId ? 'text-yellow-700' : 'text-red-800'
                 }`}
               >
                 {user.name}
               </span>
             </Link>
-
-            <button
-              onClick={() => togglePin(user.id)}
-              className='btn btn-square btn-ghost btn-sm hover:bg-yellow-100'
-              title={pinned.includes(user.id) ? 'Unpin' : 'Anheften'}
+            <Link
+              href={`/participant/${user.id}`}
+              className='flex items-center justify-center w-7 h-7 rounded-full bg-white/30 hover:bg-white/50 transition cursor-pointer'
             >
-              <PushPinIcon
-                className={
-                  pinned.includes(user.id) ? 'text-yellow-500' : 'text-gray-500'
-                }
-              />
-            </button>
+              <ArrowForwardIosIcon className='text-red-700 text-[14px]' />
+            </Link>
           </li>
         ))}
       </ul>
