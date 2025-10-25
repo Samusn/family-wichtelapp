@@ -5,8 +5,11 @@ import { collection, doc, getDocs, setDoc, getDoc } from 'firebase/firestore'
 import { db, auth } from '@/firebase/config'
 import { onAuthStateChanged } from 'firebase/auth'
 import { motion, AnimatePresence } from 'framer-motion'
-import GlowTitle from '@components/GlowTitle'
+import Lottie from 'lottie-react'
 import Confetti from 'react-confetti'
+
+import treeAnim from '@components/assets/tree.json'
+import giftBoxAnim from '@components/assets/giftBox.json'
 
 interface UserData {
   id: string
@@ -20,10 +23,11 @@ export default function DrawField() {
   const [participants, setParticipants] = useState<UserData[]>([])
   const [loading, setLoading] = useState(true)
   const [drawn, setDrawn] = useState<string | null>(null)
-  const [highlight, setHighlight] = useState<string | null>(null)
   const [animating, setAnimating] = useState(false)
   const [showPopup, setShowPopup] = useState(false)
+  const [showNameInPopup, setShowNameInPopup] = useState(false)
 
+  // 👤 Aktueller User & bisherigen Zug
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -39,6 +43,7 @@ export default function DrawField() {
     return () => unsubscribe()
   }, [])
 
+  // 👥 Teilnehmer laden
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
@@ -57,6 +62,7 @@ export default function DrawField() {
     fetchParticipants()
   }, [])
 
+  // 🎁 Los ziehen
   const handleDraw = async () => {
     if (!currentUserId || animating) return
 
@@ -74,27 +80,25 @@ export default function DrawField() {
     }
 
     setAnimating(true)
-    setDrawn(null)
 
-    let iterations = 25
+    let iterations = 10
     let random: UserData | null = null
-
     const interval = setInterval(() => {
       random = available[Math.floor(Math.random() * available.length)]
-      setHighlight(random.name)
       iterations--
-
       if (iterations <= 0) {
         clearInterval(interval)
-        setHighlight(null)
-        setAnimating(false)
         setDrawn(random!.name)
-        setShowPopup(true)
         saveDraw(currentUserId, random!.name)
+        setShowPopup(true)
+        setAnimating(false)
+
+        setTimeout(() => setShowNameInPopup(true), 500)
       }
-    }, 100)
+    }, 80)
   }
 
+  // 💾 Speichern
   const saveDraw = async (userId: string, drawnName: string) => {
     const drawRef = doc(db, 'draws', userId)
     const drawSnap = await getDoc(drawRef)
@@ -103,92 +107,102 @@ export default function DrawField() {
     await setDoc(drawRef, { drawnNames: newDrawnNames }, { merge: true })
   }
 
+  // 🔄 Replay wenn Name-Rahmen geklickt wird
+  const handleReplay = () => {
+    if (!drawn) return
+    setShowPopup(true)
+    setShowNameInPopup(false)
+    setTimeout(() => setShowNameInPopup(true), 300)
+  }
+
   return (
-    <div className='flex justify-center items-center w-full mt-6 min-h-[400px]'>
-      <div className='w-full max-w-sm bg-white/80 rounded-2xl p-6 shadow-lg flex flex-col items-center gap-6 z-10'>
-        <GlowTitle
-          text='Los ziehen'
-          size='text-2xl'
-          color='#00a000'
-          shadowColor='#99ff66'
-        />
-
-        {loading ? (
-          <p className='text-gray-500 text-sm'>Lade Teilnehmer...</p>
-        ) : !drawn ? (
-          <>
-            <motion.div
-              className='w-full h-32 flex items-center justify-center border-2 border-green-500 rounded-2xl text-gray-900 text-lg font-semibold'
-              animate={{ scale: highlight ? [1, 1.2, 1] : 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              {highlight || '---'}
-            </motion.div>
-
-            <button
-              onClick={handleDraw}
-              disabled={animating}
-              className='mt-6 flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-2xl shadow-md hover:bg-green-700 active:scale-95 transition-transform font-bold text-lg disabled:opacity-50'
-            >
-              Ziehen
-            </button>
-          </>
-        ) : (
-          <div
-            className='mt-6 flex flex-col items-center gap-4 cursor-pointer'
-            onClick={() => setShowPopup(true)}
-          >
-            <motion.div
-              initial={{ y: -50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-              className='text-4xl font-extrabold text-green-600'
-            >
-              {drawn}
-            </motion.div>
-          </div>
-        )}
+    <div className="relative flex flex-col items-center justify-center w-full min-h-[400px] gap-6">
+      {/* 🎄 Baum */}
+      <div className="w-60 h-60">
+        <Lottie animationData={treeAnim} loop />
       </div>
 
+      {/* 🎁 Zieh-Button */}
+      {!drawn && !animating && (
+        <motion.button
+          onClick={handleDraw}
+          className="px-8 py-3 bg-green-600 text-white font-bold rounded-full shadow-[0_0_15px_#3ce35f] hover:scale-105 active:scale-95 transition-transform disabled:opacity-50"
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        >
+          Los ziehen 🎁
+        </motion.button>
+      )}
+
+      {/* ✅ Name-Rahmen unter dem Baum */}
+      {drawn && (
+        <motion.div
+          onClick={handleReplay}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="cursor-pointer px-6 py-3 border-2 border-green-500 rounded-2xl bg-white/10 backdrop-blur-md text-green-300 text-xl font-bold mt-4 shadow-[0_0_15px_#1cff87] hover:shadow-[0_0_25px_#1cff87] transition-shadow"
+        >
+          🎁 Du beschenkst: <span className="text-yellow-300">{drawn}</span>
+        </motion.div>
+      )}
+
+      {loading && (
+        <p className="text-gray-400 text-sm mt-4 animate-pulse">
+          Lade Teilnehmer...
+        </p>
+      )}
+
+      {/* 🎁 Popup */}
       <AnimatePresence>
         {showPopup && drawn && (
-          <>
+          <motion.div
+            key="popup"
+            className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <Confetti numberOfPieces={180} gravity={0.3} recycle={false} />
             <motion.div
-              className='absolute inset-0 flex items-center justify-center z-50'
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              className="relative flex flex-col items-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
             >
-              <Confetti
-                numberOfPieces={200}
-                gravity={0.2}
-                recycle={false}
-                width={400}
-                height={400}
-              />
-              <motion.div
-                className='bg-white rounded-2xl p-6 shadow-lg flex flex-col items-center gap-4 w-72'
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.5, opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 300 }}
+              {/* Geschenk Animation */}
+              <div className="w-56 h-56">
+                <Lottie animationData={giftBoxAnim} loop={false} />
+              </div>
+
+              {/* Name springt heraus */}
+              <AnimatePresence>
+                {showNameInPopup && (
+                  <motion.div
+                    key="name"
+                    initial={{ y: 0, opacity: 0, scale: 0.5 }}
+                    animate={{ y: -140, opacity: 1, scale: 1.2 }}
+                    transition={{ duration: 1.2, ease: 'easeOut' }}
+                    className="absolute bottom-24 text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_12px_#ffd700]"
+                  >
+                    {drawn}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Schließen Button */}
+              <button
+                onClick={() => {
+                  setShowPopup(false)
+                  setShowNameInPopup(false)
+                }}
+                className="mt-10 px-5 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 font-semibold"
               >
-                <motion.div
-                  className='text-4xl font-extrabold text-green-600'
-                  animate={{ rotate: [0, -10, 10, 0] }}
-                  transition={{ duration: 0.5, repeat: 2 }}
-                >
-                  {drawn}
-                </motion.div>
-                <button
-                  onClick={() => setShowPopup(false)}
-                  className='mt-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700'
-                >
-                  Schließen
-                </button>
-              </motion.div>
+                Schließen
+              </button>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
