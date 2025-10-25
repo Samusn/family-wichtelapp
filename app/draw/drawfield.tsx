@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Lottie from 'lottie-react'
 import Confetti from 'react-confetti'
 
-import treeAnim from '@components/assets/tree.json'
+import fireplaceAnim from '@components/assets/fireplace.json'
 import giftBoxAnim from '@components/assets/giftBox.json'
 
 interface UserData {
@@ -107,7 +107,7 @@ export default function DrawField() {
     await setDoc(drawRef, { drawnNames: newDrawnNames }, { merge: true })
   }
 
-  // 🔄 Replay wenn Name-Rahmen geklickt wird
+  // 🔄 Replay 
   const handleReplay = () => {
     if (!drawn) return
     setShowPopup(true)
@@ -116,10 +116,10 @@ export default function DrawField() {
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full min-h-[400px] gap-6">
-      {/* 🎄 Baum */}
-      <div className="w-60 h-60">
-        <Lottie animationData={treeAnim} loop />
+    <div className="relative flex flex-col items-center justify-center w-full min-h-[400px]">
+      {/* fireplace */}
+      <div className="w-80 h-80">
+        <Lottie animationData={fireplaceAnim} loop />
       </div>
 
       {/* 🎁 Zieh-Button */}
@@ -134,14 +134,13 @@ export default function DrawField() {
         </motion.button>
       )}
 
-      {/* ✅ Name-Rahmen unter dem Baum */}
       {drawn && (
         <motion.div
           onClick={handleReplay}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="cursor-pointer px-6 py-3 border-2 border-green-500 rounded-2xl bg-white/10 backdrop-blur-md text-green-300 text-xl font-bold mt-4 shadow-[0_0_15px_#1cff87] hover:shadow-[0_0_25px_#1cff87] transition-shadow"
+          className="cursor-pointer px-6 py-3 border-2 border-green-500 rounded-2xl bg-white/10 backdrop-blur-md text-green-300 text-xl font-bold shadow-[0_0_15px_#1cff87] hover:shadow-[0_0_25px_#1cff87] transition-shadow"
         >
           🎁 Du beschenkst: <span className="text-yellow-300">{drawn}</span>
         </motion.div>
