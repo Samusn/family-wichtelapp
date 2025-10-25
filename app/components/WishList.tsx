@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import GiftIcon from '@mui/icons-material/CardGiftcard'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { auth } from '@/firebase/auth'
 import { getWishlist, saveWishlist } from '@/firebase/firestore'
 import GlowTitle from '@components/GlowTitle'
+import { motion } from 'framer-motion'
 
 export default function WishList() {
   const [items, setItems] = useState<string[]>([])
@@ -58,6 +58,7 @@ export default function WishList() {
           />
         </div>
 
+        {/* Eingabe */}
         <div className='flex gap-2 mb-4'>
           <input
             type='text'
@@ -74,24 +75,35 @@ export default function WishList() {
           </button>
         </div>
 
+        {/* Wunschliste Items */}
         <div className='flex flex-col gap-4'>
           {items.length === 0 && (
-            <p className='text-center text-red-300 italic'>Noch keine Wünsche ✨</p>
+            <p className='text-center text-green-200 italic'>Noch keine Wünsche ✨</p>
           )}
 
           {items.map((item, index) => (
-            <div
+            <motion.div
               key={index}
-              className='flex justify-between items-center w-full px-6 py-4 rounded-2xl transition-all duration-200 shadow-sm border bg-red-50 border-red-400 hover:scale-[1.02]'
+              className='flex items-center w-full px-4 py-3 rounded-2xl backdrop-blur-md bg-white/10 border-2 border-green-500 shadow-[0_0_15px_#3ce35f] text-green-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#1cff87] transition-all duration-200'
             >
-              <span className='text-red-800 font-medium truncate'>{item}</span>
+              {/* Icon links */}
+              <div className='flex-shrink-0 w-8 flex justify-center'>
+                <AddIcon style={{ color: '#00ff66', fontSize: 20 }} />
+              </div>
+
+              {/* Text zentriert */}
+              <div className='flex-grow text-center truncate'>
+                {item}
+              </div>
+
+              {/* Delete rechts */}
               <button
                 onClick={() => removeItem(index)}
-                className='text-red-700 hover:text-red-900 active:scale-90 transition-transform'
+                className='flex-shrink-0 w-8 flex justify-center text-red-500 hover:text-red-700 active:scale-90 transition-transform'
               >
                 <DeleteIcon fontSize='small' />
               </button>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

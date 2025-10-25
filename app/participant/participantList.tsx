@@ -2,18 +2,14 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import {
-  collection,
-  doc,
-  getDocs,
-  getDoc,
-} from 'firebase/firestore'
+import { collection, doc, getDocs, getDoc } from 'firebase/firestore'
 import { db, auth } from '@/firebase/config'
 import { onAuthStateChanged } from 'firebase/auth'
 import PersonIcon from '@mui/icons-material/Person'
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import GlowTitle from '@components/GlowTitle'
+import { motion } from 'framer-motion'
 
 interface UserData {
   id: string
@@ -89,52 +85,60 @@ export default function ParticipantList() {
     )
 
   return (
-    <div className='flex justify-center w-full'>
-      <ul className='w-full max-w-4xl flex flex-col gap-6 px-4 sm:px-0'>
-        <li className='text-center mb-6'>
-          <GlowTitle
-            text='Teilnehmerliste'
-            size='text-3xl sm:text-4xl'
-            color='#00a000'
-            shadowColor='#99ff66'
-          />
-        </li>
+    <div className='flex flex-col items-center w-full px-4 sm:px-0'>
+      <GlowTitle
+        text='Teilnehmerliste'
+        size='text-3xl sm:text-4xl'
+        color='#00a000'
+        shadowColor='#99ff66'
+      />
 
-        {finalList.map(user => (
-          <li
-            key={user.id}
-            className={`relative flex items-center justify-between w-full px-6 py-4 rounded-3xl shadow-xl border transition-transform duration-300 hover:scale-[1.02] ${
-              user.id === drawnUserId
-                ? 'bg-yellow-50 border-yellow-400'
-                : 'bg-red-50 border-red-400'
-            }`}
-          >
-            <Link
-              href={`/participant/${user.id}`}
-              className='relative flex items-center gap-4 flex-grow z-10'
-            >
-              {user.id === drawnUserId ? (
-                <CardGiftcardIcon className='text-yellow-500' />
-              ) : (
-                <PersonIcon className='text-red-700' />
-              )}
-              <span
-                className={`font-semibold text-base sm:text-lg ${
-                  user.id === drawnUserId ? 'text-yellow-700' : 'text-red-800'
-                }`}
+      <div className='mt-6 w-full max-w-4xl flex flex-col gap-4'>
+        {finalList.map(user => {
+          const isDrawn = user.id === drawnUserId
+          return (
+            <Link key={user.id} href={`/participant/${user.id}`}>
+              <motion.div
+                className={`
+                  relative flex items-center w-full py-4 px-4 rounded-2xl
+                  backdrop-blur-md bg-white/10 border-2
+                  shadow-[0_0_15px_#3ce35f] text-green-200 font-semibold text-lg
+                  hover:scale-[1.02] hover:shadow-[0_0_25px_#1cff87] cursor-pointer
+                  transition-all duration-200
+                `}
+                style={{
+                  borderColor: isDrawn ? '#ffd700' : '#00a000',
+                  backgroundColor: isDrawn ? 'rgba(255, 223, 0, 0.15)' : 'rgba(0,160,0,0.1)',
+                  color: isDrawn ? '#ffd700' : '#00ff66',
+                }}
               >
-                {user.name}
-              </span>
+                <div className='flex items-center w-full'>
+                  {/* Icon links */}
+                  <div className='flex-shrink-0 w-8 flex justify-center'>
+                    {isDrawn ? (
+                      <CardGiftcardIcon style={{ color: '#ffd700' }} />
+                    ) : (
+                      <PersonIcon style={{ color: '#00ff66' }} />
+                    )}
+                  </div>
+
+                  {/* Name zentriert */}
+                  <div className='flex-grow text-center'>
+                    {user.name}
+                  </div>
+
+                  {/* Pfeil rechts */}
+                  <div className='flex-shrink-0 w-8 flex justify-center'>
+                    <ArrowForwardIosIcon
+                      style={{ color: isDrawn ? '#ffd700' : '#00ff66', fontSize: 18 }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
             </Link>
-            <Link
-              href={`/participant/${user.id}`}
-              className='flex items-center justify-center w-7 h-7 rounded-full bg-white/30 hover:bg-white/50 transition cursor-pointer'
-            >
-              <ArrowForwardIosIcon className='text-red-700 text-[14px]' />
-            </Link>
-          </li>
-        ))}
-      </ul>
+          )
+        })}
+      </div>
     </div>
   )
 }
