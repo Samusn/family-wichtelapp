@@ -7,6 +7,7 @@ import LogoutButton from '@components/LogoutBtn'
 import PersonIcon from '@mui/icons-material/Person'
 import SettingsIcon from '@mui/icons-material/Settings'
 import CloseIcon from '@mui/icons-material/Close'
+import { motion } from 'framer-motion'
 
 interface BottomSheetProps {
   open: boolean
@@ -33,36 +34,45 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
       )}
 
       <div
-        className={`fixed bottom-0 left-0 right-0 z-60 bg-white rounded-t-3xl shadow-xl transition-transform duration-300 ${
+        className={`fixed bottom-0 left-0 right-0 z-60 bg-white/5 backdrop-blur-lg rounded-t-3xl shadow-xl transition-transform duration-300 ${
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
       >
         <div className='flex justify-end p-4'>
           <button
             onClick={onClose}
-            className='text-gray-400 hover:text-gray-700'
+            className='text-gray-400 hover:text-gray-100 transition-colors'
           >
             <CloseIcon fontSize='medium' />
           </button>
         </div>
 
         <div className='flex flex-col w-full gap-3 p-6'>
-          <button className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-50 border border-red-400 font-medium text-red-800 shadow-sm'>
-            <PersonIcon className='text-red-700' /> {userData ? userData.name : 'Profil'}
-          </button>
+          {/* Profil */}
+          <motion.button
+            className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600 shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#ff7777] transition-all duration-200'
+          >
+            <PersonIcon className='text-red-300' />
+            {userData ? userData.name : 'Profil'}
+          </motion.button>
 
-          <button className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-50 border border-red-400 font-medium text-red-800 shadow-sm'>
-            <SettingsIcon className='text-red-700' /> Einstellungen
-          </button>
+          {/* Einstellungen */}
+          <motion.button
+            className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600 shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#ff7777] transition-all duration-200'
+          >
+            <SettingsIcon className='text-red-300' />
+            Einstellungen
+          </motion.button>
 
-          <div className='border-t border-red-200 my-3' />
+          <div className='border-t border-red-500 my-3' />
 
-          <div className='w-full'>
+          {/* Logout */}
+          <motion.div className='w-full'>
             <LogoutButton
-              className='w-full bg-red-600 text-white px-4 py-3 rounded-2xl hover:bg-red-700 transition font-medium flex justify-center items-center'
+              className='w-full bg-red-600 text-white px-4 py-3 rounded-2xl shadow-[0_0_20px_#ff4d4d] hover:shadow-[0_0_35px_#ff6666] hover:bg-red-700 transition font-semibold flex justify-center items-center'
               label='Abmelden'
             />
-          </div>
+          </motion.div>
         </div>
       </div>
     </>
