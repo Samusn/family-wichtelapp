@@ -51,7 +51,7 @@ export default function UserWishlist(props: PageProps) {
   return (
     <ProtectedRoute>
       <div className='font-sans min-h-screen flex flex-col relative'>
-        <main className='flex-1 mt-20 mb-20 px-4 sm:px-6 md:px-10 flex flex-col gap-8 items-center justify-start w-full'>
+        <main className="flex-1 mt-24 px-6 sm:px-20 pb-40 flex flex-col gap-10 items-center z-10 min-h-[100vh]">
           {loading ? (
             <p className='text-center text-gray-400 w-full mt-20'>Lädt...</p>
           ) : (
