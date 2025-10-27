@@ -17,6 +17,9 @@ importers:
       '@headlessui/react':
         specifier: ^2.2.9
         version: 2.2.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@lottiefiles/react-lottie-player':
+        specifier: ^3.6.0
+        version: 3.6.0(react@19.1.0)
       '@mui/icons-material':
         specifier: ^7.3.4
         version: 7.3.4(@mui/material@7.3.4(@emotion/react@11.14.0(@types/react@19.1.14)(react@19.1.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.1.14)(react@19.1.0))(@types/react@19.1.14)(react@19.1.0))(@types/react@19.1.14)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@types/react@19.1.14)(react@19.1.0)
@@ -591,6 +594,11 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@lottiefiles/react-lottie-player@3.6.0':
+    resolution: {integrity: sha512-WK5TriLJT93VF3w4IjSVyveiedraZCnDhKzCPhpbeLgQeMi6zufxa3dXNc4HmAFRXq+LULPAy+Idv1rAfkReMA==}
+    peerDependencies:
+      react: 16 - 19
 
   '@mui/core-downloads-tracker@7.3.4':
     resolution: {integrity: sha512-BIktMapG3r4iXwIhYNpvk97ZfYWTreBBQTWjQKbNbzI64+ULHfYavQEX2w99aSWHS58DvXESWIgbD9adKcUOBw==}
@@ -2273,6 +2281,11 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@lottiefiles/react-lottie-player@3.6.0(react@19.1.0)':
+    dependencies:
+      lottie-web: 5.13.0
+      react: 19.1.0
 
   '@mui/core-downloads-tracker@7.3.4': {}
 
