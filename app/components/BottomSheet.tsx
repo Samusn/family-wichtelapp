@@ -61,7 +61,7 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
             className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600 shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#ff7777] transition-all duration-200'
           >
             <SettingsIcon className='text-red-300' />
-            Einstellungen
+           Impressum 
           </motion.button>
 
           <div className='border-t border-red-500 my-3' />
