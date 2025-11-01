@@ -34,23 +34,24 @@ export default function HomeCardsContainer() {
       {/* Drei Buttons */}
       <div className="flex flex-col gap-4 w-full mt-4">
         <Link href="/draw">
-          <button className="w-full py-3 bg-green-500 text-white font-bold rounded-2xl shadow-lg hover:bg-green-600 transition-transform transform hover:-translate-y-1 flex items-center justify-center gap-2">
-            <CardGiftcardIcon /> Wichtellos ziehen
+          <button className='relative w-full py-3 rounded-2xl bg-green-500 text-white font-bold shadow-[0_0_15px_rgba(60,227,95,0.5)] hover:shadow-[0_0_25px_rgba(60,227,95,0.6)] transition flex items-center justify-center gap-2'>
+            <CardGiftcardIcon className='absolute left-8' /> Wichtellos ziehen
           </button>
         </Link>
         <Link href="/wishpage">
-          <button className="w-full py-3 bg-green-500 text-white font-bold rounded-2xl shadow-lg hover:bg-green-600 transition-transform transform hover:-translate-y-1 flex items-center justify-center gap-2">
-            <ListAltIcon /> Wunschliste
+        <button className='relative w-full py-3 rounded-2xl bg-green-500 text-white font-bold shadow-[0_0_15px_rgba(60,227,95,0.5)] hover:shadow-[0_0_25px_rgba(60,227,95,0.6)] transition flex items-center justify-center gap-2'>
+
+            <ListAltIcon className='absolute left-8' /> Wunschliste
           </button>
         </Link>
         <Link href="/participant">
-          <button className="w-full py-3 bg-green-500 text-white font-bold rounded-2xl shadow-lg hover:bg-green-600 transition-transform transform hover:-translate-y-1 flex items-center justify-center gap-2">
-            <PeopleIcon /> Teilnehmerliste
+          <button className='relative w-full py-3 rounded-2xl bg-green-500 text-white font-bold shadow-[0_0_15px_rgba(60,227,95,0.5)] hover:shadow-[0_0_25px_rgba(60,227,95,0.6)] transition flex items-center justify-center gap-2'>
+            <PeopleIcon  className='absolute left-8' /> Teilnehmerliste
           </button>
         </Link>
       </div>
 
-      {/* Adventskalender Überschrift */}
+      {/* Adventskalender Überschrift 
       <h2 className="mt-6 text-2xl font-bold text-yellow-300 drop-shadow-md">
          Adventskalender
       </h2>
@@ -58,7 +59,7 @@ export default function HomeCardsContainer() {
         Klicke auf das jeweilige Türchen, um einen Spruch zu sehen.
       </p>
 
-      {/* Adventskalender Grid */}
+      Adventskalender Grid 
       <div className="grid grid-cols-6 gap-3 mt-2 w-full">
         {days.map((day) => {
           const isActive = day <= currentDay // nur Tage bis heute aktiv
@@ -78,7 +79,7 @@ export default function HomeCardsContainer() {
         })}
       </div>
 
-      {/* Popup für Spruch */}
+       Popup für Spruch
       <AnimatePresence>
         {selectedDay && (
           <motion.div
@@ -108,7 +109,7 @@ export default function HomeCardsContainer() {
           </motion.div>
         )}
       </AnimatePresence>
-
+      */}
     </div>
   )
 }
