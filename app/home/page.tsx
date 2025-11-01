@@ -1,5 +1,6 @@
 import ProtectedRoute from '@auth/ProtectedRoute'
 import BottomNav from '@components/BottomNav'
+import LocationMap from '@components/LocationMap'
 import HomeCardsContainer from './HomeCardsContainer'
 import GlowTitle from '@components/GlowTitle'
 
@@ -18,6 +19,7 @@ export default function HomePage() {
           </div>
 
           <HomeCardsContainer />
+          <LocationMap />
         </main>
 
         <div className='fixed bottom-0 left-0 right-0 z-50'>
