@@ -7,7 +7,7 @@ import {
   deleteObject,
 } from 'firebase/storage'
 
-const storage = getStorage(app)
+export const storage = getStorage(app)
 
 export const uploadImageAndGetURL = async (uid: string, file: File) => {
   const fileRef = ref(storage, `wishlists/${uid}/${Date.now()}_${file.name}`)
