@@ -65,15 +65,7 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
             className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/30 border-2 border-yellow-400 shadow-[0_0_15px_#ffbb33] text-yellow-300 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#ffc966] transition-all duration-200 relative z-70'
           >
             <ChatIcon className='text-yellow-400' />
-            Hilfsbot
-          </motion.button>
-
-          {/* Profil */}
-          <motion.button
-            className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600 shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#ff7777] transition-all duration-200'
-          >
-            <PersonIcon className='text-red-300' />
-            {userData ? userData.name : 'Profil'}
+            SamiGPT-67
           </motion.button>
 
           {/* Impressum-Link */}
@@ -89,6 +81,14 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
 
           {/* Trennlinie */}
           <div className='border-t border-red-500 my-3' />
+
+          {/* Profil */}
+          <motion.button
+            className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600 shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#ff7777] transition-all duration-200'
+          >
+            <PersonIcon className='text-red-300' />
+            {userData ? userData.name : 'Profil'}
+          </motion.button>
 
           {/* Logout */}
           <motion.div className='w-full'>

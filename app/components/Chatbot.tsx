@@ -5,6 +5,7 @@ import { Dialog } from '@headlessui/react'
 import { motion } from 'framer-motion'
 import { auth } from '@/firebase/auth'
 import { usePathname } from 'next/navigation'
+import SendIcon from '@mui/icons-material/Send'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -43,7 +44,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
         {
           role: 'assistant',
           content:
-            'Hallo! 👋 Ich bin dein persönlicher Hilfsbot und helfe dir gerne bei der Suche nach Wunschideen für dich selbst. 😊',
+            'Hallo! 👋 Ich bin dein persönlicher Hilfsbot und helfe dir gerne bei Problemen oder bei der Suche nach Ideen für dich selbst.' 
         },
       ])
     }
@@ -95,7 +96,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center p-2">
         <Dialog.Panel className="bg-red-900 rounded-2xl shadow-2xl w-full max-w-[95vw] max-h-[95vh] flex flex-col overflow-hidden border-2 border-yellow-400">
           <div className="flex justify-between items-center p-4 border-b border-yellow-400">
-            <h2 className="text-xl font-bold text-yellow-300">Hilfsbot 💬</h2>
+            <h2 className="text-xl font-bold text-yellow-300">SamiGPT-67</h2>
             <button
               onClick={() => setOpen(false)}
               className="text-yellow-300 hover:text-yellow-400 font-bold"
@@ -127,7 +128,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
           <div className="flex gap-2 p-3 border-t border-yellow-400 bg-red-800">
             <input
               type="text"
-              placeholder="Schreibe deine Wunschidee..."
+              placeholder="Stelle irgendeine Frage..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
@@ -139,7 +140,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
               disabled={loading}
               className="bg-yellow-400 text-red-900 px-4 py-2 rounded-xl font-semibold disabled:opacity-50"
             >
-              {loading ? '…' : 'Senden'}
+              {loading ? '…' : <SendIcon />}
             </button>
           </div>
         </Dialog.Panel>
