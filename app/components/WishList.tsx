@@ -126,7 +126,14 @@ export default function WishList() {
         {/* Buttons: Wunsch hinzufügen + Chatbot */}
         <div className='flex gap-2'>
           <button
-            onClick={() => { setOpen(true); setEditingIndex(null) }}
+            onClick={() => {
+              setInput('')
+              setLink('')
+              setImage(null)
+              setPreview(null)
+              setEditingIndex(null)
+              setOpen(true)
+            }}
             className='flex-1 bg-green-600 text-white font-semibold px-4 py-3 rounded-xl shadow-lg hover:scale-105 transition-all'
           >
             ➕ Wunsch hinzufügen
