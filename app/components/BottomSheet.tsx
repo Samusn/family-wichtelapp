@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { auth } from '@/firebase/auth'
 import { getUserData, UserData } from '@/firebase/firestore'
 import LogoutButton from '@components/LogoutBtn'
@@ -9,7 +10,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import ChatIcon from '@mui/icons-material/Chat'
 import CloseIcon from '@mui/icons-material/Close'
 import { motion } from 'framer-motion'
-import Chatbot from './Chatbot' 
+import Chatbot from './Chatbot'
 
 interface BottomSheetProps {
   open: boolean
@@ -46,6 +47,7 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
       >
+        {/* Close Button */}
         <div className='flex justify-end p-4'>
           <button
             onClick={onClose}
@@ -55,6 +57,7 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
           </button>
         </div>
 
+        {/* Inhalt */}
         <div className='flex flex-col w-full gap-3 p-6 relative z-70'>
           {/* Hilfsbot / Chatbot */}
           <motion.button
@@ -73,14 +76,18 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
             {userData ? userData.name : 'Profil'}
           </motion.button>
 
-          {/* Einstellungen / Impressum */}
-          <motion.button
-            className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600 shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#ff7777] transition-all duration-200'
-          >
-            <SettingsIcon className='text-red-300' />
-            Impressum
-          </motion.button>
+          {/* Impressum-Link */}
+          <motion.div whileHover={{ scale: 1.02 }} className='w-full'>
+            <Link
+              href='/impressum'
+              className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600 shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg hover:shadow-[0_0_25px_#ff7777] transition-all duration-200'
+            >
+              <SettingsIcon className='text-red-300' />
+              Impressum
+            </Link>
+          </motion.div>
 
+          {/* Trennlinie */}
           <div className='border-t border-red-500 my-3' />
 
           {/* Logout */}
