@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import EditIcon from '@mui/icons-material/Edit'
 import ImageIcon from '@mui/icons-material/Image'
+import ChatIcon from '@mui/icons-material/Chat'
 import { auth } from '@/firebase/auth'
 import { getWishlist, saveWishlist } from '@/firebase/firestore'
 import { uploadImageAndGetURL, deleteImageFromURL } from '@/firebase/storage'
-import GlowTitle from '@components/GlowTitle'
-import { motion } from 'framer-motion'
 import { Dialog } from '@headlessui/react'
+import GlowTitle from '@components/GlowTitle'
+import Chatbot from '@components/Chatbot'
 
 interface WishItem {
   text: string
@@ -24,9 +26,10 @@ export default function WishList() {
   const [preview, setPreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
 
-  // === Daten abrufen ===
   useEffect(() => {
     const fetchData = async () => {
       const user = auth.currentUser
@@ -41,7 +44,6 @@ export default function WishList() {
     fetchData()
   }, [])
 
-  // === Bild auswählen ===
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -49,8 +51,7 @@ export default function WishList() {
     setPreview(URL.createObjectURL(file))
   }
 
-  // === Wunsch hinzufügen ===
-  const addItem = async () => {
+  const saveItem = async () => {
     if (input.trim() === '') return
     const user = auth.currentUser
     if (!user) return
@@ -63,22 +64,28 @@ export default function WishList() {
       }
 
       const newItem = { text: input.trim(), link, imageUrl }
-      const newItems = [...items, newItem]
+      let newItems = [...items]
+      if (editingIndex !== null) {
+        newItems[editingIndex] = newItem
+      } else {
+        newItems.push(newItem)
+      }
+
       setItems(newItems)
       setInput('')
       setLink('')
       setImage(null)
       setPreview(null)
+      setEditingIndex(null)
       setOpen(false)
       await saveWishlist(user.uid, newItems)
     } catch (err) {
-      console.error('Fehler beim Hinzufügen:', err)
+      console.error('Fehler beim Speichern:', err)
     } finally {
       setUploading(false)
     }
   }
 
-  // === Wunsch löschen ===
   const removeItem = async (index: number) => {
     const item = items[index]
     const newItems = items.filter((_, i) => i !== index)
@@ -92,6 +99,15 @@ export default function WishList() {
     }
   }
 
+  const editItem = (index: number) => {
+    const item = items[index]
+    setInput(item.text)
+    setLink(item.link || '')
+    setPreview(item.imageUrl || null)
+    setEditingIndex(index)
+    setOpen(true)
+  }
+
   if (loading) return <p className='text-center mt-4 text-white'>Lädt...</p>
 
   return (
@@ -102,75 +118,93 @@ export default function WishList() {
           <GlowTitle
             text='Wunschliste'
             size='text-3xl'
-            color='#00a000'
+            color='#ffffff'
             shadowColor='#99ff66'
           />
         </div>
 
-        {/* Button: Wunsch hinzufügen */}
-        <button
-          onClick={() => setOpen(true)}
-          className='bg-green-600 text-white font-semibold px-4 py-3 rounded-xl shadow-lg hover:scale-105 transition-all w-full'
-        >
-          ➕ Wunsch hinzufügen
-        </button>
+        {/* Buttons: Wunsch hinzufügen + Chatbot */}
+        <div className='flex gap-2'>
+          <button
+            onClick={() => { setOpen(true); setEditingIndex(null) }}
+            className='flex-1 bg-green-600 text-white font-semibold px-4 py-3 rounded-xl shadow-lg hover:scale-105 transition-all'
+          >
+            ➕ Wunsch hinzufügen
+          </button>
+
+          <button
+            onClick={() => setChatOpen(true)}
+            className='bg-yellow-500 text-white p-3 rounded-xl shadow-lg hover:scale-105 transition-all flex items-center justify-center'
+          >
+            <ChatIcon />
+          </button>
+        </div>
 
         {/* Wunschliste */}
         <div className='flex flex-col gap-4 mt-4'>
           {items.length === 0 && (
-            <p className='text-center text-green-200 italic'>
+            <p className='text-center text-white italic'>
               Noch keine Wünsche ✨
             </p>
           )}
 
           {items.map((item, index) => (
-            <motion.div
+            <div
               key={index}
-              className='flex flex-col gap-2 w-full px-4 py-3 rounded-2xl backdrop-blur-md bg-white/10 border-2 border-green-500 shadow-[0_0_15px_#3ce35f] text-green-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#1cff87] transition-all duration-200'
+              className='flex flex-col gap-2 w-full px-4 py-3 rounded-2xl backdrop-blur-md bg-white/10 border-2 border-green-500 shadow-[0_0_15px_#3ce35f] text-white font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#1cff87] transition-all duration-200'
             >
+              {/* Text + Link */}
+              <div className='flex justify-between items-center'>
+                <div className='flex-grow text-left break-words max-w-full'>
+                  {item.link ? (
+                    <a
+                      href={item.link}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='underline text-white hover:text-green-400'
+                    >
+                      {item.text}
+                    </a>
+                  ) : (
+                    item.text
+                  )}
+                </div>
+
+                {/* Aktionen */}
+                <div className='flex gap-2 ml-2'>
+                  <button
+                    onClick={() => editItem(index)}
+                    className='text-yellow-400 hover:text-yellow-200'
+                  >
+                    <EditIcon fontSize='small' />
+                  </button>
+                  <button
+                    onClick={() => removeItem(index)}
+                    className='text-red-600 hover:text-red-400'
+                  >
+                    <DeleteOutlineIcon fontSize='small' />
+                  </button>
+                </div>
+              </div>
+
               {/* Bild */}
               {item.imageUrl && (
                 <img
                   src={item.imageUrl}
                   alt='Wunschbild'
-                  className='rounded-xl w-full max-h-48 object-cover'
+                  className='rounded-xl w-full max-h-48 object-cover mt-2'
                 />
               )}
-
-              {/* Text + Link */}
-              <div className='flex justify-between items-center'>
-                <div className='flex-grow text-left break-words max-w-full'>
-                  {item.text}
-                  {item.link && (
-                    <a
-                      href={item.link}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='block text-green-400 text-sm underline mt-1 hover:text-green-200 break-all'
-                    >
-                      🔗 {item.link}
-                    </a>
-                  )}
-                </div>
-
-                {/* Löschen */}
-                <button
-                  onClick={() => removeItem(index)}
-                  className='ml-2 transition-transform hover:scale-110 text-red-600'
-                >
-                  <DeleteOutlineIcon fontSize='small' />
-                </button>
-              </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        {/* Dialog: Neuen Wunsch hinzufügen */}
+        {/* Dialog: Neuen Wunsch hinzufügen / bearbeiten */}
         <Dialog open={open} onClose={() => setOpen(false)} className='relative z-50'>
           <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4'>
             <Dialog.Panel className='bg-green-900 p-6 rounded-2xl shadow-lg max-w-sm w-full text-white border border-green-400'>
               <Dialog.Title className='text-xl font-bold mb-3'>
-                Neuer Wunsch 🎁
+                {editingIndex !== null ? 'Wunsch bearbeiten 🎁' : 'Neuer Wunsch 🎁'}
               </Dialog.Title>
 
               {/* Text */}
@@ -179,7 +213,7 @@ export default function WishList() {
                 placeholder='Wunschtext'
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className='w-full mb-3 p-2 rounded-md bg-green-800 border border-green-500 placeholder-green-300 focus:outline-none'
+                className='w-full mb-3 p-2 rounded-md bg-green-800 border border-green-500 placeholder-white focus:outline-none text-white'
               />
 
               {/* Link */}
@@ -188,7 +222,7 @@ export default function WishList() {
                 placeholder='Optional: Link'
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
-                className='w-full mb-4 p-2 rounded-md bg-green-800 border border-green-500 placeholder-green-300 focus:outline-none'
+                className='w-full mb-4 p-2 rounded-md bg-green-800 border border-green-500 placeholder-white focus:outline-none text-white'
               />
 
               {/* Bild */}
@@ -220,7 +254,7 @@ export default function WishList() {
                   Abbrechen
                 </button>
                 <button
-                  onClick={addItem}
+                  onClick={saveItem}
                   disabled={uploading}
                   className='bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold disabled:opacity-50'
                 >
@@ -230,6 +264,9 @@ export default function WishList() {
             </Dialog.Panel>
           </div>
         </Dialog>
+
+        {/* Chatbot */}
+        {chatOpen && <Chatbot open={chatOpen} setOpen={setChatOpen} />}
       </div>
     </div>
   )
