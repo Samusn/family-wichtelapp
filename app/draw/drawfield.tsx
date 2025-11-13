@@ -27,7 +27,7 @@ export default function DrawField() {
   const [showPopup, setShowPopup] = useState(false)
   const [showNameInPopup, setShowNameInPopup] = useState(false)
 
-  // 👤 Aktueller User & bisherigen Zug
+  // 👤 Aktueller User & bisherigen Zug laden
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -36,7 +36,14 @@ export default function DrawField() {
         const drawSnap = await getDoc(drawRef)
         if (drawSnap.exists()) {
           const drawnNames: string[] = drawSnap.data().drawnNames || []
-          setDrawn(drawnNames[drawnNames.length - 1] || null)
+          const lastDrawn = drawnNames[drawnNames.length - 1] || null
+          setDrawn(lastDrawn)
+
+          // ⭐ Popup direkt anzeigen, falls bereits gezogen
+          if (lastDrawn) {
+            setShowPopup(true)
+            setShowNameInPopup(true)
+          }
         }
       }
     })
@@ -107,7 +114,7 @@ export default function DrawField() {
     await setDoc(drawRef, { drawnNames: newDrawnNames }, { merge: true })
   }
 
-  // 🔄 Replay 
+  // 🔄 Replay
   const handleReplay = () => {
     if (!drawn) return
     setShowPopup(true)
@@ -134,7 +141,7 @@ export default function DrawField() {
         </motion.button>
       )}
 
-      {drawn && (
+      {drawn && !animating && !showPopup && (
         <motion.div
           onClick={handleReplay}
           initial={{ opacity: 0, y: 30 }}
