@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import ImageIcon from '@mui/icons-material/Image'
 import { auth } from '@/firebase/auth'
 import { getWishlist, saveWishlist } from '@/firebase/firestore'
+import { uploadImageAndGetURL, deleteImageFromURL } from '@/firebase/storage'
 import GlowTitle from '@components/GlowTitle'
 import { motion } from 'framer-motion'
 import { Dialog } from '@headlessui/react'
@@ -12,15 +13,20 @@ import { Dialog } from '@headlessui/react'
 interface WishItem {
   text: string
   link?: string
+  imageUrl?: string
 }
 
 export default function WishList() {
   const [items, setItems] = useState<WishItem[]>([])
   const [input, setInput] = useState('')
   const [link, setLink] = useState('')
+  const [image, setImage] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
+  // === Daten abrufen ===
   useEffect(() => {
     const fetchData = async () => {
       const user = auth.currentUser
@@ -35,76 +41,139 @@ export default function WishList() {
     fetchData()
   }, [])
 
-  const addItem = async () => {
-    if (input.trim() === '') return
-    const newItem = { text: input.trim(), link }
-    const newItems = [...items, newItem]
-    setItems(newItems)
-    setInput('')
-    setLink('')
-    setOpen(false)
-    const user = auth.currentUser
-    if (user) await saveWishlist(user.uid, newItems)
+  // === Bild auswählen ===
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImage(file)
+    setPreview(URL.createObjectURL(file))
   }
 
+  // === Wunsch hinzufügen ===
+  const addItem = async () => {
+    if (input.trim() === '') return
+    const user = auth.currentUser
+    if (!user) return
+
+    setUploading(true)
+    let imageUrl = ''
+    try {
+      if (image) {
+        imageUrl = await uploadImageAndGetURL(user.uid, image)
+      }
+
+      const newItem = { text: input.trim(), link, imageUrl }
+      const newItems = [...items, newItem]
+      setItems(newItems)
+      setInput('')
+      setLink('')
+      setImage(null)
+      setPreview(null)
+      setOpen(false)
+      await saveWishlist(user.uid, newItems)
+    } catch (err) {
+      console.error('Fehler beim Hinzufügen:', err)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  // === Wunsch löschen ===
   const removeItem = async (index: number) => {
+    const item = items[index]
     const newItems = items.filter((_, i) => i !== index)
     setItems(newItems)
     const user = auth.currentUser
-    if (user) await saveWishlist(user.uid, newItems)
+    if (user) {
+      await saveWishlist(user.uid, newItems)
+      if (item.imageUrl) {
+        await deleteImageFromURL(item.imageUrl)
+      }
+    }
   }
 
   if (loading) return <p className='text-center mt-4 text-white'>Lädt...</p>
 
   return (
     <div className='flex justify-center w-full'>
-      <div className='w-full max-w-4xl flex flex-col gap-5 px-4 sm:px-0'>
+      <div className='w-full max-w-md flex flex-col gap-5 px-4 sm:px-0'>
+        {/* Titel */}
         <div className='text-center mb-4'>
-          <GlowTitle text='Wunschliste' size='text-3xl' color='#00a000' shadowColor='#99ff66' />
+          <GlowTitle
+            text='Wunschliste'
+            size='text-3xl'
+            color='#00a000'
+            shadowColor='#99ff66'
+          />
         </div>
 
+        {/* Button: Wunsch hinzufügen */}
         <button
           onClick={() => setOpen(true)}
-          className='bg-green-600 text-white font-semibold px-4 py-3 rounded-xl shadow-lg hover:scale-105 transition-all'
+          className='bg-green-600 text-white font-semibold px-4 py-3 rounded-xl shadow-lg hover:scale-105 transition-all w-full'
         >
           ➕ Wunsch hinzufügen
         </button>
 
+        {/* Wunschliste */}
         <div className='flex flex-col gap-4 mt-4'>
-          {items.length === 0 && <p className='text-center text-green-200 italic'>Noch keine Wünsche ✨</p>}
+          {items.length === 0 && (
+            <p className='text-center text-green-200 italic'>
+              Noch keine Wünsche ✨
+            </p>
+          )}
 
           {items.map((item, index) => (
             <motion.div
               key={index}
-              className='flex flex-col sm:flex-row sm:items-center gap-2 w-full px-4 py-3 rounded-2xl backdrop-blur-md bg-white/10 border-2 border-green-500 shadow-[0_0_15px_#3ce35f] text-green-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#1cff87] transition-all duration-200'
+              className='flex flex-col gap-2 w-full px-4 py-3 rounded-2xl backdrop-blur-md bg-white/10 border-2 border-green-500 shadow-[0_0_15px_#3ce35f] text-green-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#1cff87] transition-all duration-200'
             >
-              <div className='flex-grow text-center sm:text-left break-words max-w-full'>
-                {item.text}
-                {item.link && (
-                  <a
-                    href={item.link}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='block text-green-400 text-sm underline mt-1 hover:text-green-200 break-all'
-                  >
-                    🔗 {item.link}
-                  </a>
-                )}
+              {/* Bild */}
+              {item.imageUrl && (
+                <img
+                  src={item.imageUrl}
+                  alt='Wunschbild'
+                  className='rounded-xl w-full max-h-48 object-cover'
+                />
+              )}
+
+              {/* Text + Link */}
+              <div className='flex justify-between items-center'>
+                <div className='flex-grow text-left break-words max-w-full'>
+                  {item.text}
+                  {item.link && (
+                    <a
+                      href={item.link}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='block text-green-400 text-sm underline mt-1 hover:text-green-200 break-all'
+                    >
+                      🔗 {item.link}
+                    </a>
+                  )}
+                </div>
+
+                {/* Löschen */}
+                <button
+                  onClick={() => removeItem(index)}
+                  className='ml-2 transition-transform hover:scale-110 text-red-600'
+                >
+                  <DeleteOutlineIcon fontSize='small' />
+                </button>
               </div>
-              <button
-                onClick={() => removeItem(index)}
-                className='ml-auto sm:ml-0 transition-transform hover:scale-110 text-red-600'
-              >
-                <DeleteOutlineIcon fontSize='small' />
-              </button>
             </motion.div>
           ))}
         </div>
 
+        {/* Dialog: Neuen Wunsch hinzufügen */}
         <Dialog open={open} onClose={() => setOpen(false)} className='relative z-50'>
           <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4'>
             <Dialog.Panel className='bg-green-900 p-6 rounded-2xl shadow-lg max-w-sm w-full text-white border border-green-400'>
-              <Dialog.Title className='text-xl font-bold mb-3'>Neuer Wunsch 🎁</Dialog.Title>
+              <Dialog.Title className='text-xl font-bold mb-3'>
+                Neuer Wunsch 🎁
+              </Dialog.Title>
+
+              {/* Text */}
               <input
                 type='text'
                 placeholder='Wunschtext'
@@ -112,6 +181,8 @@ export default function WishList() {
                 onChange={(e) => setInput(e.target.value)}
                 className='w-full mb-3 p-2 rounded-md bg-green-800 border border-green-500 placeholder-green-300 focus:outline-none'
               />
+
+              {/* Link */}
               <input
                 type='text'
                 placeholder='Optional: Link'
@@ -119,9 +190,42 @@ export default function WishList() {
                 onChange={(e) => setLink(e.target.value)}
                 className='w-full mb-4 p-2 rounded-md bg-green-800 border border-green-500 placeholder-green-300 focus:outline-none'
               />
+
+              {/* Bild */}
+              <label className='flex items-center justify-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg cursor-pointer mb-3'>
+                <ImageIcon fontSize='small' /> Bild auswählen
+                <input
+                  type='file'
+                  accept='image/*'
+                  className='hidden'
+                  onChange={handleImageChange}
+                />
+              </label>
+
+              {preview && (
+                <img
+                  src={preview}
+                  alt='Preview'
+                  className='rounded-lg w-full max-h-48 object-cover mb-4'
+                />
+              )}
+
+              {/* Buttons */}
               <div className='flex justify-end gap-3'>
-                <button onClick={() => setOpen(false)} className='text-green-300 hover:text-white'>Abbrechen</button>
-                <button onClick={addItem} className='bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold'>Speichern</button>
+                <button
+                  onClick={() => setOpen(false)}
+                  className='text-green-300 hover:text-white'
+                  disabled={uploading}
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={addItem}
+                  disabled={uploading}
+                  className='bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold disabled:opacity-50'
+                >
+                  {uploading ? 'Lädt...' : 'Speichern'}
+                </button>
               </div>
             </Dialog.Panel>
           </div>
