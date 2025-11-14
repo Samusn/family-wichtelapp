@@ -7,10 +7,13 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { motion, AnimatePresence } from 'framer-motion'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 import Confetti from 'react-confetti'
+import { Button } from '@mui/material'
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 
+import GlowTitle from '@components/GlowTitle'
 import giftHouseAnim from '@components/assets/gift_house.json'
 import giftBoxAnim from '@components/assets/giftBox.json'
-import fireplaceAnim from '@components/assets/fireplace.json'
+import snowGlobeAnim from '@components/assets/schneekugel.json'
 
 interface UserData {
   id: string
@@ -99,7 +102,7 @@ export default function DrawField() {
     // Haus Lottie abspielen
     houseRef.current?.play()
 
-    // Nach 2 Sekunden Geschenk Popup mit Name
+    // Nach 3,5 Sekunden Geschenk Popup mit Name
     setTimeout(async () => {
       setDrawn(random.name)
       await saveDraw(currentUserId, random.name)
@@ -122,16 +125,55 @@ export default function DrawField() {
   return (
     <div className="relative flex flex-col items-center justify-center w-full h-full px-4 sm:px-10 gap-6">
 
+      {/* 🎄 Titel 
+      <div className="text-center mb-4">
+        <GlowTitle
+          text="Mein Wichtelopfer:"
+          size="text-3xl sm:text-4xl"
+          color="#ff4444"        // festliches Rot
+          shadowColor="#FFD700"  // goldener Glow
+        />
+      </div>
+      */}
+
       {/* 🎁 Los ziehen Button */}
       {!drawn && !animating && !loading && (
-        <motion.button
-          onClick={handleDraw}
-          className="px-8 py-3 bg-green-600 text-white font-bold rounded-full shadow-[0_0_15px_#3ce35f] hover:scale-105 active:scale-95 transition-transform"
-          animate={{ scale: [1, 1.05, 1] }}
+        <motion.div
+          initial={{ scale: 1 }}
+          animate={{ scale: [1, 1.08, 1] }}
           transition={{ repeat: Infinity, duration: 2 }}
+          className="relative inline-block"
         >
-          Los ziehen 🎁
-        </motion.button>
+          <Button
+            onClick={handleDraw}
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(90deg, #ff4444, #ff8c00, #32cd32)',
+              color: '#fff',
+              fontWeight: 'bold',
+              fontSize: '1.2rem',
+              px: 6,
+              py: 2.5,
+              borderRadius: '9999px',
+              boxShadow: '0 0 20px #FFD700',
+              position: 'relative',
+              overflow: 'hidden',
+              '&:hover': {
+                background: 'linear-gradient(90deg, #ff6347, #ffa500, #3cb371)',
+                transform: 'scale(1.05)',
+              },
+              '&:active': {
+                transform: 'scale(0.95)',
+              },
+            }}
+            endIcon={<CardGiftcardIcon sx={{ fontSize: 28, marginLeft: 1 }} />}
+          >
+            Los ziehen
+          </Button>
+
+          {/* Pulsierender Hintergrund für magischen Glow */}
+          <span className="absolute inset-0 rounded-full bg-white/20 animate-pulse pointer-events-none"></span>
+        </motion.div>
       )}
 
       {/* Haus Lottie */}
@@ -198,22 +240,34 @@ export default function DrawField() {
         )}
       </AnimatePresence>
 
-      {/* Fireplace & finale Anzeige */}
+      {/* Schneekugel & finale Anzeige */}
       {drawn && showFinal && (
         <div className="w-full flex flex-col items-center mt-6">
+
+          {/* Schneekugel Lottie */}
           <motion.div
-            key="final-name"
+            key="snow-globe"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="text-center text-3xl sm:text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_15px_#ffd700] p-3 border-2 border-yellow-400 rounded-xl bg-black/20 mb-4"
+            className="relative flex flex-col items-center"
           >
-            🎁 {drawn}
-          </motion.div>
+            <div className="w-64 h-64 sm:w-80 sm:h-80 mb-[-40px]">
+              <Lottie animationData={snowGlobeAnim} loop />
+            </div>
 
-          <div className="w-64 h-64 sm:w-80 sm:h-80">
-            <Lottie animationData={fireplaceAnim} loop />
-          </div>
+            {/* Name im weihnachtlichen Rahmen */}
+            <div className="relative flex justify-center items-center w-72 sm:w-80 p-4 rounded-t-[50%] rounded-b-xl bg-red-600 border-4 border-yellow-400 shadow-[0_0_25px_#FFD700]">
+              <motion.span
+                initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 1 }}
+                className="text-3xl sm:text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_15px_#FFD700] text-center tracking-wider"
+              >
+                {drawn}
+              </motion.span>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>
