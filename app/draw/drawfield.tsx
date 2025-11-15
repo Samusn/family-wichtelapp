@@ -10,8 +10,8 @@ import Confetti from 'react-confetti'
 import { IconButton } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
-import GlowButton from './glowButton'
 
+import GlowButton from '@components/GlowButton'
 import GlowTitle from '@components/GlowTitle'
 import giftHouseAnim from '@components/assets/gift_house.json'
 import giftBoxAnim from '@components/assets/giftBox.json'
@@ -146,12 +146,12 @@ export default function DrawField() {
 
   return (
     <div className="relative flex flex-col items-center justify-center w-full sm:px-10 gap-6">
-      <div className="text-center mb-4">
+      <div className='text-center mb-4'>
         <GlowTitle
-          text="Mein Wichtelopfer:"
-          size="text-3xl sm:text-4xl"
-          color="#FFD700"
-          shadowColor="#FF4500"
+          text='Mein Wichtelopfer'
+          size='text-3xl sm:text-4xl'
+          color='#00ff66'
+          shadowColor='#33ff99'
         />
       </div>
 
