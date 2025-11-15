@@ -8,6 +8,7 @@ import BottomNav from '@components/BottomNav'
 import GlowTitle from '@components/GlowTitle'
 import { useRouter } from 'next/navigation'
 import { use } from 'react'
+import { motion } from 'framer-motion'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -43,7 +44,6 @@ export default function UserWishlist(props: PageProps) {
         const wishlistSnap = await getDoc(wishlistRef)
         const itemsData = wishlistSnap.exists() ? wishlistSnap.data().items || [] : []
 
-        // Alte Strings normalisieren
         const normalized: WishItem[] = itemsData.map((i: any) =>
           typeof i === 'string' ? { text: i } : i
         )
@@ -67,9 +67,9 @@ export default function UserWishlist(props: PageProps) {
         <main className="flex-1 mt-24 px-6 sm:px-20 pb-40 flex flex-col gap-10 items-center z-10 min-h-[100vh]">
           <GlowTitle
             text={`${userName}’s Wünsche`}
-            size='text-2xl sm:text-3xl'
-            color='#00a000'
-            shadowColor='#99ff66'
+            size='text-3xl sm:text-4xl'
+            color='#00ff66'
+            shadowColor='#33ff99'
           />
 
           {wishlist.length === 0 ? (
@@ -79,37 +79,7 @@ export default function UserWishlist(props: PageProps) {
           ) : (
             <div className='flex flex-col gap-4 w-full max-w-md mt-4'>
               {wishlist.map((item, index) => (
-                <div
-                  key={index}
-                  className='flex flex-col gap-2 w-full px-4 py-3 rounded-2xl backdrop-blur-md bg-white/10 border-2 border-green-500 shadow-[0_0_15px_#3ce35f] text-white font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#1cff87] transition-all duration-200 cursor-pointer'
-                >
-                  {/* Text + Link */}
-                  <div className='flex justify-between items-center'>
-                    <div className='flex-grow text-left break-words max-w-full'>
-                      {item.link ? (
-                        <a
-                          href={item.link}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='underline text-white hover:text-green-400'
-                        >
-                          {item.text}
-                        </a>
-                      ) : (
-                        item.text
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Bild */}
-                  {item.imageUrl && (
-                    <img
-                      src={item.imageUrl}
-                      alt='Wunschbild'
-                      className='rounded-xl w-full max-h-48 object-cover mt-2'
-                    />
-                  )}
-                </div>
+                <WishCard key={index} item={item} />
               ))}
             </div>
           )}
@@ -127,5 +97,47 @@ export default function UserWishlist(props: PageProps) {
         </div>
       </div>
     </ProtectedRoute>
+  )
+}
+
+interface WishCardProps {
+  item: WishItem
+}
+
+function WishCard({ item }: WishCardProps) {
+  return (
+    <motion.div
+      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl bg-red-900/20 backdrop-blur-lg border-2 cursor-pointer transition-all duration-300 overflow-hidden'
+      style={{
+        borderColor: '#FFD700',
+        boxShadow: '0 0 15px 5px rgba(255,0,0,0.6), 0 0 20px 5px rgba(255,215,0,0.5)',
+      }}
+      whileHover={{ scale: 1.02, boxShadow: '0 0 25px 5px rgba(255,215,0,0.7)' }}
+    >
+      <div className='flex justify-between items-center'>
+        <div className='flex-grow text-left break-words max-w-full text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold'>
+          {item.link ? (
+            <a
+              href={item.link}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='bg-clip-text text-transparent bg-gradient-to-r from-red-400 via-red-600 to-red-500 font-semibold underline hover:from-yellow-400 hover:to-red-300'
+            >
+              {item.text}
+            </a>
+          ) : (
+            item.text
+          )}
+        </div>
+      </div>
+
+      {item.imageUrl && (
+        <img
+          src={item.imageUrl}
+          alt='Wunschbild'
+          className='rounded-xl w-full max-h-48 object-cover mt-2'
+        />
+      )}
+    </motion.div>
   )
 }
