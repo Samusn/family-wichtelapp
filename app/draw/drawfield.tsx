@@ -31,8 +31,9 @@ export default function DrawField() {
   const [drawn, setDrawn] = useState<string | null>(null)
   const [animating, setAnimating] = useState(false)
   const [showPopup, setShowPopup] = useState(false)
-  const [showNameInPopup, setShowNameInPopup] = useState(false)
   const [visible, setVisible] = useState(false)
+  const [isNewDraw, setIsNewDraw] = useState(false)
+
   const houseRef = useRef<LottieRefCurrentProps>(null)
   const scrollYRef = useRef(0)
 
@@ -47,7 +48,7 @@ export default function DrawField() {
           const drawnNames: string[] = drawSnap.data().drawnNames || []
           const lastDrawn = drawnNames[drawnNames.length - 1] || null
           setDrawn(lastDrawn)
-          if (lastDrawn) setShowPopup(true)
+          // Popup nicht automatisch öffnen
         }
       }
     })
@@ -122,6 +123,7 @@ export default function DrawField() {
     setTimeout(async () => {
       setDrawn(random.name)
       await saveDraw(currentUserId, random.name)
+      setIsNewDraw(true)
       setShowPopup(true)
       setAnimating(false)
       setTimeout(() => setVisible(true), 100)
@@ -186,7 +188,7 @@ export default function DrawField() {
 
       {/* Popup */}
       <AnimatePresence>
-        {showPopup && drawn && (
+        {showPopup && drawn && isNewDraw && (
           <motion.div
             key="popup"
             className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50"
@@ -202,21 +204,25 @@ export default function DrawField() {
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
-              <div className="w-56 h-56">
+              <div className="relative w-56 h-56">
                 <Lottie animationData={giftBoxAnim} loop={false} />
+                {visible && (
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_12px_#FFD700]"
+                    initial={{ y: 150, opacity: 0 }} // Start noch weiter unten
+                    animate={{ y: -50, opacity: 1 }}  // Fliegt weit nach oben über das Geschenk
+                    transition={{ type: 'spring', stiffness: 140, damping: 14 }}
+                  >
+                    {drawn}
+                  </motion.div>
+                )}
               </div>
-              {visible && (
-                <motion.div
-                  className="absolute bottom-24 text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_12px_#FFD700] text-center"
-                >
-                  {drawn}
-                </motion.div>
-              )}
 
               <button
                 onClick={() => {
                   setShowPopup(false)
                   setVisible(false)
+                  setIsNewDraw(false)
                 }}
                 className="mt-10 px-5 py-2 bg-green-600 text-white rounded-xl font-semibold"
               >
