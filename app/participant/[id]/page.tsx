@@ -9,6 +9,7 @@ import GlowTitle from '@components/GlowTitle'
 import { useRouter } from 'next/navigation'
 import { use } from 'react'
 import { motion } from 'framer-motion'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -107,36 +108,37 @@ interface WishCardProps {
 function WishCard({ item }: WishCardProps) {
   return (
     <motion.div
-      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl bg-red-900/20 backdrop-blur-lg border-2 cursor-pointer transition-all duration-300 overflow-hidden'
+      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 overflow-hidden bg-red-900/20 backdrop-blur-lg'
       style={{
         borderColor: '#FFD700',
         boxShadow: '0 0 15px 5px rgba(255,0,0,0.6), 0 0 20px 5px rgba(255,215,0,0.5)',
       }}
       whileHover={{ scale: 1.02, boxShadow: '0 0 25px 5px rgba(255,215,0,0.7)' }}
     >
-      <div className='flex justify-between items-center'>
-        <div className='flex-grow text-left break-words max-w-full text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold'>
-          {item.link ? (
-            <a
-              href={item.link}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='bg-clip-text text-transparent bg-gradient-to-r from-red-400 via-red-600 to-red-500 font-semibold underline hover:from-yellow-400 hover:to-red-300'
-            >
-              {item.text}
-            </a>
-          ) : (
-            item.text
-          )}
-        </div>
+      {/* Wunschtext oben */}
+      <div className='text-left break-words max-w-full text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold'>
+        {item.text}
       </div>
 
+      {/* Optionales Bild */}
       {item.imageUrl && (
         <img
           src={item.imageUrl}
           alt='Wunschbild'
           className='rounded-xl w-full max-h-48 object-cover mt-2'
         />
+      )}
+
+      {/* Link unten mit Pfeil */}
+      {item.link && (
+        <a
+          href={item.link}
+          target='_blank'
+          rel='noopener noreferrer'
+          className='mt-2 inline-flex items-center text-yellow-400 hover:text-yellow-200 text-sm font-medium'
+        >
+          Link <ArrowForwardIcon fontSize='small' className='ml-1' />
+        </a>
       )}
     </motion.div>
   )

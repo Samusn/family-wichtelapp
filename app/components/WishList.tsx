@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import EditIcon from '@mui/icons-material/Edit'
 import ImageIcon from '@mui/icons-material/Image'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { auth } from '@/firebase/auth'
 import { getWishlist, saveWishlist } from '@/firebase/firestore'
 import { uploadImageAndGetURL, deleteImageFromURL } from '@/firebase/storage'
@@ -115,6 +116,7 @@ export default function WishList() {
   return (
     <div className='flex justify-center w-full'>
       <div className='w-full max-w-md flex flex-col gap-5 px-4 sm:px-0'>
+        {/* Titel */}
         <div className='text-center mb-4'>
           <GlowTitle
             text='Wunschliste'
@@ -124,6 +126,7 @@ export default function WishList() {
           />
         </div>
 
+        {/* Buttons */}
         <div className='flex gap-2'>
           <StyledButton
             onClick={() => {
@@ -139,6 +142,7 @@ export default function WishList() {
           <BigButton onClick={() => setChatOpen(true)} />
         </div>
 
+        {/* Wunschliste */}
         <div className='flex flex-col gap-4 mt-4'>
           {items.length === 0 && (
             <p className='text-center text-white italic'>Noch keine Wünsche ✨</p>
@@ -154,6 +158,7 @@ export default function WishList() {
           ))}
         </div>
 
+        {/* Dialog */}
         <Dialog open={open} onClose={() => setOpen(false)} className='relative z-50'>
           <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4'>
             <Dialog.Panel className='bg-red-900 p-6 rounded-2xl shadow-lg max-w-sm w-full text-white border border-yellow-400'>
@@ -229,31 +234,37 @@ interface WishCardProps {
 function WishCard({ item, onEdit, onDelete }: WishCardProps) {
   return (
     <motion.div
-      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl bg-red-900/20 backdrop-blur-lg border-2 cursor-pointer transition-all duration-300 overflow-hidden'
+      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 overflow-hidden'
       style={{
         borderColor: '#FFD700',
         boxShadow: '0 0 15px 5px rgba(255,0,0,0.6), 0 0 20px 5px rgba(255,215,0,0.5)',
       }}
     >
+      {/* Pulsing circles */}
       <div className='absolute -top-6 -left-6 w-32 h-32 rounded-full bg-red-400/30 blur-3xl animate-pulse'></div>
       <div className='absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-red-600/30 blur-3xl animate-pulse'></div>
 
-      <div className='flex justify-between items-center'>
-        <div className='flex-grow text-left break-words max-w-full text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold'>
-          {item.link ? (
+      <div className='flex justify-between items-start'>
+        <div className='flex-grow text-left'>
+          {/* Wunschtext oben */}
+          <div className='text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold break-words'>
+            {item.text}
+          </div>
+
+          {/* Link unten mit Material-Icon */}
+          {item.link && (
             <a
               href={item.link}
               target='_blank'
               rel='noopener noreferrer'
-              className='bg-clip-text text-transparent bg-gradient-to-r from-red-400 via-red-600 to-red-500 font-semibold underline hover:from-yellow-400 hover:to-red-300'
+              className='mt-1 inline-flex items-center text-yellow-400 hover:text-yellow-200 text-sm font-medium'
             >
-              {item.text}
+              Link <ArrowForwardIcon fontSize='small' className='ml-1' />
             </a>
-          ) : (
-            item.text
           )}
         </div>
 
+        {/* Buttons */}
         <div className='flex gap-2 ml-2'>
           <button onClick={onEdit} className='text-yellow-400 hover:text-yellow-200'>
             <EditIcon fontSize='small' />
@@ -264,6 +275,7 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
         </div>
       </div>
 
+      {/* Optionales Bild */}
       {item.imageUrl && (
         <img
           src={item.imageUrl}
