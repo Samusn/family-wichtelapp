@@ -89,46 +89,55 @@ export default function ParticipantList() {
       <GlowTitle
         text='Teilnehmerliste'
         size='text-3xl sm:text-4xl'
-        color='#00a000'
-        shadowColor='#99ff66'
+        color='#00ff66'
+        shadowColor='#33ff99'
       />
 
-      <div className='mt-6 w-full max-w-4xl flex flex-col gap-4'>
+      <div className='mt-6 w-full max-w-4xl flex flex-col gap-5'>
         {finalList.map(user => {
           const isDrawn = user.id === drawnUserId
           return (
             <Link key={user.id} href={`/participant/${user.id}`}>
               <motion.div
                 className={`
-                  relative flex items-center w-full py-4 px-4 rounded-2xl
-                  backdrop-blur-md bg-white/10 border-2
-                  shadow-[0_0_15px_#3ce35f] text-green-200 font-semibold text-lg
-                  hover:scale-[1.02] hover:shadow-[0_0_25px_#1cff87] cursor-pointer
-                  transition-all duration-200
+                  relative flex items-center w-full p-5 rounded-2xl
+                  bg-gradient-to-r from-[#0a0a0a]/20 via-[#0a0a0a]/10 to-[#0a0a0a]/20
+                  backdrop-blur-lg
+                  border-t border-b border-transparent
+                  hover:scale-[1.03] cursor-pointer
+                  transition-all duration-300
+                  overflow-hidden
                 `}
                 style={{
-                  borderColor: isDrawn ? '#ffd700' : '#00a000',
-                  backgroundColor: isDrawn ? 'rgba(255, 223, 0, 0.15)' : 'rgba(0,160,0,0.1)',
-                  color: isDrawn ? '#ffd700' : '#00ff66',
+                  borderImage: `radial-gradient(circle, ${isDrawn ? '#ffd700' : '#00ff66'} 0%, rgba(0,0,0,0) 100%) 1`,
+                  boxShadow: isDrawn
+                    ? '0 0 30px 10px rgba(255, 215, 0, 0.5)'
+                    : '0 0 30px 10px rgba(0, 255, 102, 0.2)',
                 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
               >
+                {/* Neon Glow Circles */}
+                <div className='absolute -top-8 -left-8 w-32 h-32 rounded-full bg-yellow-400/20 blur-3xl'></div>
+                <div className='absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-green-400/20 blur-3xl'></div>
+
                 <div className='flex items-center w-full'>
                   {/* Icon links */}
-                  <div className='flex-shrink-0 w-8 flex justify-center'>
+                  <div className='flex-shrink-0 w-10 flex justify-center'>
                     {isDrawn ? (
-                      <CardGiftcardIcon style={{ color: '#ffd700' }} />
+                      <CardGiftcardIcon style={{ color: '#ffd700', fontSize: 28 }} />
                     ) : (
-                      <PersonIcon style={{ color: '#00ff66' }} />
+                      <PersonIcon style={{ color: '#00ff66', fontSize: 28 }} />
                     )}
                   </div>
 
                   {/* Name zentriert */}
-                  <div className='flex-grow text-center'>
+                  <div className='flex-grow text-center text-lg sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-green-600'>
                     {user.name}
                   </div>
 
                   {/* Pfeil rechts */}
-                  <div className='flex-shrink-0 w-8 flex justify-center'>
+                  <div className='flex-shrink-0 w-10 flex justify-center'>
                     <ArrowForwardIosIcon
                       style={{ color: isDrawn ? '#ffd700' : '#00ff66', fontSize: 18 }}
                     />
