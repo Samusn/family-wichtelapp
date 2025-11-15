@@ -93,23 +93,32 @@ export default function DrawField() {
     }
   }, [showPopup])
 
+  // Atomare Speicherung der Ziehung
   const saveDraw = async (userId: string, drawnName: string) => {
     const drawRef = doc(db, 'draws', userId)
     const drawSnap = await getDoc(drawRef)
     const drawnNames: string[] = drawSnap?.data()?.drawnNames || []
-    const newDrawnNames = [...drawnNames, drawnName]
-    await setDoc(drawRef, { drawnNames: newDrawnNames }, { merge: true })
+    if (!drawnNames.includes(drawnName)) {
+      const newDrawnNames = [...drawnNames, drawnName]
+      await setDoc(drawRef, { drawnNames: newDrawnNames }, { merge: true })
+    }
   }
 
   const handleDraw = async () => {
     if (!currentUserId || animating || drawn) return
-    const drawRef = doc(db, 'draws', currentUserId)
-    const drawSnap = await getDoc(drawRef)
-    const alreadyDrawn: string[] = drawSnap?.data()?.drawnNames || []
 
+    // Alle bisherigen Ziehungen aller User laden
+    const drawsSnapshot = await getDocs(collection(db, 'draws'))
+    const alreadyDrawnAll: string[] = []
+    drawsSnapshot.forEach(doc => {
+      const names: string[] = doc.data().drawnNames || []
+      alreadyDrawnAll.push(...names)
+    })
+
+    // Verfügbare Teilnehmer filtern
     const available = participants
-      .filter((p) => p.id !== currentUserId)
-      .filter((p) => !alreadyDrawn.includes(p.name))
+      .filter(p => p.id !== currentUserId) // sich selbst nicht ziehen
+      .filter(p => !alreadyDrawnAll.includes(p.name)) // schon gezogen?
 
     if (available.length === 0) {
       alert('Alle Teilnehmer wurden bereits gezogen.')
@@ -209,8 +218,8 @@ export default function DrawField() {
                 {visible && (
                   <motion.div
                     className="absolute inset-0 flex items-center justify-center text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_12px_#FFD700]"
-                    initial={{ y: 150, opacity: 0 }} // Start noch weiter unten
-                    animate={{ y: -50, opacity: 1 }}  // Fliegt weit nach oben über das Geschenk
+                    initial={{ y: 150, opacity: 0 }}
+                    animate={{ y: -50, opacity: 1 }}
                     transition={{ type: 'spring', stiffness: 140, damping: 14 }}
                   >
                     {drawn}
