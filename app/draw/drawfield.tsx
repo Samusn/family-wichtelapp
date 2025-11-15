@@ -7,10 +7,10 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { motion, AnimatePresence } from 'framer-motion'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 import Confetti from 'react-confetti'
-import { Button, IconButton } from '@mui/material'
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
+import { IconButton } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import GlowButton from './glowButton'
 
 import GlowTitle from '@components/GlowTitle'
 import giftHouseAnim from '@components/assets/gift_house.json'
@@ -32,7 +32,6 @@ export default function DrawField() {
   const [animating, setAnimating] = useState(false)
   const [showPopup, setShowPopup] = useState(false)
   const [showNameInPopup, setShowNameInPopup] = useState(false)
-  const [showFinal, setShowFinal] = useState(false)
   const [visible, setVisible] = useState(false)
   const houseRef = useRef<LottieRefCurrentProps>(null)
   const scrollYRef = useRef(0)
@@ -48,7 +47,7 @@ export default function DrawField() {
           const drawnNames: string[] = drawSnap.data().drawnNames || []
           const lastDrawn = drawnNames[drawnNames.length - 1] || null
           setDrawn(lastDrawn)
-          if (lastDrawn) setShowFinal(true)
+          if (lastDrawn) setShowPopup(true)
         }
       }
     })
@@ -74,7 +73,7 @@ export default function DrawField() {
     fetchParticipants()
   }, [])
 
-  // Scroll sperren, wenn Popup geöffnet ist
+  // Scroll sperren bei Popup
   useEffect(() => {
     if (showPopup) {
       scrollYRef.current = window.scrollY
@@ -112,7 +111,7 @@ export default function DrawField() {
       .filter((p) => !alreadyDrawn.includes(p.name))
 
     if (available.length === 0) {
-      alert('Alle Teilnehmer wurden bereits gezogen. Wende dich an Samuel 😅')
+      alert('Alle Teilnehmer wurden bereits gezogen.')
       return
     }
 
@@ -125,7 +124,7 @@ export default function DrawField() {
       await saveDraw(currentUserId, random.name)
       setShowPopup(true)
       setAnimating(false)
-      setTimeout(() => setShowNameInPopup(true), 100)
+      setTimeout(() => setVisible(true), 100)
     }, 3500)
   }
 
@@ -136,7 +135,6 @@ export default function DrawField() {
 
   return (
     <div className="relative flex flex-col items-center justify-center w-full sm:px-10 gap-6">
-
       <div className="text-center mb-4">
         <GlowTitle
           text="Mein Wichtelopfer:"
@@ -146,9 +144,8 @@ export default function DrawField() {
         />
       </div>
 
-      {/* Container für Haus / Schneekugel / Button */}
+      {/* Container Haus / Schneekugel / Button */}
       <div className="relative w-full max-w-[95%] mt-6 flex justify-center" style={{ minHeight: 400 }}>
-        {/* Haus */}
         {!drawn && (
           <Lottie
             lottieRef={houseRef}
@@ -159,7 +156,6 @@ export default function DrawField() {
           />
         )}
 
-        {/* Schneekugel + Name + Visibility (nach Ziehen) */}
         {drawn && (
           <div className="relative flex flex-col items-center z-0">
             <div className="relative w-64 h-64 sm:w-80 sm:h-80">
@@ -181,38 +177,9 @@ export default function DrawField() {
           </div>
         )}
 
-        {/* Button absolut über dem Haus */}
         {!drawn && !animating && !loading && (
-          <motion.div
-            className="absolute top-0 z-10 flex justify-center w-full"
-            initial={{ scale: 1 }}
-            animate={{ scale: [1, 1.08, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-          >
-            <Button
-              onClick={handleDraw}
-              variant="contained"
-              sx={{
-                background: 'linear-gradient(90deg, #ff4444, #ff8c00, #32cd32)',
-                color: '#fff',
-                fontWeight: 'bold',
-                fontSize: '1.2rem',
-                px: 6,
-                py: 2.5,
-                borderRadius: '9999px',
-                boxShadow: '0 0 20px #FFD700',
-                '&:hover': {
-                  background: 'linear-gradient(90deg, #ff6347, #ffa500, #3cb371)',
-                  transform: 'scale(1.05)',
-                },
-                '&:active': {
-                  transform: 'scale(0.95)',
-                },
-              }}
-              endIcon={<CardGiftcardIcon sx={{ fontSize: 28, marginLeft: 1 }} />}
-            >
-              Los ziehen
-            </Button>
+          <motion.div className="absolute top-0 z-10 flex justify-center w-full">
+            <GlowButton onClick={handleDraw} text="Los ziehen" />
           </motion.div>
         )}
       </div>
@@ -238,29 +205,20 @@ export default function DrawField() {
               <div className="w-56 h-56">
                 <Lottie animationData={giftBoxAnim} loop={false} />
               </div>
-
-              <AnimatePresence>
-                {showNameInPopup && (
-                  <motion.div
-                    key="name"
-                    initial={{ y: 0, opacity: 0, scale: 0.5 }}
-                    animate={{ y: -140, opacity: 1, scale: 1.2 }}
-                    exit={{ y: 0, opacity: 0, scale: 0.5 }}
-                    transition={{ duration: 0.8, ease: 'easeOut' }}
-                    className="absolute bottom-24 text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_12px_#ffd700] text-center"
-                  >
-                    {drawn}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {visible && (
+                <motion.div
+                  className="absolute bottom-24 text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_12px_#FFD700] text-center"
+                >
+                  {drawn}
+                </motion.div>
+              )}
 
               <button
                 onClick={() => {
                   setShowPopup(false)
-                  setShowNameInPopup(false)
-                  setShowFinal(true)
+                  setVisible(false)
                 }}
-                className="mt-10 px-5 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 font-semibold"
+                className="mt-10 px-5 py-2 bg-green-600 text-white rounded-xl font-semibold"
               >
                 Schließen
               </button>
