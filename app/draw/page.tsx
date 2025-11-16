@@ -3,7 +3,7 @@ import Link from 'next/link'
 import ProtectedRoute from '@auth/ProtectedRoute'
 import Header from '@components/Header'
 import BottomNav from '@components/BottomNav'
-import DrawField from './drawfield.tsx'
+import DrawField from './drawfield'
 import bgImage from '@components/wichtel_room.jpg'
 
 export default function DrawPage() {

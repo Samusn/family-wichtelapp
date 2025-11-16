@@ -9,8 +9,6 @@ export default function IndexPage() {
       <GlowTitle
         text='Frohes Wichteln!'
         size='text-5xl sm:text-5xl'
-        color='#FFD700'
-        shadowColor='#FFEE88'
       />
       <div className='w-[300px]'>
         <SantaLottie />

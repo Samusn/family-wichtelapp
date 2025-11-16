@@ -13,13 +13,19 @@ import {
    WISHLIST FUNCTIONS
    ========================================================== */
 
-export const getWishlist = async (uid: string): Promise<string[]> => {
+export interface WishItem {
+  text: string;
+  link?: string;
+  imageUrl?: string;
+}
+
+export const getWishlist = async (uid: string): Promise<WishItem[]> => {
   const docRef = doc(db, "wishlist", uid);
   const docSnap = await getDoc(docRef);
   return docSnap.exists() ? docSnap.data().items || [] : [];
 };
 
-export const saveWishlist = async (uid: string, items: string[]) => {
+export const saveWishlist = async (uid: string, items: WishItem[]) => {
   const docRef = doc(db, "wishlist", uid);
   await setDoc(docRef, { items });
 };

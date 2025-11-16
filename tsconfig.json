@@ -17,25 +17,18 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "baseUrl": ".",       
+    "paths": {
+      "@/*": ["./*"],
+      "@components/*": ["app/components/*"],
+      "@images/*": ["app/images/*"],
+      "@auth/*": ["app/login/*"]
+    },
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@components/*": [
-        "app/components/*"
-      ],
-      "@images/*": [
-        "app/images/*"
-      ],
-      "@auth/*": [
-        "app/login/*"
-      ]
-    }
+    ]
   },
   "include": [
     "next-env.d.ts",

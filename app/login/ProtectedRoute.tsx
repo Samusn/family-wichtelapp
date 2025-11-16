@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { onUserChange } from '@/firebase/auth'
+import { onUserChange } from '@/firebase/authClient'
 import Lottie from 'lottie-react'
 import loadingReindeer from '@components/assets/reindeer.json'
 

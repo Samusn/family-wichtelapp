@@ -69,8 +69,6 @@ export default function UserWishlist(props: PageProps) {
           <GlowTitle
             text={`${userName}’s Wünsche`}
             size='text-5xl sm:text-4xl'
-            color='#00ff66'
-            shadowColor='#33ff99'
           />
 
           {wishlist.length === 0 ? (

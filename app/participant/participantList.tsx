@@ -14,13 +14,12 @@ import GlowTitle from '@components/GlowTitle'
 import { motion } from 'framer-motion'
 
 interface UserData {
-  id: string
   name: string
   role: string
 }
 
 export default function ParticipantList() {
-  const [participants, setParticipants] = useState<UserData[]>([])
+  const [participants, setParticipants] = useState<(UserData & { id: string })[]>([])
   const [loading, setLoading] = useState(true)
   const [drawnUserId, setDrawnUserId] = useState<string | null>(null)
   const [usersWhoDrew, setUsersWhoDrew] = useState<string[]>([]) // ids der Teilnehmer, die selbst schon gezogen haben
@@ -41,7 +40,7 @@ export default function ParticipantList() {
           const usersRef = collection(db, 'users')
           const snapshot = await getDocs(usersRef)
           const found = snapshot.docs
-            .map(d => ({ id: d.id, ...(d.data() as UserData) }))
+            .map(d => ({ id: d.id, ...(d.data() as Omit<UserData, 'id'>) }))
             .find(u => u.name === lastName)
 
           if (found) setDrawnUserId(found.id)
@@ -70,7 +69,7 @@ export default function ParticipantList() {
         const snapshot = await getDocs(usersRef)
 
         const list = snapshot.docs
-          .map(d => ({ id: d.id, ...(d.data() as UserData) }))
+          .map(d => ({ id: d.id, ...(d.data() as Omit<UserData, 'id'>) }))
           .filter(u => u.role === 'user')
 
         setParticipants(list)
@@ -109,8 +108,6 @@ export default function ParticipantList() {
       <GlowTitle
         text="Teilnehmerliste"
         size="text-5xl sm:text-4xl"
-        color="#00ff66"
-        shadowColor="#33ff99"
       />
 
       <div className="mt-6 w-full max-w-4xl flex flex-col gap-5">

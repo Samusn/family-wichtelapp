@@ -45,7 +45,6 @@ export default function DrawField() {
         setCurrentUserId(user.uid)
 
         // Prüfen, ob der User schon gezogen hat
-        const userDrawRef = doc(db, 'draws', user.uid)
         const userDrawSnap = await getDocs(collection(db, 'draws'))
         const userDoc = userDrawSnap.docs.find(d => d.id === user.uid)
         const drawnNames: string[] = userDoc?.data().drawnNames || []
@@ -66,7 +65,10 @@ export default function DrawField() {
         const usersRef = collection(db, 'users')
         const snapshot = await getDocs(usersRef)
         const users = snapshot.docs
-          .map((doc) => ({ id: doc.id, ...(doc.data() as UserData) }))
+          .map((doc) => {
+            const data = doc.data() as Omit<UserData, 'id'> // id aus UserData rausnehmen
+            return { id: doc.id, ...data }
+          })
           .filter((u) => u.role === 'user')
         setParticipants(users)
       } catch (error) {
@@ -155,8 +157,6 @@ export default function DrawField() {
         <GlowTitle
           text='Mein Wichtelopfer'
           size='text-5xl sm:text-4xl'
-          color='#00ff66'
-          shadowColor='#33ff99'
         />
       </div>
 

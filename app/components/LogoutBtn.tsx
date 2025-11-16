@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { logout } from "@/firebase/auth";
+import { logout } from "@/firebase/authClient"
 import LogoutIcon from "@mui/icons-material/Logout";
 
 interface LogoutButtonProps {

@@ -8,18 +8,19 @@ import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 interface GlowButtonProps {
   onClick: () => void
   text: string
+  disabled?: boolean
 }
 
-const GlowButton: React.FC<GlowButtonProps> = ({ onClick, text }) => {
+const GlowButton: React.FC<GlowButtonProps> = ({ onClick, text, disabled = false }) => {
   return (
     <motion.div
-      drag
+      drag={!disabled} // Nur draggable, wenn nicht disabled
       dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
       dragElastic={0.2}
       style={{ display: 'inline-block' }}
     >
-      <StyledWrapper>
-        <button onClick={onClick}>
+      <StyledWrapper disabled={disabled}>
+        <button onClick={onClick} disabled={disabled}>
           {text} <CardGiftcardIcon style={{ marginLeft: 8 }} />
         </button>
       </StyledWrapper>
@@ -27,9 +28,8 @@ const GlowButton: React.FC<GlowButtonProps> = ({ onClick, text }) => {
   )
 }
 
-const StyledWrapper = styled.div`
+const StyledWrapper = styled.div<{ disabled?: boolean }>`
   button {
-    /* Weihnachtsfarben */
     --glow-color: #F1C40F; /* Gold */
     --glow-spread-color: rgba(241, 196, 15, 0.7);
     --btn-color: #C0392B; /* Rot */
@@ -49,7 +49,8 @@ const StyledWrapper = styled.div`
     text-shadow: 0 0 0.5em var(--glow-color);
     position: relative;
     transition: all 0.3s;
-    cursor: grab;
+    cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'grab')};
+    opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
   }
 
   button::after {
@@ -70,7 +71,7 @@ const StyledWrapper = styled.div`
     box-shadow: 0 0 0.6em 0.25em var(--glow-color),
       0 0 2.5em 2em var(--glow-spread-color),
       inset 0 0 0.5em 0.25em var(--glow-color);
-    cursor: grabbing;
+    cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'grabbing')};
   }
 `
 
