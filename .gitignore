@@ -42,3 +42,6 @@ next-env.d.ts
 
 #user data
 .pwd
+
+# Firebase Service Account Key
+serviceAccountKey.json
