@@ -33,6 +33,7 @@ export default function DrawField() {
   const [showPopup, setShowPopup] = useState(false)
   const [visible, setVisible] = useState(false)
   const [isNewDraw, setIsNewDraw] = useState(false)
+  const [hasDrawn, setHasDrawn] = useState(false) // Ob der User schon gezogen hat
 
   const houseRef = useRef<LottieRefCurrentProps>(null)
   const scrollYRef = useRef(0)
@@ -47,7 +48,10 @@ export default function DrawField() {
         if (drawSnap.exists()) {
           const drawnNames: string[] = drawSnap.data().drawnNames || []
           const lastDrawn = drawnNames[drawnNames.length - 1] || null
-          setDrawn(lastDrawn)
+          if (lastDrawn) {
+            setDrawn(lastDrawn)
+            setHasDrawn(true) // User hat bereits gezogen
+          }
         }
       }
     })
@@ -104,8 +108,9 @@ export default function DrawField() {
   }
 
   const handleDraw = async () => {
-    if (!currentUserId || animating || drawn) return
+    if (!currentUserId || animating || hasDrawn) return
 
+    // Alle bisherigen Ziehungen auslesen
     const drawsSnapshot = await getDocs(collection(db, 'draws'))
     const alreadyDrawnAll: string[] = []
     drawsSnapshot.forEach(doc => {
@@ -113,6 +118,7 @@ export default function DrawField() {
       alreadyDrawnAll.push(...names)
     })
 
+    // Filter: nicht der eigene Name & noch nicht gezogen
     const available = participants
       .filter(p => p.id !== currentUserId)
       .filter(p => !alreadyDrawnAll.includes(p.name))
@@ -128,6 +134,7 @@ export default function DrawField() {
 
     setTimeout(async () => {
       setDrawn(random.name)
+      setHasDrawn(true)
       await saveDraw(currentUserId, random.name)
       setIsNewDraw(true)
       setShowPopup(true)
@@ -168,7 +175,6 @@ export default function DrawField() {
             <div className="relative w-full h-64 sm:h-80">
               <Lottie animationData={snowGlobeAnim} loop className="pointer-events-none"/>
             </div>
-            {/* Namensschild mit mehr Abstand */}
             <div className="relative flex justify-center items-center w-full p-4 rounded-t-[50%] rounded-b-xl bg-red-600 border-4 border-yellow-400 shadow-[0_0_35px_#FFD700] mt-[-10px] sm:mt-0">
               <span
                 className="text-3xl sm:text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_15px_#FFD700] text-center tracking-wider"
@@ -187,7 +193,11 @@ export default function DrawField() {
 
         {!drawn && !animating && !loading && (
           <motion.div className="absolute top-0 z-10 flex justify-center w-full">
-            <GlowButton onClick={handleDraw} text="Los ziehen" />
+            <GlowButton
+              onClick={handleDraw}
+              text={hasDrawn ? 'Du hast bereits gezogen' : 'Los ziehen'}
+              disabled={hasDrawn}
+            />
           </motion.div>
         )}
       </div>

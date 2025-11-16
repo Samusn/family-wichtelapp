@@ -41,10 +41,11 @@ export default function BottomNav() {
           background: 'linear-gradient(to top, #ffffff, #f8f8f8)',
           borderTopLeftRadius: 50,
           borderTopRightRadius: 50,
-          boxShadow: '0 -3px 15px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 -3px 15px rgba(0, 0, 0, 0.12)',
           overflow: 'hidden',
-          borderTop: '3px solid rgba(255,255,255,0.8)',
-          height: 70,
+          borderTop: '3px solid rgba(255,255,255,0.9)',
+          height: 78,                     // ⬅ Größer für bessere Touch-Hitboxes
+          WebkitTapHighlightColor: 'transparent',
         }}
       >
         <BottomNavigation
@@ -53,24 +54,43 @@ export default function BottomNav() {
             if (navItems[newValue].label === 'Mehr') {
               setSidebarOpen(true)
             } else {
-              router.push(navItems[newValue].path)
+              router.push(navItems[newValue].path!)
             }
           }}
           showLabels
           sx={{
             height: '100%',
             background: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+
             '& .MuiBottomNavigationAction-root': {
+              minWidth: 60,                // ⬅ Größere Klickfläche
+              padding: '10px 0',
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent',
               color: '#9ca3af',
-              minWidth: 0,
-              fontWeight: 500,
+              fontWeight: 600,
+              fontSize: 12,
+
+              '&:active': {
+                transform: 'scale(0.92)', // ⬅ besseres Klickgefühl
+                transition: 'transform 0.05s',
+              },
+
+              // Ripple entfernen -> besser für mobile Genauigkeit
+              '& .MuiTouchRipple-root': {
+                display: 'none',
+              },
+
               '&.Mui-selected': {
                 color: '#dc2626',
               },
             },
+
             '& .Mui-selected svg': {
-              transform: 'scale(1.2)',
-              transition: 'transform 0.3s',
+              transform: 'scale(1.26)',
+              transition: 'transform 0.25s ease',
             },
           }}
         >
