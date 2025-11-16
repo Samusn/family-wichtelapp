@@ -145,7 +145,7 @@ export default function DrawField() {
       <div className='text-center mb-4'>
         <GlowTitle
           text='Mein Wichtelopfer'
-          size='text-3xl sm:text-4xl'
+          size='text-5xl sm:text-4xl'
           color='#00ff66'
           shadowColor='#33ff99'
         />

@@ -37,7 +37,6 @@ const Wrapper = styled.div`
     font-weight: 600;
     font-size: 0.95rem; /* kleinerer Text */
     border: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
   .dots_border {
@@ -49,17 +48,6 @@ const Wrapper = styled.div`
     transform: translate(-50%, -50%);
     border-radius: 9999px;
     overflow: hidden;
-  }
-
-  .dots_border::before {
-    content: "";
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    width: 100%;
-    height: 2rem;
-    mask: linear-gradient(transparent 0%, white 120%);
-    animation: rotate 2s linear infinite;
   }
 
   .sparkle {

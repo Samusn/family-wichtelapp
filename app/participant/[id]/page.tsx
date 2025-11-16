@@ -74,8 +74,8 @@ export default function UserWishlist(props: PageProps) {
           />
 
           {wishlist.length === 0 ? (
-            <p className='text-white italic mt-4 text-center w-full'>
-              Noch keine Wünsche vorhanden ✨
+            <p className="text-white/70 text-lg mt-4 text-center max-w-xs italic">
+              Noch keine Wünsche✨
             </p>
           ) : (
             <div className='flex flex-col gap-4 w-full max-w-md mt-4'>

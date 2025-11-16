@@ -108,7 +108,7 @@ export default function ParticipantList() {
     <div className="flex flex-col items-center w-full px-4 sm:px-0">
       <GlowTitle
         text="Teilnehmerliste"
-        size="text-3xl sm:text-4xl"
+        size="text-5xl sm:text-4xl"
         color="#00ff66"
         shadowColor="#33ff99"
       />
