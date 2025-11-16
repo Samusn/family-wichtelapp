@@ -45,10 +45,10 @@ export default function DrawField() {
         setCurrentUserId(user.uid)
 
         // Prüfen, ob der User schon gezogen hat
-        const drawRef = doc(db, 'draws', user.uid)
-        const drawSnap = await getDocs(collection(db, 'draws'))
-        const userDrawSnap = drawSnap.docs.find(d => d.id === user.uid)
-        const drawnNames: string[] = userDrawSnap?.data().drawnNames || []
+        const userDrawRef = doc(db, 'draws', user.uid)
+        const userDrawSnap = await getDocs(collection(db, 'draws'))
+        const userDoc = userDrawSnap.docs.find(d => d.id === user.uid)
+        const drawnNames: string[] = userDoc?.data().drawnNames || []
 
         if (drawnNames.length > 0) {
           setDrawn(drawnNames[drawnNames.length - 1])
