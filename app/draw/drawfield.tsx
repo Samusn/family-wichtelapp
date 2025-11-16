@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { collection, doc, getDocs, setDoc, getDoc } from 'firebase/firestore'
+import { collection, doc, getDocs, runTransaction, serverTimestamp } from 'firebase/firestore'
 import { db, auth } from '@/firebase/config'
 import { onAuthStateChanged } from 'firebase/auth'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -33,7 +33,7 @@ export default function DrawField() {
   const [showPopup, setShowPopup] = useState(false)
   const [visible, setVisible] = useState(false)
   const [isNewDraw, setIsNewDraw] = useState(false)
-  const [hasDrawn, setHasDrawn] = useState(false) // Ob der User schon gezogen hat
+  const [hasDrawn, setHasDrawn] = useState(false)
 
   const houseRef = useRef<LottieRefCurrentProps>(null)
   const scrollYRef = useRef(0)
@@ -43,15 +43,16 @@ export default function DrawField() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUserId(user.uid)
+
+        // Prüfen, ob der User schon gezogen hat
         const drawRef = doc(db, 'draws', user.uid)
-        const drawSnap = await getDoc(drawRef)
-        if (drawSnap.exists()) {
-          const drawnNames: string[] = drawSnap.data().drawnNames || []
-          const lastDrawn = drawnNames[drawnNames.length - 1] || null
-          if (lastDrawn) {
-            setDrawn(lastDrawn)
-            setHasDrawn(true) // User hat bereits gezogen
-          }
+        const drawSnap = await getDocs(collection(db, 'draws'))
+        const userDrawSnap = drawSnap.docs.find(d => d.id === user.uid)
+        const drawnNames: string[] = userDrawSnap?.data().drawnNames || []
+
+        if (drawnNames.length > 0) {
+          setDrawn(drawnNames[drawnNames.length - 1])
+          setHasDrawn(true)
         }
       }
     })
@@ -96,56 +97,57 @@ export default function DrawField() {
     }
   }, [showPopup])
 
-  // Atomare Speicherung der Ziehung
-  const saveDraw = async (userId: string, drawnName: string) => {
-    const drawRef = doc(db, 'draws', userId)
-    const drawSnap = await getDoc(drawRef)
-    const drawnNames: string[] = drawSnap?.data()?.drawnNames || []
-    if (!drawnNames.includes(drawnName)) {
-      const newDrawnNames = [...drawnNames, drawnName]
-      await setDoc(drawRef, { drawnNames: newDrawnNames }, { merge: true })
-    }
-  }
-
   const handleDraw = async () => {
     if (!currentUserId || animating || hasDrawn) return
 
-    // Alle bisherigen Ziehungen auslesen
-    const drawsSnapshot = await getDocs(collection(db, 'draws'))
-    const alreadyDrawnAll: string[] = []
-    drawsSnapshot.forEach(doc => {
-      const names: string[] = doc.data().drawnNames || []
-      alreadyDrawnAll.push(...names)
-    })
-
-    // Filter: nicht der eigene Name & noch nicht gezogen
-    const available = participants
-      .filter(p => p.id !== currentUserId)
-      .filter(p => !alreadyDrawnAll.includes(p.name))
-
-    if (available.length === 0) {
-      alert('Alle Teilnehmer wurden bereits gezogen.')
-      return
-    }
-
     setAnimating(true)
-    const random = available[Math.floor(Math.random() * available.length)]
     houseRef.current?.play()
 
-    setTimeout(async () => {
-      setDrawn(random.name)
-      setHasDrawn(true)
-      await saveDraw(currentUserId, random.name)
-      setIsNewDraw(true)
-      setShowPopup(true)
+    try {
+      // Transaction: atomare globale Ziehung
+      const drawnName = await runTransaction(db, async (transaction) => {
+        // Alle bisher gezogenen Namen
+        const drawnNamesSnapshot = await getDocs(collection(db, 'drawnNames'))
+        const takenNames = drawnNamesSnapshot.docs.map(d => d.id)
+
+        // Verfügbare Teilnehmer: nicht der eigene Name & noch nicht gezogen
+        const available = participants
+          .filter(p => p.id !== currentUserId)
+          .filter(p => !takenNames.includes(p.name))
+
+        if (available.length === 0) throw new Error('Alle Teilnehmer wurden bereits gezogen.')
+
+        const random = available[Math.floor(Math.random() * available.length)]
+
+        // Global speichern
+        const globalDrawRef = doc(db, 'drawnNames', random.name)
+        transaction.set(globalDrawRef, { userId: currentUserId, timestamp: serverTimestamp() })
+
+        // User-spezifisch speichern
+        const userDrawRef = doc(db, 'draws', currentUserId)
+        transaction.set(userDrawRef, { drawnNames: [random.name] }, { merge: true })
+
+        return random.name
+      })
+
+      // Animationen & Popup
+      setTimeout(() => {
+        setDrawn(drawnName)
+        setHasDrawn(true)
+        setIsNewDraw(true)
+        setShowPopup(true)
+        setAnimating(false)
+        setTimeout(() => setVisible(true), 100)
+      }, 3500)
+
+    } catch (error) {
+      console.error(error)
+      alert(error instanceof Error ? error.message : 'Fehler bei der Ziehung')
       setAnimating(false)
-      setTimeout(() => setVisible(true), 100)
-    }, 3500)
+    }
   }
 
-  const handleShowName = () => {
-    setVisible(!visible)
-  }
+  const handleShowName = () => setVisible(!visible)
 
   return (
     <div className="relative flex flex-col items-center justify-center w-full sm:px-10 gap-6">
@@ -158,7 +160,6 @@ export default function DrawField() {
         />
       </div>
 
-      {/* Container Haus / Schneekugel / Button */}
       <div className="relative w-full max-w-[95%] mt-6 flex justify-center" style={{ minHeight: 400 }}>
         {!drawn && (
           <Lottie
@@ -202,7 +203,6 @@ export default function DrawField() {
         )}
       </div>
 
-      {/* Popup */}
       <AnimatePresence>
         {showPopup && drawn && isNewDraw && (
           <motion.div
