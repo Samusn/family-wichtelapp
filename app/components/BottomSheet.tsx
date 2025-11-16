@@ -36,7 +36,7 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
       {/* Overlay */}
       {open && (
         <div
-          className='fixed inset-0 bg-black/25 z-50'
+          className="fixed inset-0 bg-black/25 z-50"
           onClick={onClose}
         />
       )}
@@ -46,61 +46,77 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
         className={`fixed bottom-0 left-0 right-0 z-60 bg-white/5 backdrop-blur-lg rounded-t-3xl shadow-xl transition-transform duration-300 ${
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
+        role="dialog"
+        aria-modal="true"
       >
         {/* Close Button */}
-        <div className='flex justify-end p-4'>
+        <div className="flex justify-end p-4">
           <button
             onClick={onClose}
-            className='text-gray-400 hover:text-gray-100 transition-colors z-70 relative'
+            aria-label="Schließen"
+            className="p-3 rounded-full hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           >
-            <CloseIcon fontSize='medium' />
+            <CloseIcon fontSize="medium" className="text-gray-200" />
           </button>
         </div>
 
         {/* Inhalt */}
-        <div className='flex flex-col w-full gap-3 p-6 relative z-70'>
-          {/* Hilfsbot / Chatbot */}
+        <div className="flex flex-col w-full gap-3 px-6 pb-8 relative z-70">
+
+          {/* Sami GPT */}
           <motion.button
             onClick={() => setChatOpen(true)}
-            className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/30 border-2 border-yellow-400 shadow-[0_0_15px_#ffbb33] text-yellow-300 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#ffc966] transition-all duration-200 relative z-70'
+            className="min-h-[50px] w-full flex items-center gap-3 px-5 py-3 rounded-2xl bg-red-800/30 border-2 border-yellow-400
+            shadow-[0_0_15px_#ffbb33] text-yellow-300 font-semibold text-lg
+            hover:scale-[1.02] hover:shadow-[0_0_25px_#ffc966]
+            transition-all duration-200"
+            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           >
-            <ChatIcon className='text-yellow-400' />
-            SamiGPT-67
+            <ChatIcon className="text-yellow-400" />
+            <span className="flex-1 text-left">SamiGPT-67</span>
           </motion.button>
 
-          {/* Impressum-Link */}
-          <motion.div whileHover={{ scale: 1.02 }} className='w-full'>
+          {/* Impressum */}
+          <motion.div whileHover={{ scale: 1.01 }} className="w-full">
             <Link
-              href='/impressum'
-              className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600 shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg hover:shadow-[0_0_25px_#ff7777] transition-all duration-200'
+              href="/impressum"
+              className="min-h-[50px] w-full flex items-center gap-3 px-5 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600
+              shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg
+              hover:shadow-[0_0_25px_#ff7777] transition-all duration-200"
+              style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
             >
-              <SettingsIcon className='text-red-300' />
-              Impressum
+              <SettingsIcon className="text-red-300" />
+              <span className="flex-1 text-left">Impressum</span>
             </Link>
           </motion.div>
 
           {/* Trennlinie */}
-          <div className='border-t border-red-500 my-3' />
+          <div className="border-t border-red-500 my-3" />
 
           {/* Profil */}
           <motion.button
-            className='flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600 shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg hover:scale-[1.02] hover:shadow-[0_0_25px_#ff7777] transition-all duration-200'
+            className="min-h-[50px] w-full flex items-center gap-3 px-5 py-3 rounded-2xl bg-red-800/20 border-2 border-red-600
+            shadow-[0_0_15px_#ff5555] text-red-200 font-semibold text-lg
+            hover:scale-[1.02] hover:shadow-[0_0_25px_#ff7777]
+            transition-all duration-200"
+            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           >
-            <PersonIcon className='text-red-300' />
-            {userData ? userData.name : 'Profil'}
+            <PersonIcon className="text-red-300" />
+            <span className="flex-1 text-left">
+              {userData ? userData.name : 'Profil'}
+            </span>
           </motion.button>
 
           {/* Logout */}
-          <motion.div className='w-full'>
-            <LogoutButton
-              className='w-full bg-red-600 text-white px-4 py-3 rounded-2xl shadow-[0_0_20px_#ff4d4d] hover:shadow-[0_0_35px_#ff6666] hover:bg-red-700 transition font-semibold flex justify-center items-center'
-              label='Abmelden'
-            />
-          </motion.div>
+          <LogoutButton
+            className="w-full min-h-[50px] bg-red-600 text-white px-4 py-3 rounded-2xl shadow-[0_0_20px_#ff4d4d]
+            hover:shadow-[0_0_35px_#ff6666] hover:bg-red-700 transition font-semibold flex justify-center items-center"
+            label="Abmelden"
+          />
         </div>
       </div>
 
-      {/* Chatbot-Popup */}
       <Chatbot open={chatOpen} setOpen={setChatOpen} />
     </>
   )

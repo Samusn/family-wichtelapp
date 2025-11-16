@@ -68,7 +68,7 @@ export default function UserWishlist(props: PageProps) {
         <main className="flex-1 mt-24 px-6 sm:px-20 pb-40 flex flex-col gap-10 items-center z-10 min-h-[100vh]">
           <GlowTitle
             text={`${userName}’s Wünsche`}
-            size='text-3xl sm:text-4xl'
+            size='text-5xl sm:text-4xl'
             color='#00ff66'
             shadowColor='#33ff99'
           />

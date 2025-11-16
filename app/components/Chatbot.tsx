@@ -39,14 +39,13 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  // Willkommensnachricht beim ersten Öffnen
   useEffect(() => {
     if (open && messages.length === 0) {
       setMessages([
         {
           role: 'assistant',
           content:
-            'Hallo! 👋 Ich bin dein persönlicher Hilfsbot und helfe dir gerne bei Problemen oder bei der Suche nach Ideen für dich selbst.',
+            'Hallo! 👋 Ich bin dein persönlicher Hilfsbot und helfe dir gerne bei Problemen oder bei der Suche nach Geschenk Ideen für dich selbst.',
         },
       ])
     }
@@ -55,6 +54,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
   const sendMessage = async () => {
     const messageText = input.trim()
     if (!messageText) return
+
     const newMessages = [...messages, { role: 'user', content: messageText }]
     setMessages(newMessages)
     setInput('')
@@ -73,6 +73,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
       })
 
       const data = await res.json()
+
       if (data.text) {
         setMessages([...safeMessages, { role: 'assistant', content: data.text }])
       }
@@ -95,14 +96,29 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
   return (
     <Dialog open={open} onClose={() => setOpen(false)} className="relative z-50">
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center p-2">
-        <Dialog.Panel className="bg-red-900 rounded-2xl shadow-2xl w-full max-w-[95vw] max-h-[95vh] flex flex-col overflow-hidden border-2 border-yellow-400">
+        
+        <Dialog.Panel
+          className="
+            bg-red-900 
+            rounded-2xl 
+            shadow-2xl 
+            w-full 
+            max-w-[480px]     /* Laptop / Desktop: schmal */
+            max-h-[95vh] 
+            flex flex-col 
+            overflow-hidden 
+            border-2 border-yellow-400
+          "
+        >
+
           {/* Header */}
           <div className="flex justify-between items-center p-4 border-b border-yellow-400">
             <h2 className="text-xl font-bold text-yellow-300">SamiGPT-67</h2>
+
             <IconButton
               onClick={() => setOpen(false)}
               sx={{
-                color: '#FFD700', // Gelb
+                color: '#FFD700',
                 '&:hover': { color: '#FFFF66', backgroundColor: 'rgba(255,255,0,0.2)' },
                 p: 1,
               }}
@@ -112,7 +128,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
             </IconButton>
           </div>
 
-          {/* Chat Nachrichten */}
+          {/* Chat body */}
           <div className="flex flex-col gap-2 overflow-y-auto p-3 bg-red-800 flex-1">
             {messages.map((m, i) => (
               <motion.div
@@ -129,7 +145,6 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
               </motion.div>
             ))}
 
-            {/* Loading Animation */}
             {loading && (
               <motion.div
                 className="flex gap-2 self-start p-2 bg-yellow-300 text-red-900 rounded-xl max-w-[40%]"
@@ -144,8 +159,8 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Eingabe */}
-          <div className="flex gap-2 p-3 border-t border-yellow-400 bg-red-800 sticky bottom-0">
+          {/* Input */}
+          <div className="flex gap-2 p-3 border-t border-yellow-400 bg-red-800">
             <input
               type="text"
               placeholder="Stelle irgendeine Frage..."

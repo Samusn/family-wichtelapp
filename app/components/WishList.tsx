@@ -32,6 +32,7 @@ export default function WishList() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const [error, setError] = useState('') // neuer State für Validierung
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,11 +56,16 @@ export default function WishList() {
   }
 
   const saveItem = async () => {
-    if (input.trim() === '') return
+    if (input.trim() === '') {
+      setError('Der Wunschtext darf nicht leer sein!') // Fehler anzeigen
+      return
+    }
+
     const user = auth.currentUser
     if (!user) return
 
     setUploading(true)
+    setError('')
     let imageUrl = ''
     try {
       if (image) {
@@ -109,6 +115,7 @@ export default function WishList() {
     setPreview(item.imageUrl || null)
     setEditingIndex(index)
     setOpen(true)
+    setError('')
   }
 
   if (loading) return <p className='text-center mt-4 text-white'>Lädt...</p>
@@ -136,6 +143,7 @@ export default function WishList() {
               setPreview(null)
               setEditingIndex(null)
               setOpen(true)
+              setError('')
             }}
           />
           <BigButton onClick={() => setChatOpen(true)} />
@@ -166,16 +174,17 @@ export default function WishList() {
           <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4'>
             <Dialog.Panel className='bg-gradient-to-br from-red-900 via-red-800 to-red-900 p-6 rounded-2xl shadow-2xl max-w-sm w-full text-white border border-yellow-400 relative z-10'>
               <Dialog.Title className='text-xl font-bold mb-3'>
-                {editingIndex !== null ? 'Wunsch bearbeiten 🎁' : 'Neuer Wunsch 🎁'}
+                {editingIndex !== null ? 'Wunsch bearbeiten' : 'Neuer Wunsch'}
               </Dialog.Title>
 
-              {/* Wunschtext-Feld größer */}
               <textarea
                 placeholder='Wunschtext'
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className='w-full mb-3 p-3 rounded-lg bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white h-24 resize-none shadow-inner'
+                className={`w-full mb-3 p-3 rounded-lg bg-red-800 border ${error ? 'border-red-500' : 'border-red-500'} placeholder-white focus:outline-none text-white h-24 resize-none shadow-inner`}
               />
+
+              {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
 
               <input
                 type='text'
@@ -185,7 +194,6 @@ export default function WishList() {
                 className='w-full mb-4 p-3 rounded-lg bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white shadow-inner'
               />
 
-              {/* Eleganter Bild-Auswahlbutton */}
               <label className='flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 via-green-600 to-green-500 hover:via-green-700 text-white px-5 py-3 rounded-xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 mb-3'>
                 <ImageIcon fontSize='small' /> Bild auswählen
                 <input
@@ -204,7 +212,6 @@ export default function WishList() {
                 />
               )}
 
-              {/* Buttons nebeneinander */}
               <div className='flex justify-end gap-3 mt-4'>
                 <button
                   onClick={() => setOpen(false)}
@@ -240,7 +247,7 @@ interface WishCardProps {
 function WishCard({ item, onEdit, onDelete }: WishCardProps) {
   return (
     <motion.div
-      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 cursor-pointer overflow-hidden'
+      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 overflow-hidden'
       style={{
         borderColor: '#FFD700',
         boxShadow: '0 0 15px 5px rgba(255,0,0,0.6), 0 0 20px 5px rgba(255,215,0,0.5)',
@@ -252,8 +259,9 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
       <div className='absolute -top-6 -left-6 w-32 h-32 rounded-full bg-red-400/30 blur-3xl animate-pulse pointer-events-none'></div>
       <div className='absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-red-600/30 blur-3xl animate-pulse pointer-events-none'></div>
 
-      <div className='flex justify-between items-start relative z-10'>
-        <div className='flex-grow text-left'>
+      <div className='flex justify-between items-start relative z-10 gap-2'>
+        {/* Textbereich */}
+        <div className='flex-1 min-w-0'>
           <div className='text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold break-words'>
             {item.text}
           </div>
@@ -263,29 +271,29 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
               href={item.link}
               target='_blank'
               rel='noopener noreferrer'
-              className='mt-1 inline-flex items-center text-yellow-400 hover:text-yellow-200 text-sm font-medium'
+              className='mt-1 inline-flex items-center text-yellow-400 hover:text-yellow-200 text-sm font-medium break-all'
             >
               Link <ArrowForwardIcon fontSize='small' className='ml-1' />
             </a>
           )}
         </div>
 
-        {/* Buttons */}
-        <div className='flex gap-2 ml-2'>
+        {/* Buttons rechts oben */}
+        <div className='flex flex-shrink-0 gap-1'>
           <button
             onClick={onEdit}
-            className='text-yellow-400 hover:text-yellow-200 p-3 rounded-full focus:outline-none shadow-md hover:shadow-lg transition-all duration-200'
+            className='text-yellow-400 hover:text-yellow-200 p-2 rounded-full focus:outline-none shadow-md hover:shadow-lg transition-all duration-200'
           >
             <EditIcon fontSize='small' />
           </button>
           <button
             onClick={onDelete}
-            className='text-red-600 hover:text-red-400 p-3 rounded-full focus:outline-none shadow-md hover:shadow-lg transition-all duration-200'
+            className='text-red-600 hover:text-red-400 p-2 rounded-full focus:outline-none shadow-md hover:shadow-lg transition-all duration-200'
           >
             <DeleteOutlineIcon fontSize='small' />
           </button>
         </div>
-      </div>
+       </div>
 
       {item.imageUrl && (
         <img
