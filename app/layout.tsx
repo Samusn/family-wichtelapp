@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "@components/background.scss";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +28,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="background min-h-screen flex justify-center items-center relative">
+          {/* Schneefall global */}
+          <div className="snow-container">
+            {Array.from({ length: 200 }).map((_, i) => (
+              <div key={i} className="snow" />
+            ))}
+          </div>
+
+          {/* Page Content */}
+          {children}
+        </div>
       </body>
     </html>
   );
