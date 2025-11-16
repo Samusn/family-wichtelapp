@@ -48,7 +48,6 @@ export default function DrawField() {
           const drawnNames: string[] = drawSnap.data().drawnNames || []
           const lastDrawn = drawnNames[drawnNames.length - 1] || null
           setDrawn(lastDrawn)
-          // Popup nicht automatisch öffnen
         }
       }
     })
@@ -107,7 +106,6 @@ export default function DrawField() {
   const handleDraw = async () => {
     if (!currentUserId || animating || drawn) return
 
-    // Alle bisherigen Ziehungen aller User laden
     const drawsSnapshot = await getDocs(collection(db, 'draws'))
     const alreadyDrawnAll: string[] = []
     drawsSnapshot.forEach(doc => {
@@ -115,10 +113,9 @@ export default function DrawField() {
       alreadyDrawnAll.push(...names)
     })
 
-    // Verfügbare Teilnehmer filtern
     const available = participants
-      .filter(p => p.id !== currentUserId) // sich selbst nicht ziehen
-      .filter(p => !alreadyDrawnAll.includes(p.name)) // schon gezogen?
+      .filter(p => p.id !== currentUserId)
+      .filter(p => !alreadyDrawnAll.includes(p.name))
 
     if (available.length === 0) {
       alert('Alle Teilnehmer wurden bereits gezogen.')
@@ -140,8 +137,7 @@ export default function DrawField() {
   }
 
   const handleShowName = () => {
-    setVisible(true)
-    setTimeout(() => setVisible(false), 5000)
+    setVisible(!visible)
   }
 
   return (
@@ -163,16 +159,17 @@ export default function DrawField() {
             animationData={giftHouseAnim}
             loop={false}
             autoplay={false}
-            className="z-0"
+            className="z-0 pointer-events-none"
           />
         )}
 
         {drawn && (
-          <div className="relative flex flex-col items-center z-0">
-            <div className="relative w-64 h-64 sm:w-80 sm:h-80">
-              <Lottie animationData={snowGlobeAnim} loop />
+          <div className="relative flex flex-col items-center z-0 w-full max-w-[320px] sm:max-w-[400px]">
+            <div className="relative w-full h-64 sm:h-80">
+              <Lottie animationData={snowGlobeAnim} loop className="pointer-events-none"/>
             </div>
-            <div className="relative flex justify-center items-center w-72 sm:w-80 p-4 rounded-t-[50%] rounded-b-xl bg-red-600 border-4 border-yellow-400 shadow-[0_0_35px_#FFD700] mt-[-40px]">
+            {/* Namensschild mit mehr Abstand */}
+            <div className="relative flex justify-center items-center w-full p-4 rounded-t-[50%] rounded-b-xl bg-red-600 border-4 border-yellow-400 shadow-[0_0_35px_#FFD700] mt-[-10px] sm:mt-0">
               <span
                 className="text-3xl sm:text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_15px_#FFD700] text-center tracking-wider"
                 style={{ filter: visible ? 'blur(0px)' : 'blur(8px)', transition: 'filter 0.3s' }}
@@ -180,9 +177,9 @@ export default function DrawField() {
                 {drawn}
               </span>
             </div>
-            <div className="absolute top-0 right-0">
-              <IconButton onClick={handleShowName} sx={{ color: '#FFD700' }}>
-                {visible ? <VisibilityOffIcon /> : <VisibilityIcon />}
+            <div className="absolute top-2 right-2">
+              <IconButton onClick={handleShowName} sx={{ color: '#FFD700' }} size="large">
+                {visible ? <VisibilityOffIcon fontSize="large"/> : <VisibilityIcon fontSize="large"/>}
               </IconButton>
             </div>
           </div>
@@ -213,11 +210,11 @@ export default function DrawField() {
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
-              <div className="relative w-56 h-56">
-                <Lottie animationData={giftBoxAnim} loop={false} />
+              <div className="relative w-56 h-56 sm:w-64 sm:h-64">
+                <Lottie animationData={giftBoxAnim} loop={false} className="pointer-events-none" />
                 {visible && (
                   <motion.div
-                    className="absolute inset-0 flex items-center justify-center text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_12px_#FFD700]"
+                    className="absolute inset-0 flex items-center justify-center text-3xl sm:text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_12px_#FFD700] text-center px-2"
                     initial={{ y: 150, opacity: 0 }}
                     animate={{ y: -50, opacity: 1 }}
                     transition={{ type: 'spring', stiffness: 140, damping: 14 }}
@@ -233,7 +230,7 @@ export default function DrawField() {
                   setVisible(false)
                   setIsNewDraw(false)
                 }}
-                className="mt-10 px-5 py-2 bg-green-600 text-white rounded-xl font-semibold"
+                className="mt-8 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold text-lg"
               >
                 Schließen
               </button>
