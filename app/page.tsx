@@ -8,7 +8,7 @@ export default function IndexPage() {
     <main className='flex flex-col items-center justify-center min-h-screen p-8 gap-10'>
       <GlowTitle
         text='Frohes Wichteln!'
-        size='text-4xl sm:text-5xl'
+        size='text-5xl sm:text-5xl'
         color='#FFD700'
         shadowColor='#FFEE88'
       />
