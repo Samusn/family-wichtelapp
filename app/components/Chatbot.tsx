@@ -6,6 +6,8 @@ import { motion } from 'framer-motion'
 import { auth } from '@/firebase/auth'
 import { usePathname } from 'next/navigation'
 import SendIcon from '@mui/icons-material/Send'
+import IconButton from '@mui/material/IconButton'
+import CloseIcon from '@mui/icons-material/Close'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -35,7 +37,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, loading])
 
   // Willkommensnachricht beim ersten Öffnen
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
         {
           role: 'assistant',
           content:
-            'Hallo! 👋 Ich bin dein persönlicher Hilfsbot und helfe dir gerne bei Problemen oder bei der Suche nach Ideen für dich selbst.' 
+            'Hallo! 👋 Ich bin dein persönlicher Hilfsbot und helfe dir gerne bei Problemen oder bei der Suche nach Ideen für dich selbst.',
         },
       ])
     }
@@ -88,21 +90,26 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
     }
   }
 
-  // Bedingungen für Anzeige
   if (!userLoggedIn || pathname === '/' || pathname === '/login') return null
 
   return (
     <Dialog open={open} onClose={() => setOpen(false)} className="relative z-50">
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center p-2">
         <Dialog.Panel className="bg-red-900 rounded-2xl shadow-2xl w-full max-w-[95vw] max-h-[95vh] flex flex-col overflow-hidden border-2 border-yellow-400">
+          {/* Header */}
           <div className="flex justify-between items-center p-4 border-b border-yellow-400">
             <h2 className="text-xl font-bold text-yellow-300">SamiGPT-67</h2>
-            <button
+            <IconButton
               onClick={() => setOpen(false)}
-              className="text-yellow-300 hover:text-yellow-400 font-bold"
+              sx={{
+                color: '#FFD700', // Gelb
+                '&:hover': { color: '#FFFF66', backgroundColor: 'rgba(255,255,0,0.2)' },
+                p: 1,
+              }}
+              size="large"
             >
-              ✖
-            </button>
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
           </div>
 
           {/* Chat Nachrichten */}
@@ -121,11 +128,24 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
                 {m.content}
               </motion.div>
             ))}
+
+            {/* Loading Animation */}
+            {loading && (
+              <motion.div
+                className="flex gap-2 self-start p-2 bg-yellow-300 text-red-900 rounded-xl max-w-[40%]"
+                initial={{ opacity: 0.5 }}
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ repeat: Infinity, duration: 0.8 }}
+              >
+                <span>KI überlegt…</span>
+              </motion.div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
           {/* Eingabe */}
-          <div className="flex gap-2 p-3 border-t border-yellow-400 bg-red-800">
+          <div className="flex gap-2 p-3 border-t border-yellow-400 bg-red-800 sticky bottom-0">
             <input
               type="text"
               placeholder="Stelle irgendeine Frage..."

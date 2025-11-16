@@ -138,7 +138,6 @@ export default function WishList() {
               setOpen(true)
             }}
           />
-          
           <BigButton onClick={() => setChatOpen(true)} />
         </div>
 
@@ -161,27 +160,28 @@ export default function WishList() {
         {/* Dialog */}
         <Dialog open={open} onClose={() => setOpen(false)} className='relative z-50'>
           <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4'>
-            <Dialog.Panel className='bg-red-900 p-6 rounded-2xl shadow-lg max-w-sm w-full text-white border border-yellow-400'>
+            <Dialog.Panel className='bg-red-900 p-6 rounded-2xl shadow-lg max-w-sm w-full text-white border border-yellow-400 relative z-10'>
               <Dialog.Title className='text-xl font-bold mb-3'>
                 {editingIndex !== null ? 'Wunsch bearbeiten 🎁' : 'Neuer Wunsch 🎁'}
               </Dialog.Title>
 
-              <input
-                type='text'
+              {/* Wunschtext-Feld größer */}
+              <textarea
                 placeholder='Wunschtext'
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className='w-full mb-3 p-2 rounded-md bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white'
+                className='w-full mb-3 p-3 rounded-md bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white h-20 resize-none'
               />
+
               <input
                 type='text'
                 placeholder='Optional: Link'
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
-                className='w-full mb-4 p-2 rounded-md bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white'
+                className='w-full mb-4 p-3 rounded-md bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white'
               />
 
-              <label className='flex items-center justify-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg cursor-pointer mb-3'>
+              <label className='flex items-center justify-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-3 rounded-lg cursor-pointer mb-3'>
                 <ImageIcon fontSize='small' /> Bild auswählen
                 <input
                   type='file'
@@ -199,10 +199,11 @@ export default function WishList() {
                 />
               )}
 
-              <div className='flex justify-end gap-3'>
+              {/* Buttons nebeneinander */}
+              <div className='flex justify-end gap-3 mt-4'>
                 <button
                   onClick={() => setOpen(false)}
-                  className='text-green-300 hover:text-white'
+                  className='text-green-300 hover:text-white px-5 py-3 rounded-lg font-medium focus:outline-none'
                   disabled={uploading}
                 >
                   Abbrechen
@@ -210,7 +211,7 @@ export default function WishList() {
                 <button
                   onClick={saveItem}
                   disabled={uploading}
-                  className='bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold disabled:opacity-50'
+                  className='bg-green-600 hover:bg-green-700 px-5 py-3 rounded-lg font-semibold disabled:opacity-50'
                 >
                   {uploading ? 'Lädt...' : 'Speichern'}
                 </button>
@@ -234,24 +235,24 @@ interface WishCardProps {
 function WishCard({ item, onEdit, onDelete }: WishCardProps) {
   return (
     <motion.div
-      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 overflow-hidden'
+      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 cursor-pointer overflow-hidden'
       style={{
         borderColor: '#FFD700',
         boxShadow: '0 0 15px 5px rgba(255,0,0,0.6), 0 0 20px 5px rgba(255,215,0,0.5)',
       }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       {/* Pulsing circles */}
-      <div className='absolute -top-6 -left-6 w-32 h-32 rounded-full bg-red-400/30 blur-3xl animate-pulse'></div>
-      <div className='absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-red-600/30 blur-3xl animate-pulse'></div>
+      <div className='absolute -top-6 -left-6 w-32 h-32 rounded-full bg-red-400/30 blur-3xl animate-pulse pointer-events-none'></div>
+      <div className='absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-red-600/30 blur-3xl animate-pulse pointer-events-none'></div>
 
-      <div className='flex justify-between items-start'>
+      <div className='flex justify-between items-start relative z-10'>
         <div className='flex-grow text-left'>
-          {/* Wunschtext oben */}
           <div className='text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold break-words'>
             {item.text}
           </div>
 
-          {/* Link unten mit Material-Icon */}
           {item.link && (
             <a
               href={item.link}
@@ -266,16 +267,21 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
 
         {/* Buttons */}
         <div className='flex gap-2 ml-2'>
-          <button onClick={onEdit} className='text-yellow-400 hover:text-yellow-200'>
+          <button
+            onClick={onEdit}
+            className='text-yellow-400 hover:text-yellow-200 p-3 rounded-full focus:outline-none'
+          >
             <EditIcon fontSize='small' />
           </button>
-          <button onClick={onDelete} className='text-red-600 hover:text-red-400'>
+          <button
+            onClick={onDelete}
+            className='text-red-600 hover:text-red-400 p-3 rounded-full focus:outline-none'
+          >
             <DeleteOutlineIcon fontSize='small' />
           </button>
         </div>
       </div>
 
-      {/* Optionales Bild */}
       {item.imageUrl && (
         <img
           src={item.imageUrl}
