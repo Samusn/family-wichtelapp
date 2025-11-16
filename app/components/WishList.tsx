@@ -120,7 +120,7 @@ export default function WishList() {
         <div className='text-center mb-4'>
           <GlowTitle
             text='Wunschliste'
-            size='text-3xl sm:text-4xl'
+            size='text-5xl sm:text-4xl'
             color='#00ff66'
             shadowColor='#33ff99'
           />
@@ -144,7 +144,11 @@ export default function WishList() {
         {/* Wunschliste */}
         <div className='flex flex-col gap-4 mt-4'>
           {items.length === 0 && (
-            <p className='text-center text-white italic'>Noch keine Wünsche ✨</p>
+            <div className="flex flex-col items-center justify-center py-10">
+              <p className="text-white/70 text-lg mt-4 text-center max-w-xs italic">
+                Noch keine Wünsche✨
+              </p>
+            </div>
           )}
 
           {items.map((item, index) => (
@@ -160,7 +164,7 @@ export default function WishList() {
         {/* Dialog */}
         <Dialog open={open} onClose={() => setOpen(false)} className='relative z-50'>
           <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4'>
-            <Dialog.Panel className='bg-red-900 p-6 rounded-2xl shadow-lg max-w-sm w-full text-white border border-yellow-400 relative z-10'>
+            <Dialog.Panel className='bg-gradient-to-br from-red-900 via-red-800 to-red-900 p-6 rounded-2xl shadow-2xl max-w-sm w-full text-white border border-yellow-400 relative z-10'>
               <Dialog.Title className='text-xl font-bold mb-3'>
                 {editingIndex !== null ? 'Wunsch bearbeiten 🎁' : 'Neuer Wunsch 🎁'}
               </Dialog.Title>
@@ -170,7 +174,7 @@ export default function WishList() {
                 placeholder='Wunschtext'
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className='w-full mb-3 p-3 rounded-md bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white h-20 resize-none'
+                className='w-full mb-3 p-3 rounded-lg bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white h-24 resize-none shadow-inner'
               />
 
               <input
@@ -178,10 +182,11 @@ export default function WishList() {
                 placeholder='Optional: Link'
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
-                className='w-full mb-4 p-3 rounded-md bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white'
+                className='w-full mb-4 p-3 rounded-lg bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white shadow-inner'
               />
 
-              <label className='flex items-center justify-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-3 rounded-lg cursor-pointer mb-3'>
+              {/* Eleganter Bild-Auswahlbutton */}
+              <label className='flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 via-green-600 to-green-500 hover:via-green-700 text-white px-5 py-3 rounded-xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 mb-3'>
                 <ImageIcon fontSize='small' /> Bild auswählen
                 <input
                   type='file'
@@ -195,7 +200,7 @@ export default function WishList() {
                 <img
                   src={preview}
                   alt='Preview'
-                  className='rounded-lg w-full max-h-48 object-cover mb-4'
+                  className='rounded-xl w-full max-h-48 object-cover mb-4 shadow-lg'
                 />
               )}
 
@@ -203,7 +208,7 @@ export default function WishList() {
               <div className='flex justify-end gap-3 mt-4'>
                 <button
                   onClick={() => setOpen(false)}
-                  className='text-green-300 hover:text-white px-5 py-3 rounded-lg font-medium focus:outline-none'
+                  className='px-5 py-3 rounded-xl font-medium bg-gray-700 hover:bg-gray-600 text-white shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none'
                   disabled={uploading}
                 >
                   Abbrechen
@@ -211,7 +216,7 @@ export default function WishList() {
                 <button
                   onClick={saveItem}
                   disabled={uploading}
-                  className='bg-green-600 hover:bg-green-700 px-5 py-3 rounded-lg font-semibold disabled:opacity-50'
+                  className='px-5 py-3 rounded-xl font-semibold bg-gradient-to-r from-green-500 via-green-600 to-green-500 hover:via-green-700 text-white shadow-lg hover:shadow-2xl transition-all duration-300 disabled:opacity-50'
                 >
                   {uploading ? 'Lädt...' : 'Speichern'}
                 </button>
@@ -269,13 +274,13 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
         <div className='flex gap-2 ml-2'>
           <button
             onClick={onEdit}
-            className='text-yellow-400 hover:text-yellow-200 p-3 rounded-full focus:outline-none'
+            className='text-yellow-400 hover:text-yellow-200 p-3 rounded-full focus:outline-none shadow-md hover:shadow-lg transition-all duration-200'
           >
             <EditIcon fontSize='small' />
           </button>
           <button
             onClick={onDelete}
-            className='text-red-600 hover:text-red-400 p-3 rounded-full focus:outline-none'
+            className='text-red-600 hover:text-red-400 p-3 rounded-full focus:outline-none shadow-md hover:shadow-lg transition-all duration-200'
           >
             <DeleteOutlineIcon fontSize='small' />
           </button>
@@ -286,7 +291,7 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
         <img
           src={item.imageUrl}
           alt='Wunschbild'
-          className='rounded-xl w-full max-h-48 object-cover mt-2'
+          className='rounded-xl w-full max-h-48 object-cover mt-2 shadow-md'
         />
       )}
     </motion.div>

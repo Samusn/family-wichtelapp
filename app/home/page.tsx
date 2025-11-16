@@ -12,7 +12,7 @@ export default function HomePage() {
           <div className='text-center'>
             <GlowTitle
               text='Weihnachtswichteln 2025'
-              size='text-2xl sm:text-4xl'
+              size='text-4xl sm:text-4xl'
               color='#00ff66'
               shadowColor='#33ff99'
             />
