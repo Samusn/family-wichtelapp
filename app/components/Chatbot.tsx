@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Dialog } from '@headlessui/react'
 import { motion } from 'framer-motion'
-import { auth } from '@/firebase/auth'
+import { auth } from '@/firebase/authClient'
 import { usePathname } from 'next/navigation'
 import SendIcon from '@mui/icons-material/Send'
 import IconButton from '@mui/material/IconButton'
@@ -55,13 +55,17 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
     const messageText = input.trim()
     if (!messageText) return
 
-    const newMessages = [...messages, { role: 'user', content: messageText }]
+    // User-Nachricht
+    const userMessage: ChatMessage = { role: 'user', content: messageText }
+    const newMessages: ChatMessage[] = [...messages, userMessage]
+
     setMessages(newMessages)
     setInput('')
     setLoading(true)
 
     try {
-      const safeMessages = newMessages.map((m) => ({
+      // Messages für API Request
+      const safeMessages: ChatMessage[] = newMessages.map((m) => ({
         role: m.role,
         content: m.content || '',
       }))
@@ -75,17 +79,19 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
       const data = await res.json()
 
       if (data.text) {
-        setMessages([...safeMessages, { role: 'assistant', content: data.text }])
+        const assistantMessage: ChatMessage = {
+          role: 'assistant',
+          content: data.text,
+        }
+        setMessages([...safeMessages, assistantMessage])
       }
     } catch (err) {
       console.error(err)
-      setMessages([
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: 'Ups, es gab ein Problem beim Abrufen der Antwort. 😅',
-        },
-      ])
+      const assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: 'Ups, es gab ein Problem beim Abrufen der Antwort. 😅',
+      }
+      setMessages([...newMessages, assistantMessage])
     } finally {
       setLoading(false)
     }
@@ -96,25 +102,22 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
   return (
     <Dialog open={open} onClose={() => setOpen(false)} className="relative z-50">
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center p-2">
-        
         <Dialog.Panel
           className="
             bg-red-900 
             rounded-2xl 
             shadow-2xl 
             w-full 
-            max-w-[480px]     /* Laptop / Desktop: schmal */
+            max-w-[480px] 
             max-h-[95vh] 
             flex flex-col 
             overflow-hidden 
             border-2 border-yellow-400
           "
         >
-
           {/* Header */}
           <div className="flex justify-between items-center p-4 border-b border-yellow-400">
             <h2 className="text-xl font-bold text-yellow-300">SamiGPT-67</h2>
-
             <IconButton
               onClick={() => setOpen(false)}
               sx={{

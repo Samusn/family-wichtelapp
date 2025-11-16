@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { auth } from '@/firebase/auth'
-import { getUserData, UserData } from '@/firebase/firestore'
+import { auth } from '@/firebase/authClient'
+import { getUserData, UserData } from '@/firebase/firestoreClient'
 import LogoutButton from '@components/LogoutBtn'
 import PersonIcon from '@mui/icons-material/Person'
 import SettingsIcon from '@mui/icons-material/Settings'

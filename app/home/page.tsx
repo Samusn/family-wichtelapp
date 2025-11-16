@@ -13,8 +13,6 @@ export default function HomePage() {
             <GlowTitle
               text='Weihnachtswichteln 2025'
               size='text-4xl sm:text-4xl'
-              color='#00ff66'
-              shadowColor='#33ff99'
             />
           </div>
 

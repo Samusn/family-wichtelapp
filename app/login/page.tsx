@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { login } from '@/firebase/auth'
+import { login } from '@/firebase/authClient'
 import { Dialog } from '@headlessui/react'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import VisibilityIcon from '@mui/icons-material/Visibility'

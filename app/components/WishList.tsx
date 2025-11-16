@@ -5,21 +5,15 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import EditIcon from '@mui/icons-material/Edit'
 import ImageIcon from '@mui/icons-material/Image'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import { auth } from '@/firebase/auth'
-import { getWishlist, saveWishlist } from '@/firebase/firestore'
-import { uploadImageAndGetURL, deleteImageFromURL } from '@/firebase/storage'
+import { auth } from '@/firebase/authClient'
+import { getWishlist, saveWishlist, WishItem } from '@/firebase/firestoreClient'
+import { uploadImageAndGetURL, deleteImageFromURL } from '@/firebase/storageClient'
 import { Dialog } from '@headlessui/react'
 import GlowTitle from '@components/GlowTitle'
 import Chatbot from '@components/Chatbot'
 import { motion } from 'framer-motion'
 import StyledButton from '@components/AddWishButton'
 import BigButton from '@components/BigButton'
-
-interface WishItem {
-  text: string
-  link?: string
-  imageUrl?: string
-}
 
 export default function WishList() {
   const [items, setItems] = useState<WishItem[]>([])
@@ -32,17 +26,14 @@ export default function WishList() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
-  const [error, setError] = useState('') // neuer State für Validierung
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
       const user = auth.currentUser
       if (!user) return
       const savedItems = await getWishlist(user.uid)
-      const normalized = savedItems.map((i: any) =>
-        typeof i === 'string' ? { text: i } : i
-      )
-      setItems(normalized)
+      setItems(savedItems)
       setLoading(false)
     }
     fetchData()
@@ -57,7 +48,7 @@ export default function WishList() {
 
   const saveItem = async () => {
     if (input.trim() === '') {
-      setError('Der Wunschtext darf nicht leer sein!') // Fehler anzeigen
+      setError('Der Wunschtext darf nicht leer sein!')
       return
     }
 
@@ -72,8 +63,8 @@ export default function WishList() {
         imageUrl = await uploadImageAndGetURL(user.uid, image)
       }
 
-      const newItem = { text: input.trim(), link, imageUrl }
-      let newItems = [...items]
+      const newItem: WishItem = { text: input.trim(), link, imageUrl }
+      const newItems = [...items]
       if (editingIndex !== null) {
         newItems[editingIndex] = newItem
       } else {
@@ -87,7 +78,7 @@ export default function WishList() {
       setPreview(null)
       setEditingIndex(null)
       setOpen(false)
-      await saveWishlist(user.uid, newItems)
+      await saveWishlist(user.uid, newItems) // jetzt korrekt Typ WishItem[]
     } catch (err) {
       console.error('Fehler beim Speichern:', err)
     } finally {
@@ -123,17 +114,13 @@ export default function WishList() {
   return (
     <div className='flex justify-center w-full'>
       <div className='w-full max-w-md flex flex-col gap-5 px-4 sm:px-0'>
-        {/* Titel */}
         <div className='text-center mb-4'>
           <GlowTitle
             text='Wunschliste'
             size='text-5xl sm:text-4xl'
-            color='#00ff66'
-            shadowColor='#33ff99'
           />
         </div>
 
-        {/* Buttons */}
         <div className='flex gap-2'>
           <StyledButton
             onClick={() => {
@@ -149,7 +136,6 @@ export default function WishList() {
           <BigButton onClick={() => setChatOpen(true)} />
         </div>
 
-        {/* Wunschliste */}
         <div className='flex flex-col gap-4 mt-4'>
           {items.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10">
@@ -169,7 +155,6 @@ export default function WishList() {
           ))}
         </div>
 
-        {/* Dialog */}
         <Dialog open={open} onClose={() => setOpen(false)} className='relative z-50'>
           <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4'>
             <Dialog.Panel className='bg-gradient-to-br from-red-900 via-red-800 to-red-900 p-6 rounded-2xl shadow-2xl max-w-sm w-full text-white border border-yellow-400 relative z-10'>
@@ -255,12 +240,10 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      {/* Pulsing circles */}
       <div className='absolute -top-6 -left-6 w-32 h-32 rounded-full bg-red-400/30 blur-3xl animate-pulse pointer-events-none'></div>
       <div className='absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-red-600/30 blur-3xl animate-pulse pointer-events-none'></div>
 
       <div className='flex justify-between items-start relative z-10 gap-2'>
-        {/* Textbereich */}
         <div className='flex-1 min-w-0'>
           <div className='text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold break-words'>
             {item.text}
@@ -278,7 +261,6 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
           )}
         </div>
 
-        {/* Buttons rechts oben */}
         <div className='flex flex-shrink-0 gap-1'>
           <button
             onClick={onEdit}
@@ -293,7 +275,7 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
             <DeleteOutlineIcon fontSize='small' />
           </button>
         </div>
-       </div>
+      </div>
 
       {item.imageUrl && (
         <img
