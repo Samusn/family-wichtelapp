@@ -10,11 +10,11 @@ export default function ImpressumPage() {
         <section className="mb-6">
           <h2 className="text-xl font-semibold text-yellow-300">Verantwortlich</h2>
           <p className="mt-2 text-yellow-100/90">
-            Max Muster<br />
-            Musterweg 12<br />
-            8000 Zürich<br />
+            Samuel Soun<br />
+            Tramstrasse 64<br />
+            5034 Suhr<br />
             Schweiz<br />
-            E-Mail: <a href="mailto:familie@muster.ch" className="underline text-yellow-300">familie@muster.ch</a>
+            E-Mail: <a href="mailto:familie@muster.ch" className="underline text-yellow-300">wichtelparty4family@gmail.com</a>
           </p>
           <p className="text-sm text-yellow-200/70 mt-2">
             Diese Anwendung wird privat betrieben und richtet sich ausschliesslich an Familienmitglieder sowie an enge
@@ -85,7 +85,7 @@ export default function ImpressumPage() {
             Recht auf Auskunft, Berichtigung und Löschung ihrer gespeicherten Daten.
           </p>
           <p className="mt-2">
-            Anfragen zum Datenschutz können jederzeit an <a href="mailto:datenschutz@familie.ch" className="underline text-yellow-300">datenschutz@familie.ch</a> gerichtet werden.
+            Anfragen zum Datenschutz können jederzeit an <a href="mailto:datenschutz@familie.ch" className="underline text-yellow-300">wichtelparty4family@gmail.com</a> gerichtet werden.
           </p>
         </section>
 
@@ -104,7 +104,7 @@ export default function ImpressumPage() {
           <h2 className="text-xl font-semibold text-yellow-300">Stand und Kontakt</h2>
           <p className="mt-2">
             Letzte Aktualisierung: {new Date().toLocaleDateString('de-CH')}<br />
-            Kontaktadresse: <a href="mailto:familie@muster.ch" className="underline text-yellow-300">familie@muster.ch</a>
+            Kontaktadresse: <a href="mailto:familie@muster.ch" className="underline text-yellow-300">wichtelparty4family@gmail.com</a>
           </p>
         </section>
 
