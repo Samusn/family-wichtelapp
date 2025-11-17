@@ -149,10 +149,10 @@ function WishCard({ item, reservedBy, currentUid, onToggle }: WishCardProps) {
       }}
       whileHover={{ scale: 1.02 }}
     >
-      {/* Reservierungsbutton oben rechts */}
+      {/* Reservierungsbutton unten rechts */}
       <button
         onClick={onToggle}
-        className='absolute top-3 right-3 text-xs px-2 py-1 rounded-full bg-black/30 text-white hover:bg-black/50 transition'
+        className='absolute bottom-3 right-3 text-xs px-2 py-1 rounded-full bg-black/30 text-white hover:bg-black/50 transition'
         disabled={Boolean(taken && !isMine)}
       >
         {buttonText}
