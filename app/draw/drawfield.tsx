@@ -175,7 +175,7 @@ export default function DrawField() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -30 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-yellow-400/90 text-black px-4 py-2 rounded-xl shadow-lg flex justify-between items-center gap-4 max-w-md w-[90%]"
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-yellow-400/90 backdrop-blur-sm text-black px-4 py-2 rounded-xl shadow-lg flex justify-between items-center gap-4 max-w-md w-[90%]"
           >
             <span className="text-sm sm:text-base font-medium">{bannerText}</span>
             <button
