@@ -14,7 +14,7 @@ export default function ImpressumPage() {
             Tramstrasse 64<br />
             5034 Suhr<br />
             Schweiz<br />
-            E-Mail: <a href="mailto:familie@muster.ch" className="underline text-yellow-300">wichtelparty4family@gmail.com</a>
+            E-Mail: <a href="mailto:familie@muster.ch" className="underline text-yellow-300">sounsamuel07@gmail.com</a>
           </p>
           <p className="text-sm text-yellow-200/70 mt-2">
             Diese Anwendung wird privat betrieben und richtet sich ausschliesslich an Familienmitglieder sowie an enge
@@ -104,7 +104,7 @@ export default function ImpressumPage() {
           <h2 className="text-xl font-semibold text-yellow-300">Stand und Kontakt</h2>
           <p className="mt-2">
             Letzte Aktualisierung: {new Date().toLocaleDateString('de-CH')}<br />
-            Kontaktadresse: <a href="mailto:familie@muster.ch" className="underline text-yellow-300">wichtelparty4family@gmail.com</a>
+            Kontaktadresse: <a href="mailto:familie@muster.ch" className="underline text-yellow-300">sounsamuel07@gmail.com</a>
           </p>
         </section>
 
