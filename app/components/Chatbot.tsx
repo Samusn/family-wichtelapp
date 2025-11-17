@@ -55,7 +55,6 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
     const messageText = input.trim()
     if (!messageText) return
 
-    // User-Nachricht
     const userMessage: ChatMessage = { role: 'user', content: messageText }
     const newMessages: ChatMessage[] = [...messages, userMessage]
 
@@ -64,7 +63,6 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
     setLoading(true)
 
     try {
-      // Messages für API Request
       const safeMessages: ChatMessage[] = newMessages.map((m) => ({
         role: m.role,
         content: m.content || '',
@@ -104,14 +102,14 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center p-2">
         <Dialog.Panel
           className="
-            bg-red-900 
-            rounded-2xl 
-            shadow-2xl 
-            w-full 
-            max-w-[480px] 
-            max-h-[95vh] 
-            flex flex-col 
-            overflow-hidden 
+            bg-red-900
+            rounded-2xl
+            shadow-2xl
+            w-full
+            max-w-[480px]
+            h-[600px]
+            flex flex-col
+            overflow-hidden
             border-2 border-yellow-400
           "
         >
