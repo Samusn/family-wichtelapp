@@ -25,10 +25,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <div className="background min-h-screen flex justify-center items-center relative">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <div
+          className="background min-h-screen flex justify-center items-center relative"
+          style={{
+            backgroundColor: "#000", // immer schwarz als Fallback
+            backgroundImage: "url('/adf384b0-345b-4e84-a5dc-fd01c62c6aa1.png')",
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
           {/* Schneefall global */}
           <div className="snow-container">
             {Array.from({ length: 200 }).map((_, i) => (
