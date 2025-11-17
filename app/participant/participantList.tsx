@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { collection, doc, getDocs, getDoc } from 'firebase/firestore'
+import { collection, getDocs, getDoc } from 'firebase/firestore'
 import { db, auth } from '@/firebase/config'
 import { onAuthStateChanged } from 'firebase/auth'
 import PersonIcon from '@mui/icons-material/Person'
@@ -21,33 +21,13 @@ interface UserData {
 export default function ParticipantList() {
   const [participants, setParticipants] = useState<(UserData & { id: string })[]>([])
   const [loading, setLoading] = useState(true)
-  const [drawnUserId, setDrawnUserId] = useState<string | null>(null)
   const [usersWhoDrew, setUsersWhoDrew] = useState<string[]>([]) // ids der Teilnehmer, die selbst schon gezogen haben
 
-  // Lade gezogene Person von mir
+  // Wer hat selbst schon gezogen
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) return
 
-      // Wer habe ich gezogen
-      const drawRef = doc(db, 'draws', user.uid)
-      const drawSnap = await getDoc(drawRef)
-      if (drawSnap.exists()) {
-        const names = drawSnap.data()?.drawnNames || []
-        const lastName = names[names.length - 1]
-
-        if (lastName) {
-          const usersRef = collection(db, 'users')
-          const snapshot = await getDocs(usersRef)
-          const found = snapshot.docs
-            .map(d => ({ id: d.id, ...(d.data() as Omit<UserData, 'id'>) }))
-            .find(u => u.name === lastName)
-
-          if (found) setDrawnUserId(found.id)
-        }
-      }
-
-      // Wer hat selbst schon gezogen
       const allDrawsSnap = await getDocs(collection(db, 'draws'))
       const drawnIds: string[] = []
       allDrawsSnap.forEach(docSnap => {
@@ -71,6 +51,7 @@ export default function ParticipantList() {
         const list = snapshot.docs
           .map(d => ({ id: d.id, ...(d.data() as Omit<UserData, 'id'>) }))
           .filter(u => u.role === 'user')
+          .sort((a, b) => a.name.localeCompare(b.name)) // alphabetisch sortieren
 
         setParticipants(list)
       } finally {
@@ -95,14 +76,6 @@ export default function ParticipantList() {
       </p>
     )
 
-  // Sortierung: Dein gezogener User oben, Rest alphabetisch
-  const sorted = participants
-    .filter(p => p.id !== drawnUserId)
-    .sort((a, b) => a.name.localeCompare(b.name))
-  const finalList = drawnUserId
-    ? [participants.find(p => p.id === drawnUserId)!, ...sorted]
-    : sorted
-
   return (
     <div className="flex flex-col items-center w-full px-4 sm:px-0">
       <GlowTitle
@@ -111,8 +84,7 @@ export default function ParticipantList() {
       />
 
       <div className="mt-6 w-full max-w-4xl flex flex-col gap-5">
-        {finalList.map((user) => {
-          const isDrawnPerson = user.id === drawnUserId
+        {participants.map((user) => {
           const hasDrawn = usersWhoDrew.includes(user.id) // ob die Person selbst schon gezogen hat
 
           return (
@@ -127,12 +99,8 @@ export default function ParticipantList() {
                   overflow-hidden
                 `}
                 style={{
-                  boxShadow: isDrawnPerson
-                    ? '0 0 25px 10px rgba(255, 215, 0, 0.45)'
-                    : '0 0 15px 6px rgba(0, 255, 102, 0.20)',
-                  border: `1px solid ${
-                    isDrawnPerson ? '#ffd700' : 'rgba(0,255,100,0.25)'
-                  }`,
+                  boxShadow: '0 0 15px 6px rgba(0, 255, 102, 0.20)',
+                  border: '1px solid rgba(0,255,100,0.25)',
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
@@ -140,21 +108,12 @@ export default function ParticipantList() {
                 {/* NAME ROW */}
                 <div className="flex items-center w-full">
                   <div className="flex-shrink-0 w-10 flex justify-center">
-                    {isDrawnPerson ? (
-                      <CardGiftcardIcon
-                        style={{
-                          color: '#ffd700',
-                          fontSize: 28,
-                        }}
-                      />
-                    ) : (
-                      <PersonIcon
-                        style={{
-                          color: '#00ff66',
-                          fontSize: 28,
-                        }}
-                      />
-                    )}
+                    <PersonIcon
+                      style={{
+                        color: '#00ff66',
+                        fontSize: 28,
+                      }}
+                    />
                   </div>
 
                   <div className="flex-grow text-center text-lg sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-green-600">
@@ -164,7 +123,7 @@ export default function ParticipantList() {
                   <div className="flex-shrink-0 w-10 flex justify-center">
                     <ArrowForwardIosIcon
                       style={{
-                        color: isDrawnPerson ? '#ffd700' : '#00ff66',
+                        color: '#00ff66',
                         fontSize: 18,
                       }}
                     />
