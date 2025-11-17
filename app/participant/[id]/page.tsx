@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import ProtectedRoute from '@auth/ProtectedRoute'
 import BottomNav from '@components/BottomNav'
@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { use } from 'react'
 import { motion } from 'framer-motion'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { auth } from '@/firebase/authClient'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -25,63 +26,85 @@ export default function UserWishlist(props: PageProps) {
   const { id } = use(props.params)
   const router = useRouter()
   const [wishlist, setWishlist] = useState<WishItem[]>([])
+  const [reservations, setReservations] = useState<Record<string, string | null>>({})
   const [userName, setUserName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [currentUid, setCurrentUid] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchWishlist = async () => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      setCurrentUid(user?.uid || null)
+    })
+    return unsubscribe
+  }, [])
+
+  useEffect(() => {
+    const loadData = async () => {
       try {
         const userRef = doc(db, 'users', id)
         const userSnap = await getDoc(userRef)
         if (!userSnap.exists()) {
-          setUserName('Unbekannter User')
+          setUserName(null)
           setWishlist([])
           return
         }
-        const userData = userSnap.data()
-        setUserName(userData.name || 'User')
+        setUserName(userSnap.data().name || 'User')
 
         const wishlistRef = doc(db, 'wishlist', id)
-        const wishlistSnap = await getDoc(wishlistRef)
-        const itemsData = wishlistSnap.exists() ? wishlistSnap.data().items || [] : []
+        const wsSnap = await getDoc(wishlistRef)
+        const items = wsSnap.exists() ? wsSnap.data().items || [] : []
+        setWishlist(items.map((i: any) => (typeof i === 'string' ? { text: i } : i)))
 
-        const normalized: WishItem[] = itemsData.map((i: any) =>
-          typeof i === 'string' ? { text: i } : i
-        )
-        setWishlist(normalized)
-      } catch (err) {
-        console.error('Fehler beim Laden der Wishlist:', err)
-        setUserName('Unbekannter User')
-        setWishlist([])
+        const resRef = doc(db, 'reservations', id)
+        const resSnap = await getDoc(resRef)
+        setReservations(resSnap.exists() ? resSnap.data().items || {} : {})
       } finally {
         setLoading(false)
       }
     }
-    fetchWishlist()
+    loadData()
   }, [id])
 
+  const toggleReservation = async (index: number) => {
+    if (!currentUid) return
+    const resRef = doc(db, 'reservations', id)
+    const currentValue = reservations[index]
+    const newValue = currentValue === currentUid ? null : currentUid
+    await setDoc(
+      resRef,
+      { items: { ...reservations, [index]: newValue } },
+      { merge: true }
+    )
+    setReservations(prev => ({ ...prev, [index]: newValue }))
+  }
+
   if (loading) return <p className='text-center mt-4 text-white'>Lädt...</p>
+  if (!userName) return <p className='text-center mt-4 text-white'>404 – User nicht gefunden</p>
 
   return (
     <ProtectedRoute>
       <div className='font-sans min-h-screen flex flex-col relative'>
         <main className="flex-1 mt-24 px-6 sm:px-20 pb-40 flex flex-col gap-10 items-center z-10 min-h-[100vh]">
-          <GlowTitle
-            text={`${userName}’s Wünsche`}
-            size='text-5xl sm:text-4xl'
-          />
+          <GlowTitle text={`${userName}’s Wünsche`} size='text-5xl sm:text-4xl' />
 
-          {wishlist.length === 0 ? (
-            <p className="text-white/70 text-lg mt-4 text-center max-w-xs italic">
-              Noch keine Wünsche✨
-            </p>
-          ) : (
-            <div className='flex flex-col gap-4 w-full max-w-md mt-4'>
-              {wishlist.map((item, index) => (
-                <WishCard key={index} item={item} />
-              ))}
-            </div>
-          )}
+          <div className='flex flex-col gap-4 w-full max-w-md mt-4'>
+            {wishlist.length === 0 ? (
+              <p className="text-white/70 text-lg mt-4 text-center max-w-xs italic">
+                Noch keine Wünsche✨
+              </p>
+            ) : (
+              wishlist.map((item, index) => (
+                <WishCard
+                  key={index}
+                  item={item}
+                  index={index}
+                  reservedBy={reservations[index] || null}
+                  currentUid={currentUid}
+                  onToggle={() => toggleReservation(index)}
+                />
+              ))
+            )}
+          </div>
 
           <button
             onClick={() => router.push('/participant')}
@@ -101,19 +124,41 @@ export default function UserWishlist(props: PageProps) {
 
 interface WishCardProps {
   item: WishItem
+  index: number
+  reservedBy: string | null
+  currentUid: string | null
+  onToggle: () => void
 }
 
-function WishCard({ item }: WishCardProps) {
+function WishCard({ item, reservedBy, currentUid, onToggle }: WishCardProps) {
+  const isMine = reservedBy === currentUid
+  const taken = !!reservedBy && !isMine
+
+  let buttonText = 'Reservieren'
+  if (isMine) buttonText = 'Reserviert'
+  else if (taken) buttonText = 'Bereits reserviert'
+
   return (
     <motion.div
-      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 overflow-hidden bg-red-900/20 backdrop-blur-lg'
+      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 transition-all duration-300 overflow-hidden bg-red-900/20 backdrop-blur-lg'
       style={{
-        borderColor: '#FFD700',
-        boxShadow: '0 0 15px 5px rgba(255,0,0,0.6), 0 0 20px 5px rgba(255,215,0,0.5)',
+        borderColor: isMine ? '#00FF88' : taken ? '#FF4444' : '#FFD700',
+        boxShadow: isMine
+          ? '0 0 15px 5px rgba(0,255,136,0.6), 0 0 20px 5px rgba(255,215,0,0.5)'
+          : '0 0 15px 5px rgba(255,0,0,0.6), 0 0 20px 5px rgba(255,215,0,0.5)',
       }}
-      whileHover={{ scale: 1.02, boxShadow: '0 0 25px 5px rgba(255,215,0,0.7)' }}
+      whileHover={{ scale: 1.02 }}
     >
-      {/* Wunschtext oben */}
+      {/* Reservierungsbutton oben rechts */}
+      <button
+        onClick={onToggle}
+        className='absolute top-3 right-3 text-xs px-2 py-1 rounded-full bg-black/30 text-white hover:bg-black/50 transition'
+        disabled={Boolean(taken && !isMine)}
+      >
+        {buttonText}
+      </button>
+
+      {/* Wunschtext */}
       <div className='text-left break-words max-w-full text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold'>
         {item.text}
       </div>
@@ -127,7 +172,7 @@ function WishCard({ item }: WishCardProps) {
         />
       )}
 
-      {/* Link unten mit Pfeil */}
+      {/* Optionaler Link */}
       {item.link && (
         <a
           href={item.link}
