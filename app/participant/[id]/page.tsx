@@ -168,7 +168,7 @@ function WishCard({ item, reservedBy, currentUid, onToggle }: WishCardProps) {
         <img
           src={item.imageUrl}
           alt='Wunschbild'
-          className='rounded-xl w-full max-h-48 object-cover mt-2'
+          className='rounded-xl w-full object-cover mt-2'
         />
       )}
 
