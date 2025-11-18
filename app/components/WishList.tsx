@@ -193,7 +193,7 @@ export default function WishList() {
                 <img
                   src={preview}
                   alt='Preview'
-                  className='rounded-xl w-full max-h-48 object-cover mb-4 shadow-lg'
+                  className='rounded-xl w-full object-cover mb-4 shadow-lg'
                 />
               )}
 
