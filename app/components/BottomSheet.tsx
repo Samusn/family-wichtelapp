@@ -6,7 +6,7 @@ import { auth } from '@/firebase/authClient'
 import { getUserData, UserData } from '@/firebase/firestoreClient'
 import LogoutButton from '@components/LogoutBtn'
 import PersonIcon from '@mui/icons-material/Person'
-import SettingsIcon from '@mui/icons-material/Settings'
+import GavelIcon from '@mui/icons-material/Gavel';
 import ChatIcon from '@mui/icons-material/Chat'
 import CloseIcon from '@mui/icons-material/Close'
 import { motion } from 'framer-motion'
@@ -86,7 +86,7 @@ export default function BottomSheet({ open, onClose }: BottomSheetProps) {
               hover:shadow-[0_0_25px_#ff7777] transition-all duration-200"
               style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
             >
-              <SettingsIcon className="text-red-300" />
+              <GavelIcon className="text-red-300" />
               <span className="flex-1 text-left">Impressum</span>
             </Link>
           </motion.div>
