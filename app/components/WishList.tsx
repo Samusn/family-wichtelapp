@@ -78,7 +78,7 @@ export default function WishList() {
       setPreview(null)
       setEditingIndex(null)
       setOpen(false)
-      await saveWishlist(user.uid, newItems) // jetzt korrekt Typ WishItem[]
+      await saveWishlist(user.uid, newItems)
     } catch (err) {
       console.error('Fehler beim Speichern:', err)
     } finally {
@@ -155,9 +155,14 @@ export default function WishList() {
           ))}
         </div>
 
+        {/* ------------------- POPUP ------------------- */}
         <Dialog open={open} onClose={() => setOpen(false)} className='relative z-50'>
           <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4'>
-            <Dialog.Panel className='bg-gradient-to-br from-red-900 via-red-800 to-red-900 p-6 rounded-2xl shadow-2xl max-w-sm w-full text-white border border-yellow-400 relative z-10'>
+            
+            <Dialog.Panel className='bg-gradient-to-br from-red-900 via-red-800 to-red-900 
+              p-6 rounded-2xl shadow-2xl max-w-sm w-full text-white border border-yellow-400 
+              relative z-10 h-[75vh] overflow-y-auto'>
+
               <Dialog.Title className='text-xl font-bold mb-3'>
                 {editingIndex !== null ? 'Wunsch bearbeiten' : 'Neuer Wunsch'}
               </Dialog.Title>
@@ -213,6 +218,7 @@ export default function WishList() {
                   {uploading ? 'Lädt...' : 'Speichern'}
                 </button>
               </div>
+
             </Dialog.Panel>
           </div>
         </Dialog>
@@ -281,7 +287,7 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
         <img
           src={item.imageUrl}
           alt='Wunschbild'
-          className='rounded-xl w-full max-h-48 object-cover mt-2 shadow-md'
+          className='rounded-xl w-full object-cover mt-2 shadow-md'
         />
       )}
     </motion.div>
