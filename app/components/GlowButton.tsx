@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { memo } from 'react'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
@@ -11,7 +11,7 @@ interface GlowButtonProps {
   disabled?: boolean
 }
 
-const GlowButton: React.FC<GlowButtonProps> = ({ onClick, text, disabled = false }) => {
+const GlowButton: React.FC<GlowButtonProps> = memo(({ onClick, text, disabled = false }) => {
   return (
     <motion.div
       drag={!disabled} // Nur draggable, wenn nicht disabled
@@ -26,7 +26,7 @@ const GlowButton: React.FC<GlowButtonProps> = ({ onClick, text, disabled = false
       </StyledWrapper>
     </motion.div>
   )
-}
+})
 
 const StyledWrapper = styled.div<{ disabled?: boolean }>`
   button {
@@ -75,4 +75,5 @@ const StyledWrapper = styled.div<{ disabled?: boolean }>`
   }
 `
 
+GlowButton.displayName = 'GlowButton'
 export default GlowButton
