@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { collection, doc, getDocs, runTransaction, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, runTransaction, serverTimestamp } from 'firebase/firestore'
 import { db, auth } from '@/firebase/config'
 import { onAuthStateChanged } from 'firebase/auth'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -13,6 +13,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 
 import GlowButton from '@components/GlowButton'
 import GlowTitle from '@components/GlowTitle'
+import SecretSantaChat from '@components/SecretSantaChat'
 import giftHouseAnim from '@components/assets/gift_house.json'
 import giftBoxAnim from '@components/assets/giftBox.json'
 import snowGlobeAnim from '@components/assets/schneekugel.json'
@@ -34,10 +35,8 @@ export default function DrawField() {
   const [visible, setVisible] = useState(false)
   const [isNewDraw, setIsNewDraw] = useState(false)
   const [hasDrawn, setHasDrawn] = useState(false)
-
-  // Notification state
-  const [showBanner, setShowBanner] = useState(true)
-  const bannerText = "Die Santa's secret geheim Nachricht funktion ist noch in der Entwicklung... coming soon!" 
+  const [chatOpen, setChatOpen] = useState(false)
+  const [currentUserRole, setCurrentUserRole] = useState<string>('')
 
   const houseRef = useRef<LottieRefCurrentProps>(null)
   const scrollYRef = useRef(0)
@@ -47,6 +46,20 @@ export default function DrawField() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUserId(user.uid)
+
+        // User Role laden
+        try {
+          const userDocRef = doc(db, 'users', user.uid)
+          const userDocSnap = await getDoc(userDocRef)
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data()
+            if (userData?.role) {
+              setCurrentUserRole(userData.role)
+            }
+          }
+        } catch (error) {
+          console.error('Fehler beim Laden der User-Role:', error)
+        }
 
         // Prüfen, ob der User schon gezogen hat
         const userDrawSnap = await getDocs(collection(db, 'draws'))
@@ -155,38 +168,16 @@ export default function DrawField() {
 
   const handleShowName = () => setVisible(!visible)
 
-  // Automatisches Banner Timeout (5 Sekunden)
-  useEffect(() => {
-    if (showBanner) {
-      const timeout = setTimeout(() => setShowBanner(false), 5000)
-      return () => clearTimeout(timeout)
-    }
-  }, [showBanner])
-
   return (
     <div className="relative flex flex-col items-center justify-center w-full sm:px-10 gap-6">
-
-      {/* --- Banner Notification */}
-      <AnimatePresence>
-        {showBanner && (
-          <motion.div
-            key="banner"
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -30 }}
-            transition={{ duration: 0.3 }}
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-yellow-400/90 backdrop-blur-sm text-black px-4 py-2 rounded-xl shadow-lg flex justify-between items-center gap-4 max-w-md w-[90%]"
-          >
-            <span className="text-sm sm:text-base font-medium">{bannerText}</span>
-            <button
-              onClick={() => setShowBanner(false)}
-              className="font-bold text-black text-lg px-2 py-1 rounded hover:bg-yellow-500/70"
-            >
-              ✕
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Secret Santa Chat - für normale User nur wenn gezogen, für Admins immer */}
+      {(drawn || currentUserRole === 'admin') && (
+        <SecretSantaChat
+          receiverName={drawn}
+          open={chatOpen}
+          setOpen={setChatOpen}
+        />
+      )}
 
       <div className='text-center mb-4'>
         <GlowTitle

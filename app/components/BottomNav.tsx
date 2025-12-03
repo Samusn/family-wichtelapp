@@ -10,7 +10,9 @@ import CardGiftcardRoundedIcon from '@mui/icons-material/CardGiftcardRounded'
 import ConfirmationNumberRoundedIcon from '@mui/icons-material/ConfirmationNumberRounded'
 import GroupsIcon from '@mui/icons-material/Groups'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
+import Badge from '@mui/material/Badge'
 import BottomSheet from './BottomSheet'
+import { useSecretMessages } from './SecretMessageContext'
 
 const navItems = [
   { label: 'Home', icon: <HomeRoundedIcon />, path: '/home' },
@@ -24,6 +26,7 @@ export default function BottomNav() {
   const router = useRouter()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
+  const { unreadCount } = useSecretMessages()
 
   const currentIndex = navItems.findIndex(
     (item) => item.path && pathname.startsWith(item.path)
@@ -94,13 +97,25 @@ export default function BottomNav() {
             },
           }}
         >
-          {navItems.map((item) => (
-            <BottomNavigationAction
-              key={item.label}
-              label={item.label}
-              icon={item.icon}
-            />
-          ))}
+          {navItems.map((item) => {
+            // Badge nur für "Los" Tab (Draw) anzeigen
+            const showBadge = item.label === 'Los' && unreadCount > 0
+            return (
+              <BottomNavigationAction
+                key={item.label}
+                label={item.label}
+                icon={
+                  showBadge ? (
+                    <Badge badgeContent={unreadCount} color="error" max={99}>
+                      {item.icon}
+                    </Badge>
+                  ) : (
+                    item.icon
+                  )
+                }
+              />
+            )
+          })}
         </BottomNavigation>
       </Box>
 
