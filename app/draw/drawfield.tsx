@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo, useCallback, Suspense } from 'react'
 import { collection, doc, getDoc, getDocs, runTransaction, serverTimestamp } from 'firebase/firestore'
 import { db, auth } from '@/firebase/config'
 import { onAuthStateChanged } from 'firebase/auth'
 import { motion, AnimatePresence } from 'framer-motion'
-import Lottie, { LottieRefCurrentProps } from 'lottie-react'
+import dynamic from 'next/dynamic'
 import Confetti from 'react-confetti'
 import { IconButton } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
@@ -14,9 +14,38 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import GlowButton from '@components/GlowButton'
 import GlowTitle from '@components/GlowTitle'
 import SecretSantaChat from '@components/SecretSantaChat'
-import giftHouseAnim from '@components/assets/gift_house.json'
-import giftBoxAnim from '@components/assets/giftBox.json'
-import snowGlobeAnim from '@components/assets/schneekugel.json'
+
+// Lazy load Lottie to reduce initial bundle size
+const Lottie = dynamic(() => import('lottie-react'), { 
+  ssr: false,
+  loading: () => <div className="w-full h-full" />
+})
+
+// Cache animation data to avoid re-importing
+let giftHouseAnim: any = null
+let giftBoxAnim: any = null
+let snowGlobeAnim: any = null
+
+const loadGiftHouseAnim = () => {
+  if (!giftHouseAnim) {
+    giftHouseAnim = require('@components/assets/gift_house.json')
+  }
+  return giftHouseAnim
+}
+
+const loadGiftBoxAnim = () => {
+  if (!giftBoxAnim) {
+    giftBoxAnim = require('@components/assets/giftBox.json')
+  }
+  return giftBoxAnim
+}
+
+const loadSnowGlobeAnim = () => {
+  if (!snowGlobeAnim) {
+    snowGlobeAnim = require('@components/assets/schneekugel.json')
+  }
+  return snowGlobeAnim
+}
 
 interface UserData {
   id: string
@@ -37,45 +66,63 @@ export default function DrawField() {
   const [hasDrawn, setHasDrawn] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
   const [currentUserRole, setCurrentUserRole] = useState<string>('')
+  const [userDataLoaded, setUserDataLoaded] = useState(false)
+  const [participantsLoaded, setParticipantsLoaded] = useState(false)
 
-  const houseRef = useRef<LottieRefCurrentProps>(null)
+  const houseRef = useRef<any>(null)
   const scrollYRef = useRef(0)
 
-  // Auth check & letzte Ziehung laden
+  // Memoize user data fetching
+  const fetchUserData = useCallback(async (userId: string) => {
+    try {
+      const [userDocSnap, userDrawSnap] = await Promise.all([
+        getDoc(doc(db, 'users', userId)),
+        getDocs(collection(db, 'draws'))
+      ])
+      
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data()
+        if (userData?.role) {
+          setCurrentUserRole(userData.role)
+        }
+      }
+
+      const userDoc = userDrawSnap.docs.find(d => d.id === userId)
+      const drawnNames: string[] = userDoc?.data().drawnNames || []
+
+      if (drawnNames.length > 0) {
+        setDrawn(drawnNames[drawnNames.length - 1])
+        setHasDrawn(true)
+      }
+      
+      setUserDataLoaded(true)
+      return true
+    } catch (error) {
+      console.error('Fehler beim Laden der User-Daten:', error)
+      setUserDataLoaded(true)
+      return false
+    }
+  }, [])
+
+  // Auth check & letzte Ziehung laden - optimized
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUserId(user.uid)
-
-        // User Role laden
-        try {
-          const userDocRef = doc(db, 'users', user.uid)
-          const userDocSnap = await getDoc(userDocRef)
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data()
-            if (userData?.role) {
-              setCurrentUserRole(userData.role)
-            }
-          }
-        } catch (error) {
-          console.error('Fehler beim Laden der User-Role:', error)
-        }
-
-        // Prüfen, ob der User schon gezogen hat
-        const userDrawSnap = await getDocs(collection(db, 'draws'))
-        const userDoc = userDrawSnap.docs.find(d => d.id === user.uid)
-        const drawnNames: string[] = userDoc?.data().drawnNames || []
-
-        if (drawnNames.length > 0) {
-          setDrawn(drawnNames[drawnNames.length - 1])
-          setHasDrawn(true)
-        }
+        await fetchUserData(user.uid)
+      } else {
+        setCurrentUserId(null)
+        setDrawn(null)
+        setHasDrawn(false)
+        setUserDataLoaded(true)
+        setParticipantsLoaded(true)
+        setLoading(false)
       }
     })
     return () => unsubscribe()
-  }, [])
+  }, [fetchUserData])
 
-  // Teilnehmer laden
+  // Teilnehmer laden - optimized
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
@@ -83,19 +130,27 @@ export default function DrawField() {
         const snapshot = await getDocs(usersRef)
         const users = snapshot.docs
           .map((doc) => {
-            const data = doc.data() as Omit<UserData, 'id'> // id aus UserData rausnehmen
+            const data = doc.data() as Omit<UserData, 'id'>
             return { id: doc.id, ...data }
           })
           .filter((u) => u.role === 'user')
         setParticipants(users)
+        setParticipantsLoaded(true)
       } catch (error) {
         console.error('Fehler beim Laden der Teilnehmer:', error)
-      } finally {
-        setLoading(false)
+        setParticipantsLoaded(true)
       }
     }
+    
     fetchParticipants()
   }, [])
+
+  // Setze loading auf false, wenn beide Queries fertig sind
+  useEffect(() => {
+    if (userDataLoaded && participantsLoaded) {
+      setLoading(false)
+    }
+  }, [userDataLoaded, participantsLoaded])
 
   // Scroll sperren bei Popup
   useEffect(() => {
@@ -116,7 +171,7 @@ export default function DrawField() {
     }
   }, [showPopup])
 
-  const handleDraw = async () => {
+  const handleDraw = useCallback(async () => {
     if (!currentUserId || animating || hasDrawn) return
 
     setAnimating(true)
@@ -164,14 +219,18 @@ export default function DrawField() {
       alert(error instanceof Error ? error.message : 'Fehler bei der Ziehung')
       setAnimating(false)
     }
-  }
+  }, [currentUserId, animating, hasDrawn, participants])
 
-  const handleShowName = () => setVisible(!visible)
+  const handleShowName = useCallback(() => setVisible(prev => !prev), [])
+
+  // Memoize expensive renders
+  const showChat = useMemo(() => drawn || currentUserRole === 'admin', [drawn, currentUserRole])
+  const showButton = useMemo(() => !drawn && !animating && !loading, [drawn, animating, loading])
 
   return (
     <div className="relative flex flex-col items-center justify-center w-full sm:px-10 gap-6">
       {/* Secret Santa Chat - für normale User nur wenn gezogen, für Admins immer */}
-      {(drawn || currentUserRole === 'admin') && (
+      {showChat && (
         <SecretSantaChat
           receiverName={drawn}
           open={chatOpen}
@@ -187,45 +246,61 @@ export default function DrawField() {
       </div>
 
       <div className="relative w-full max-w-[95%] mt-6 flex justify-center" style={{ minHeight: 400 }}>
-        {!drawn && (
-          <Lottie
-            lottieRef={houseRef}
-            animationData={giftHouseAnim}
-            loop={false}
-            autoplay={false}
-            className="z-0 pointer-events-none"
-          />
-        )}
+        {loading ? (
+          // Loading State - zeige nichts, um Pop-Effekt zu vermeiden
+          <div className="w-full h-full" />
+        ) : (
+          <>
+            {!drawn && (
+              <Suspense fallback={<div className="w-full h-full" />}>
+                <Lottie
+                  lottieRef={houseRef}
+                  animationData={loadGiftHouseAnim()}
+                  loop={false}
+                  autoplay={false}
+                  className="z-0 pointer-events-none"
+                />
+              </Suspense>
+            )}
 
-        {drawn && (
-          <div className="relative flex flex-col items-center z-0 w-full max-w-[320px] sm:max-w-[400px]">
-            <div className="relative w-full h-64 sm:h-80">
-              <Lottie animationData={snowGlobeAnim} loop className="pointer-events-none"/>
-            </div>
-            <div className="relative flex justify-center items-center w-full p-4 rounded-t-[50%] rounded-b-xl bg-red-600 border-4 border-yellow-400 shadow-[0_0_35px_#FFD700] mt-[-10px] sm:mt-0">
-              <span
-                className="text-3xl sm:text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_15px_#FFD700] text-center tracking-wider"
-                style={{ filter: visible ? 'blur(0px)' : 'blur(8px)', transition: 'filter 0.3s' }}
+            {drawn && (
+              <div className="relative flex flex-col items-center z-0 w-full max-w-[320px] sm:max-w-[400px]">
+                <div className="relative w-full h-64 sm:h-80">
+                  <Suspense fallback={<div className="w-full h-full" />}>
+                    <Lottie animationData={loadSnowGlobeAnim()} loop className="pointer-events-none"/>
+                  </Suspense>
+                </div>
+                <div className="relative flex justify-center items-center w-full p-4 rounded-t-[50%] rounded-b-xl bg-red-600 border-4 border-yellow-400 shadow-[0_0_35px_#FFD700] mt-[-10px] sm:mt-0">
+                  <span
+                    className="text-3xl sm:text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_15px_#FFD700] text-center tracking-wider"
+                    style={{ filter: visible ? 'blur(0px)' : 'blur(8px)', transition: 'filter 0.3s' }}
+                  >
+                    {drawn}
+                  </span>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <IconButton onClick={handleShowName} sx={{ color: '#FFD700' }} size="large">
+                    {visible ? <VisibilityOffIcon fontSize="large"/> : <VisibilityIcon fontSize="large"/>}
+                  </IconButton>
+                </div>
+              </div>
+            )}
+
+            {showButton && (
+              <motion.div 
+                className="absolute top-0 z-10 flex justify-center w-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
               >
-                {drawn}
-              </span>
-            </div>
-            <div className="absolute top-2 right-2">
-              <IconButton onClick={handleShowName} sx={{ color: '#FFD700' }} size="large">
-                {visible ? <VisibilityOffIcon fontSize="large"/> : <VisibilityIcon fontSize="large"/>}
-              </IconButton>
-            </div>
-          </div>
-        )}
-
-        {!drawn && !animating && !loading && (
-          <motion.div className="absolute top-0 z-10 flex justify-center w-full">
-            <GlowButton
-              onClick={handleDraw}
-              text={hasDrawn ? 'Du hast bereits gezogen' : 'Los ziehen'}
-              disabled={hasDrawn}
-            />
-          </motion.div>
+                <GlowButton
+                  onClick={handleDraw}
+                  text={hasDrawn ? 'Du hast bereits gezogen' : 'Los ziehen'}
+                  disabled={hasDrawn}
+                />
+              </motion.div>
+            )}
+          </>
         )}
       </div>
 
@@ -247,7 +322,9 @@ export default function DrawField() {
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
               <div className="relative w-56 h-56 sm:w-64 sm:h-64">
-                <Lottie animationData={giftBoxAnim} loop={false} className="pointer-events-none" />
+                <Suspense fallback={<div className="w-full h-full" />}>
+                  <Lottie animationData={loadGiftBoxAnim()} loop={false} className="pointer-events-none" />
+                </Suspense>
                 {visible && (
                   <motion.div
                     className="absolute inset-0 flex items-center justify-center text-3xl sm:text-4xl font-extrabold text-yellow-300 drop-shadow-[0_0_12px_#FFD700] text-center px-2"

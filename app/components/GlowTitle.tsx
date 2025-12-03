@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { memo } from "react";
 import { Mountains_of_Christmas } from "next/font/google";
 
 const mountains = Mountains_of_Christmas({
@@ -14,7 +14,7 @@ interface GlowTitleProps {
   className?: string;
 }
 
-export default function GlowTitle({
+const GlowTitle = memo(function GlowTitle({
   text,
   size = "text-3xl",
   className = "",
@@ -50,4 +50,6 @@ export default function GlowTitle({
       `}</style>
     </h1>
   );
-}
+})
+
+export default GlowTitle
