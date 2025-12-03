@@ -169,6 +169,7 @@ export default function Chatbot({ open, setOpen }: ChatbotProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               className="flex-grow p-3 rounded-xl bg-red-900 text-yellow-100 border border-yellow-400 focus:outline-none"
+              style={{ fontSize: '16px' }}
               disabled={loading}
             />
             <button

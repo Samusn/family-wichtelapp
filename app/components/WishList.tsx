@@ -121,7 +121,7 @@ export default function WishList() {
           />
         </div>
 
-        <div className='flex gap-2'>
+        <div className='flex gap-3 items-center justify-center w-full'>
           <StyledButton
             onClick={() => {
               setInput('')
@@ -160,52 +160,60 @@ export default function WishList() {
           <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4'>
             
             <Dialog.Panel className='bg-gradient-to-br from-red-900 via-red-800 to-red-900 
-              p-6 rounded-2xl shadow-2xl max-w-sm w-full text-white border border-yellow-400 
-              relative z-10 h-[75vh] overflow-y-auto'>
+              p-5 sm:p-6 rounded-2xl shadow-2xl max-w-sm w-full text-white border border-yellow-400 
+              relative z-10 max-h-[90vh] flex flex-col'>
 
-              <Dialog.Title className='text-xl font-bold mb-3'>
+              <Dialog.Title className='text-lg sm:text-xl font-bold mb-4 flex-shrink-0'>
                 {editingIndex !== null ? 'Wunsch bearbeiten' : 'Neuer Wunsch'}
               </Dialog.Title>
 
-              <textarea
-                placeholder='Wunschtext'
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className={`w-full mb-3 p-3 rounded-lg bg-red-800 border ${error ? 'border-red-500' : 'border-red-500'} placeholder-white focus:outline-none text-white h-24 resize-none shadow-inner`}
-              />
+              <div className='flex-1 overflow-y-auto overflow-x-hidden pr-1 space-y-3 min-h-0 -mr-1'>
+                <div>
+                  <textarea
+                    placeholder='Wunschtext'
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    className={`w-full p-3 rounded-lg bg-red-800/80 border ${error ? 'border-red-500' : 'border-red-500/50'} placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white h-20 resize-none shadow-inner text-base`}
+                    style={{ fontSize: '16px' }}
+                  />
+                  {error && <p className='text-red-300 text-xs mt-1.5'>{error}</p>}
+                </div>
 
-              {error && <p className='text-red-500 text-sm mb-2'>{error}</p>}
-
-              <input
-                type='text'
-                placeholder='Optional: Link'
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-                className='w-full mb-4 p-3 rounded-lg bg-red-800 border border-red-500 placeholder-white focus:outline-none text-white shadow-inner'
-              />
-
-              <label className='flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 via-green-600 to-green-500 hover:via-green-700 text-white px-5 py-3 rounded-xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 mb-3'>
-                <ImageIcon fontSize='small' /> Bild auswählen
                 <input
-                  type='file'
-                  accept='image/*'
-                  className='hidden'
-                  onChange={handleImageChange}
+                  type='text'
+                  placeholder='Optional: Link'
+                  value={link}
+                  onChange={(e) => setLink(e.target.value)}
+                  className='w-full p-3 rounded-lg bg-red-800/80 border border-red-500/50 placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white shadow-inner'
+                  style={{ fontSize: '16px' }}
                 />
-              </label>
 
-              {preview && (
-                <img
-                  src={preview}
-                  alt='Preview'
-                  className='rounded-xl w-full object-cover mb-4 shadow-lg'
-                />
-              )}
+                <label className='flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 via-green-600 to-green-500 hover:via-green-700 active:scale-[0.98] text-white px-4 py-2.5 rounded-xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 touch-manipulation min-h-[44px]'>
+                  <ImageIcon fontSize='small' /> 
+                  <span className="text-sm sm:text-base">Bild auswählen</span>
+                  <input
+                    type='file'
+                    accept='image/*'
+                    className='hidden'
+                    onChange={handleImageChange}
+                  />
+                </label>
 
-              <div className='flex justify-end gap-3 mt-4'>
+                {preview && (
+                  <div className='mt-1'>
+                    <img
+                      src={preview}
+                      alt='Preview'
+                      className='rounded-xl w-full object-cover shadow-lg max-h-48 sm:max-h-56'
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className='flex justify-end gap-3 mt-4 pt-4 border-t border-red-700/50 flex-shrink-0'>
                 <button
                   onClick={() => setOpen(false)}
-                  className='px-5 py-3 rounded-xl font-medium bg-gray-700 hover:bg-gray-600 text-white shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none'
+                  className='px-4 sm:px-5 py-2.5 rounded-xl font-medium bg-gray-700/80 hover:bg-gray-600 active:scale-[0.97] text-white shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none touch-manipulation min-h-[44px] text-sm sm:text-base'
                   disabled={uploading}
                 >
                   Abbrechen
@@ -213,7 +221,7 @@ export default function WishList() {
                 <button
                   onClick={saveItem}
                   disabled={uploading}
-                  className='px-5 py-3 rounded-xl font-semibold bg-gradient-to-r from-green-500 via-green-600 to-green-500 hover:via-green-700 text-white shadow-lg hover:shadow-2xl transition-all duration-300 disabled:opacity-50'
+                  className='px-4 sm:px-5 py-2.5 rounded-xl font-semibold bg-gradient-to-r from-green-500 via-green-600 to-green-500 hover:via-green-700 active:scale-[0.97] text-white shadow-lg hover:shadow-2xl transition-all duration-300 disabled:opacity-50 touch-manipulation min-h-[44px] text-sm sm:text-base'
                 >
                   {uploading ? 'Lädt...' : 'Speichern'}
                 </button>
