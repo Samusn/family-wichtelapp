@@ -614,6 +614,7 @@ export default function SecretSantaChat({
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !loading && sendMessage()}
                   className="flex-grow p-3 rounded-xl bg-red-900 text-yellow-100 border border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  style={{ fontSize: '16px' }}
                   disabled={
                     loading || 
                     (activeTab === 'toPerson' && !selectedReceiver && !receiverName) ||

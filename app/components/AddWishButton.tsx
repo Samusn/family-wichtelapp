@@ -23,16 +23,19 @@ const Wrapper = styled.div`
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     border-radius: 9999px;
     background-color: #ff0000;
     color: white;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem;
     border: none;
     transition: all 0.3s ease;
     box-shadow: 0 0 15px #ff5555, 0 0 25px #ff8888;
     animation: ${glow} 2s infinite;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
 
     &:hover {
       transform: scale(1.05);
@@ -46,11 +49,14 @@ const Wrapper = styled.div`
 
   .icon {
     font-size: 1.2rem;
+    flex-shrink: 0;
   }
 
   .text_button {
     position: relative;
     z-index: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `
 

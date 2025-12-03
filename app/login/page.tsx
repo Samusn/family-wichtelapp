@@ -47,7 +47,11 @@ export default function LoginPage() {
             placeholder="E-Mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-4 rounded-xl bg-white/20 border border-red-400 placeholder-red-300 text-white focus:outline-none focus:ring-2 focus:ring-red-300 text-base"
+            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+            className="w-full p-4 rounded-xl bg-white/20 border border-red-400 placeholder-red-300 text-white focus:outline-none focus:ring-2 focus:ring-red-300"
+            style={{ fontSize: '16px' }}
+            autoComplete="email"
+            autoCapitalize="none"
           />
 
           {/* Passwort mit Toggle */}
@@ -57,7 +61,10 @@ export default function LoginPage() {
               placeholder="Passwort"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-4 pr-14 rounded-xl bg-white/20 border border-red-400 placeholder-red-300 text-white focus:outline-none focus:ring-2 focus:ring-red-300 text-base"
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+              className="w-full p-4 pr-14 rounded-xl bg-white/20 border border-red-400 placeholder-red-300 text-white focus:outline-none focus:ring-2 focus:ring-red-300"
+              style={{ fontSize: '16px' }}
+              autoComplete="current-password"
             />
 
             {/* Toggle Button */}

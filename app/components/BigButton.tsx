@@ -19,6 +19,7 @@ const GlowButton = styled.button`
   outline: 0;
   height: 48px;
   width: 48px;
+  min-width: 48px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -28,6 +29,7 @@ const GlowButton = styled.button`
   background: linear-gradient(45deg, #efad21, #ffd60f);
   transition: transform 0.2s;
   animation: ${glow} 2s infinite;
+  flex-shrink: 0;
 
   &:hover {
     transform: scale(1.05);
