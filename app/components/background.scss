@@ -1,15 +1,19 @@
 @use "sass:math";
 
 .background {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
   background: url("/adf384b0-345b-4e84-a5dc-fd01c62c6aa1.png") center/cover no-repeat;
   background-attachment: fixed;
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 0;
+  pointer-events: none;
 }
 
 main {
