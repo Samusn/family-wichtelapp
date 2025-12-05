@@ -133,6 +133,7 @@ interface WishCardProps {
 function WishCard({ item, reservedBy, currentUid, onToggle }: WishCardProps) {
   const isMine = reservedBy === currentUid
   const taken = !!reservedBy && !isMine
+  const isReserved = !!reservedBy
 
   let buttonText = 'Reservieren'
   if (isMine) buttonText = 'Reserviert'
@@ -140,36 +141,53 @@ function WishCard({ item, reservedBy, currentUid, onToggle }: WishCardProps) {
 
   return (
     <motion.div
-      className='relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 transition-all duration-300 overflow-hidden bg-red-900/20 backdrop-blur-lg'
+      className={`relative flex flex-col gap-2 w-full p-4 rounded-2xl border-2 transition-all duration-300 overflow-hidden backdrop-blur-lg ${
+        isReserved ? 'bg-red-900/10 opacity-60' : 'bg-red-900/20'
+      }`}
       style={{
         borderColor: isMine ? '#00FF88' : taken ? '#FF4444' : '#FFD700',
         boxShadow: isMine
           ? '0 0 15px 5px rgba(0,255,136,0.6), 0 0 20px 5px rgba(255,215,0,0.5)'
           : '0 0 15px 5px rgba(255,0,0,0.6), 0 0 20px 5px rgba(255,215,0,0.5)',
       }}
-      whileHover={{ scale: 1.02 }}
+      whileHover={!isReserved ? { scale: 1.02 } : {}}
     >
+      {/* RESERVIERT Badge oben */}
+      {isReserved && (
+        <div className='absolute top-2 left-1/2 -translate-x-1/2 z-20 bg-red-600 text-white font-bold text-xs sm:text-sm px-4 py-1.5 rounded-full shadow-lg border-2 border-red-800'>
+          RESERVIERT
+        </div>
+      )}
+
       {/* Reservierungsbutton unten rechts */}
       <button
         onClick={onToggle}
-        className='absolute bottom-3 right-3 text-xs px-2 py-1 rounded-full bg-black/30 text-white hover:bg-black/50 transition'
+        className={`absolute bottom-3 right-3 text-xs px-2 py-1 rounded-full bg-black/30 text-white hover:bg-black/50 transition ${
+          isReserved ? 'opacity-50' : ''
+        }`}
         disabled={Boolean(taken && !isMine)}
       >
         {buttonText}
       </button>
 
       {/* Wunschtext */}
-      <div className='text-left break-words max-w-full text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400 font-semibold'>
+      <div className={`text-left break-words max-w-full font-semibold ${
+        isReserved 
+          ? 'text-gray-400 line-through' 
+          : 'text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-yellow-200 to-red-400'
+      }`}>
         {item.text}
       </div>
 
       {/* Optionales Bild */}
       {item.imageUrl && (
-        <img
-          src={item.imageUrl}
-          alt='Wunschbild'
-          className='rounded-xl w-full object-cover mt-2'
-        />
+        <div className={`mt-2 ${isReserved ? 'opacity-40 grayscale' : ''}`}>
+          <img
+            src={item.imageUrl}
+            alt='Wunschbild'
+            className='rounded-xl w-full object-cover'
+          />
+        </div>
       )}
 
       {/* Optionaler Link */}
@@ -178,7 +196,11 @@ function WishCard({ item, reservedBy, currentUid, onToggle }: WishCardProps) {
           href={item.link}
           target='_blank'
           rel='noopener noreferrer'
-          className='mt-2 inline-flex items-center text-yellow-400 hover:text-yellow-200 text-sm font-medium'
+          className={`mt-2 inline-flex items-center text-sm font-medium ${
+            isReserved 
+              ? 'text-gray-500 pointer-events-none' 
+              : 'text-yellow-400 hover:text-yellow-200'
+          }`}
         >
           Link <ArrowForwardIcon fontSize='small' className='ml-1' />
         </a>
