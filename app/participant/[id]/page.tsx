@@ -12,6 +12,30 @@ import { motion } from 'framer-motion'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { auth } from '@/firebase/authClient'
 
+// Hilfsfunktion: Normalisiert URLs - fügt Protokoll hinzu wenn nötig
+const normalizeUrl = (url: string): string => {
+  if (!url || !url.trim()) return '#'
+  
+  let trimmed = url.trim()
+  
+  // Entferne führende/trailing Slashes
+  trimmed = trimmed.replace(/^\/+|\/+$/g, '')
+  
+  // Wenn bereits ein Protokoll vorhanden ist (http:// oder https://), zurückgeben
+  if (trimmed.match(/^https?:\/\//i)) {
+    return trimmed
+  }
+  
+  // Wenn mit // beginnt (Protokoll-relative URL), https:// hinzufügen
+  if (trimmed.startsWith('//')) {
+    return `https:${trimmed}`
+  }
+  
+  // Für alle anderen Fälle: https:// hinzufügen
+  // Funktioniert für: www.example.com, example.com, subdomain.example.com, etc.
+  return `https://${trimmed}`
+}
+
 interface PageProps {
   params: Promise<{ id: string }>
 }
@@ -191,9 +215,9 @@ function WishCard({ item, reservedBy, currentUid, onToggle }: WishCardProps) {
       )}
 
       {/* Optionaler Link */}
-      {item.link && (
+      {item.link && item.link.trim() && (
         <a
-          href={item.link}
+          href={normalizeUrl(item.link)}
           target='_blank'
           rel='noopener noreferrer'
           className={`mt-2 inline-flex items-center text-sm font-medium ${

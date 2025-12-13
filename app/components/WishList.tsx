@@ -15,6 +15,30 @@ import { motion } from 'framer-motion'
 import StyledButton from '@components/AddWishButton'
 import BigButton from '@components/BigButton'
 
+// Hilfsfunktion: Normalisiert URLs - fügt Protokoll hinzu wenn nötig
+const normalizeUrl = (url: string): string => {
+  if (!url || !url.trim()) return '#'
+  
+  let trimmed = url.trim()
+  
+  // Entferne führende/trailing Slashes
+  trimmed = trimmed.replace(/^\/+|\/+$/g, '')
+  
+  // Wenn bereits ein Protokoll vorhanden ist (http:// oder https://), zurückgeben
+  if (trimmed.match(/^https?:\/\//i)) {
+    return trimmed
+  }
+  
+  // Wenn mit // beginnt (Protokoll-relative URL), https:// hinzufügen
+  if (trimmed.startsWith('//')) {
+    return `https:${trimmed}`
+  }
+  
+  // Für alle anderen Fälle: https:// hinzufügen
+  // Funktioniert für: www.example.com, example.com, subdomain.example.com, etc.
+  return `https://${trimmed}`
+}
+
 export default function WishList() {
   const [items, setItems] = useState<WishItem[]>([])
   const [input, setInput] = useState('')
@@ -263,9 +287,9 @@ function WishCard({ item, onEdit, onDelete }: WishCardProps) {
             {item.text}
           </div>
 
-          {item.link && (
+          {item.link && item.link.trim() && (
             <a
-              href={item.link}
+              href={normalizeUrl(item.link)}
               target='_blank'
               rel='noopener noreferrer'
               className='mt-1 inline-flex items-center text-yellow-400 hover:text-yellow-200 text-sm font-medium break-all'
