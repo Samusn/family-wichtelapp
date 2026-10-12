@@ -9,13 +9,12 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-// ── Sessions (one per year/round) ──────────────────────────────
-
 export const sessions = pgTable("sessions", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   year: integer("year").notNull(),
-  isActive: boolean("is_active").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  isArchived: boolean("is_archived").default(false).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -26,8 +25,6 @@ export const sessionsRelations = relations(sessions, ({ many }) => ({
   draws: many(draws),
 }));
 
-// ── Participants (per session, each gets a unique URL) ─────────
-
 export const participants = pgTable("participants", {
   id: uuid("id").defaultRandom().primaryKey(),
   sessionId: uuid("session_id")
@@ -35,7 +32,6 @@ export const participants = pgTable("participants", {
     .notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   urlToken: varchar("url_token", { length: 32 }).unique().notNull(),
-  isAdmin: boolean("is_admin").default(false).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -53,8 +49,6 @@ export const participantsRelations = relations(
     receivedDraws: many(draws, { relationName: "receiver" }),
   }),
 );
-
-// ── Wish Items (per participant) ───────────────────────────────
 
 export const wishItems = pgTable("wish_items", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -76,8 +70,6 @@ export const wishItemsRelations = relations(wishItems, ({ one }) => ({
     references: [participants.id],
   }),
 }));
-
-// ── Draws (secret: who gives to whom) ─────────────────────────
 
 export const draws = pgTable("draws", {
   id: uuid("id").defaultRandom().primaryKey(),
