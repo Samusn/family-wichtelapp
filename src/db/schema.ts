@@ -1,0 +1,114 @@
+import {
+  pgTable,
+  uuid,
+  varchar,
+  integer,
+  boolean,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+
+// ── Sessions (one per year/round) ──────────────────────────────
+
+export const sessions = pgTable("sessions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  year: integer("year").notNull(),
+  isActive: boolean("is_active").default(false).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const sessionsRelations = relations(sessions, ({ many }) => ({
+  participants: many(participants),
+  draws: many(draws),
+}));
+
+// ── Participants (per session, each gets a unique URL) ─────────
+
+export const participants = pgTable("participants", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id")
+    .references(() => sessions.id, { onDelete: "cascade" })
+    .notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  urlToken: varchar("url_token", { length: 32 }).unique().notNull(),
+  isAdmin: boolean("is_admin").default(false).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const participantsRelations = relations(
+  participants,
+  ({ one, many }) => ({
+    session: one(sessions, {
+      fields: [participants.sessionId],
+      references: [sessions.id],
+    }),
+    wishItems: many(wishItems),
+    givenDraws: many(draws, { relationName: "giver" }),
+    receivedDraws: many(draws, { relationName: "receiver" }),
+  }),
+);
+
+// ── Wish Items (per participant) ───────────────────────────────
+
+export const wishItems = pgTable("wish_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  participantId: uuid("participant_id")
+    .references(() => participants.id, { onDelete: "cascade" })
+    .notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  url: text("url"),
+  imageUrl: text("image_url"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const wishItemsRelations = relations(wishItems, ({ one }) => ({
+  participant: one(participants, {
+    fields: [wishItems.participantId],
+    references: [participants.id],
+  }),
+}));
+
+// ── Draws (secret: who gives to whom) ─────────────────────────
+
+export const draws = pgTable("draws", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id")
+    .references(() => sessions.id, { onDelete: "cascade" })
+    .notNull(),
+  giverId: uuid("giver_id")
+    .references(() => participants.id, { onDelete: "cascade" })
+    .notNull(),
+  receiverId: uuid("receiver_id")
+    .references(() => participants.id, { onDelete: "cascade" })
+    .notNull(),
+  revealedAt: timestamp("revealed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const drawsRelations = relations(draws, ({ one }) => ({
+  session: one(sessions, {
+    fields: [draws.sessionId],
+    references: [sessions.id],
+  }),
+  giver: one(participants, {
+    fields: [draws.giverId],
+    references: [participants.id],
+    relationName: "giver",
+  }),
+  receiver: one(participants, {
+    fields: [draws.receiverId],
+    references: [participants.id],
+    relationName: "receiver",
+  }),
+}));

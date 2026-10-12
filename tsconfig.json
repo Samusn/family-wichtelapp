@@ -22,7 +22,8 @@
       "@/*": ["./*"],
       "@components/*": ["app/components/*"],
       "@images/*": ["app/images/*"],
-      "@auth/*": ["app/login/*"]
+      "@auth/*": ["app/login/*"],
+      "@db/*": ["src/db/*"]
     },
     "plugins": [
       {
