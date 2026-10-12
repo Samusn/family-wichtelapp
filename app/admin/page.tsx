@@ -1,23 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { verifyAdminPassword } from "@/app/actions/admin";
+import { useState, useEffect } from "react";
+import {
+  verifyAdminPassword,
+  checkAdminSession,
+  logoutAdmin,
+} from "@/app/actions/admin";
 import SessionOverview from "./SessionOverview";
 
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    checkAdminSession().then((valid) => {
+      setAuthenticated(valid);
+      setChecking(false);
+    });
+  }, []);
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    const valid = await verifyAdminPassword(password);
-    if (valid) {
+    const result = await verifyAdminPassword(password);
+    if (result.success) {
       setAuthenticated(true);
       setError("");
+      setPassword("");
     } else {
-      setError("Falsches Passwort.");
+      setError(result.error ?? "Fehler.");
     }
+  }
+
+  async function handleLogout() {
+    await logoutAdmin();
+    setAuthenticated(false);
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-white/40">Laden...</p>
+      </div>
+    );
   }
 
   if (!authenticated) {
@@ -49,5 +75,5 @@ export default function AdminPage() {
     );
   }
 
-  return <SessionOverview />;
+  return <SessionOverview onLogout={handleLogout} />;
 }

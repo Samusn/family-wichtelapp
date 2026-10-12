@@ -13,7 +13,7 @@ type Session = {
   participants: { id: string; name: string }[];
 };
 
-export default function SessionOverview() {
+export default function SessionOverview({ onLogout }: { onLogout: () => void }) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null,
@@ -58,7 +58,15 @@ export default function SessionOverview() {
 
   return (
     <div className="min-h-screen p-6 max-w-2xl mx-auto flex flex-col gap-8">
-      <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+        <button
+          onClick={onLogout}
+          className="text-white/40 hover:text-white text-sm transition"
+        >
+          Abmelden
+        </button>
+      </div>
 
       <section className="bg-white/10 backdrop-blur rounded-xl p-6 flex flex-col gap-4">
         <h2 className="text-xl font-semibold text-white">Neue Session</h2>
