@@ -2,6 +2,7 @@
 
 import { cookies, headers } from "next/headers";
 import { randomBytes } from "crypto";
+import { isIPv6 } from "net";
 import { db } from "@db/index";
 import { adminSessions, loginAttempts } from "@db/schema";
 import { eq } from "drizzle-orm";
@@ -10,14 +11,39 @@ const MAX_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24;
 
+// IPv4 clients share their router's public address, but with IPv6 every
+// device has its own (and can rotate it), so group those by /64 network.
+function normalizeIp(ip: string) {
+  const address = ip.split("%")[0];
+  if (!isIPv6(address)) return address;
+
+  const mapped = address.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
+  if (mapped) return mapped[1];
+
+  const [head, tail = ""] = address.split("::");
+  const headGroups = head ? head.split(":") : [];
+  const tailGroups = tail ? tail.split(":") : [];
+  const groups = address.includes("::")
+    ? [
+        ...headGroups,
+        ...Array(8 - headGroups.length - tailGroups.length).fill("0"),
+        ...tailGroups,
+      ]
+    : headGroups;
+
+  const network = groups
+    .slice(0, 4)
+    .map((group) => parseInt(group, 16).toString(16))
+    .join(":");
+  return `${network}::/64`;
+}
+
 async function getClientIdentifier() {
   const headerStore = await headers();
   const forwardedFor = headerStore.get("x-forwarded-for");
-  return (
-    forwardedFor?.split(",")[0]?.trim() ||
-    headerStore.get("x-real-ip") ||
-    "unknown"
-  );
+  const ip =
+    forwardedFor?.split(",")[0]?.trim() || headerStore.get("x-real-ip");
+  return ip ? normalizeIp(ip).slice(0, 64) : "unknown";
 }
 
 async function getOrCreateAttemptRecord(identifier: string) {
