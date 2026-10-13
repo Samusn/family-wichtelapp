@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { randomBytes } from "crypto";
 import { db } from "@db/index";
 import { adminSessions, loginAttempts } from "@db/schema";
@@ -10,13 +10,29 @@ const MAX_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24;
 
-async function getOrCreateAttemptRecord() {
-  const existing = await db.query.loginAttempts.findFirst();
+async function getClientIdentifier() {
+  const headerStore = await headers();
+  const forwardedFor = headerStore.get("x-forwarded-for");
+  return (
+    forwardedFor?.split(",")[0]?.trim() ||
+    headerStore.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
+async function getOrCreateAttemptRecord(identifier: string) {
+  const existing = await db.query.loginAttempts.findFirst({
+    where: eq(loginAttempts.identifier, identifier),
+  });
   if (existing) return existing;
 
   const [record] = await db
     .insert(loginAttempts)
-    .values({ attemptCount: 0 })
+    .values({ identifier, attemptCount: 0 })
+    .onConflictDoUpdate({
+      target: loginAttempts.identifier,
+      set: { updatedAt: new Date() },
+    })
     .returning();
   return record;
 }
@@ -26,7 +42,8 @@ export async function verifyAdminPassword(password: string) {
     return { success: false, error: "Admin-Zugang nicht konfiguriert." };
   }
 
-  const record = await getOrCreateAttemptRecord();
+  const identifier = await getClientIdentifier();
+  const record = await getOrCreateAttemptRecord(identifier);
 
   if (record.lockedUntil && record.lockedUntil > new Date()) {
     const minutesLeft = Math.ceil(
