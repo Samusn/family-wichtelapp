@@ -1,17 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import CatalogEditor from "./CatalogEditor";
+import type { Preferences } from "@/app/actions/catalog";
 
 type Props = {
-  participant: { id: string; name: string; token: string };
+  participant: { name: string; token: string };
   session: { name: string; year: number; isArchived: boolean };
   drawnName: string | null;
+  preferences: Preferences;
 };
 
 export default function ParticipantView({
   participant,
   session,
   drawnName,
+  preferences,
 }: Props) {
   const [revealed, setRevealed] = useState(false);
 
@@ -47,6 +53,20 @@ export default function ParticipantView({
           </p>
         </section>
       )}
+
+      <Link
+        href={`/p/${participant.token}/katalog`}
+        className="bg-white/10 hover:bg-white/20 backdrop-blur rounded-xl p-6 text-white font-semibold flex items-center justify-between transition"
+      >
+        Wunschkataloge der anderen
+        <ChevronRight className="w-5 h-5" aria-hidden />
+      </Link>
+
+      <CatalogEditor
+        token={participant.token}
+        preferences={preferences}
+        isEditable={!session.isArchived}
+      />
 
       {session.isArchived && (
         <p className="text-orange-400 text-sm text-center">

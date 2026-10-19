@@ -6,8 +6,9 @@ import {
   boolean,
   text,
   timestamp,
+  primaryKey,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 export const sessions = pgTable("sessions", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -32,6 +33,7 @@ export const participants = pgTable("participants", {
     .notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   urlToken: varchar("url_token", { length: 32 }).unique().notNull(),
+  note: varchar("note", { length: 500 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -44,32 +46,39 @@ export const participantsRelations = relations(
       fields: [participants.sessionId],
       references: [sessions.id],
     }),
-    wishItems: many(wishItems),
+    categoryChoices: many(categoryChoices),
     givenDraws: many(draws, { relationName: "giver" }),
     receivedDraws: many(draws, { relationName: "receiver" }),
   }),
 );
 
-export const wishItems = pgTable("wish_items", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  participantId: uuid("participant_id")
-    .references(() => participants.id, { onDelete: "cascade" })
-    .notNull(),
-  title: varchar("title", { length: 255 }).notNull(),
-  url: text("url"),
-  imageUrl: text("image_url"),
-  sortOrder: integer("sort_order").default(0).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const categoryChoices = pgTable(
+  "category_choices",
+  {
+    participantId: uuid("participant_id")
+      .references(() => participants.id, { onDelete: "cascade" })
+      .notNull(),
+    categoryId: varchar("category_id", { length: 50 }).notNull(),
+    sentiment: varchar("sentiment", { length: 10 })
+      .$type<"like" | "dislike">()
+      .notNull(),
+    tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.participantId, table.categoryId] })],
+);
 
-export const wishItemsRelations = relations(wishItems, ({ one }) => ({
-  participant: one(participants, {
-    fields: [wishItems.participantId],
-    references: [participants.id],
+export const categoryChoicesRelations = relations(
+  categoryChoices,
+  ({ one }) => ({
+    participant: one(participants, {
+      fields: [categoryChoices.participantId],
+      references: [participants.id],
+    }),
   }),
-}));
+);
 
 export const draws = pgTable("draws", {
   id: uuid("id").defaultRandom().primaryKey(),
