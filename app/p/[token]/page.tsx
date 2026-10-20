@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getParticipantByToken } from "@/app/actions/participants";
 import { getDrawForParticipant } from "@/app/actions/draws";
+import { getOwnPreferences } from "@/app/actions/catalog";
 import ParticipantView from "./ParticipantView";
 
 export default async function ParticipantPage({
@@ -15,15 +16,14 @@ export default async function ParticipantPage({
     redirect("/");
   }
 
-  const draw = await getDrawForParticipant(
-    participant.session.id,
-    participant.id,
-  );
+  const [draw, preferences] = await Promise.all([
+    getDrawForParticipant(participant.session.id, participant.id),
+    getOwnPreferences(token),
+  ]);
 
   return (
     <ParticipantView
       participant={{
-        id: participant.id,
         name: participant.name,
         token,
       }}
@@ -33,6 +33,7 @@ export default async function ParticipantPage({
         isArchived: participant.session.isArchived,
       }}
       drawnName={draw?.receiver?.name ?? null}
+      preferences={preferences}
     />
   );
 }
