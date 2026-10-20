@@ -12,6 +12,8 @@ import CategoryIcon from "@/app/components/CategoryIcon";
 
 type Selection = Record<string, { sentiment: Sentiment; tags: string[] }>;
 
+const RETRY_DELAYS = [2000, 5000, 15000];
+
 function toSelection(preferences: Preferences): Selection {
   return Object.fromEntries(
     preferences.choices.map(({ categoryId, sentiment, tags }) => [
@@ -34,16 +36,23 @@ export default function CatalogEditor({
     toSelection(preferences),
   );
   const [note, setNote] = useState(preferences.note);
-  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">(
-    "idle",
-  );
+  const [status, setStatus] = useState<
+    "idle" | "saving" | "saved" | "retrying" | "error"
+  >("idle");
   const [error, setError] = useState("");
   const latest = useRef({ selection, note });
+  const dirty = useRef(false);
   const saving = useRef(false);
   const queued = useRef(false);
+  const attempt = useRef(0);
   const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const save = useCallback(async () => {
+    if (retryTimer.current) {
+      clearTimeout(retryTimer.current);
+      retryTimer.current = null;
+    }
     if (saving.current) {
       queued.current = true;
       return;
@@ -54,18 +63,36 @@ export default function CatalogEditor({
       do {
         queued.current = false;
         const { selection, note } = latest.current;
-        await savePreferences(token, {
+        const result = await savePreferences(token, {
           choices: Object.entries(selection).map(([categoryId, entry]) => ({
             categoryId,
             ...entry,
           })),
           note,
         });
+        if (result.error) {
+          attempt.current = 0;
+          setError(result.error);
+          setStatus("error");
+          return;
+        }
       } while (queued.current);
+      attempt.current = 0;
+      if (!noteTimer.current) dirty.current = false;
       setStatus("saved");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Fehler beim Speichern.");
-      setStatus("error");
+    } catch {
+      if (attempt.current < RETRY_DELAYS.length) {
+        const delay = RETRY_DELAYS[attempt.current++];
+        setStatus("retrying");
+        retryTimer.current = setTimeout(() => {
+          retryTimer.current = null;
+          save();
+        }, delay);
+      } else {
+        attempt.current = 0;
+        setError("Speichern fehlgeschlagen. Bitte prüfe deine Verbindung.");
+        setStatus("error");
+      }
     } finally {
       saving.current = false;
     }
@@ -78,10 +105,24 @@ export default function CatalogEditor({
     save();
   }, [save]);
 
-  useEffect(() => flushNote, [flushNote]);
+  useEffect(() => {
+    function warnIfUnsaved(e: BeforeUnloadEvent) {
+      if (dirty.current) e.preventDefault();
+    }
+    window.addEventListener("beforeunload", warnIfUnsaved);
+    return () => {
+      window.removeEventListener("beforeunload", warnIfUnsaved);
+      if (noteTimer.current || retryTimer.current) {
+        if (noteTimer.current) clearTimeout(noteTimer.current);
+        noteTimer.current = null;
+        save();
+      }
+    };
+  }, [save]);
 
   function updateSelection(next: Selection) {
     latest.current.selection = next;
+    dirty.current = true;
     setSelection(next);
     save();
   }
@@ -110,6 +151,7 @@ export default function CatalogEditor({
 
   function handleNoteChange(value: string) {
     latest.current.note = value;
+    dirty.current = true;
     setNote(value);
     if (noteTimer.current) clearTimeout(noteTimer.current);
     noteTimer.current = setTimeout(() => {
@@ -227,7 +269,7 @@ export default function CatalogEditor({
 
       <p
         aria-live="polite"
-        className={`h-5 flex items-center justify-center gap-1.5 text-sm ${
+        className={`min-h-5 flex flex-wrap items-center justify-center gap-1.5 text-sm text-center ${
           status === "error" ? "text-orange-400" : "text-white/50"
         }`}
       >
@@ -243,10 +285,23 @@ export default function CatalogEditor({
             Gespeichert
           </>
         )}
+        {status === "retrying" && (
+          <>
+            <LoaderCircle className="w-4 h-4 animate-spin" aria-hidden />
+            Speichern fehlgeschlagen, neuer Versuch…
+          </>
+        )}
         {status === "error" && (
           <>
-            <CircleAlert className="w-4 h-4" aria-hidden />
+            <CircleAlert className="w-4 h-4 shrink-0" aria-hidden />
             {error}
+            <button
+              type="button"
+              onClick={save}
+              className="ml-1 underline hover:text-orange-300 transition"
+            >
+              Erneut versuchen
+            </button>
           </>
         )}
       </p>

@@ -62,10 +62,12 @@ function validatePreferences(input: Preferences) {
 
   const note = input.note.trim();
   if (note.length > NOTE_MAX_LENGTH) {
-    throw new Error(`Die Notiz darf höchstens ${NOTE_MAX_LENGTH} Zeichen haben.`);
+    return {
+      error: `Die Notiz darf höchstens ${NOTE_MAX_LENGTH} Zeichen haben.`,
+    } as const;
   }
 
-  return { choices, note: note || null };
+  return { choices, note: note || null, error: null };
 }
 
 async function getParticipant(token: string) {
@@ -107,14 +109,25 @@ export async function getSessionPreferences(token: string) {
   }));
 }
 
-export async function savePreferences(token: string, input: Preferences) {
-  const participant = await getParticipant(token);
+export async function savePreferences(
+  token: string,
+  input: Preferences,
+): Promise<{ error: string | null }> {
+  const participant = await getParticipantByToken(token);
 
-  if (participant.session.isArchived) {
-    throw new Error("Diese Session ist archiviert.");
+  if (!participant || !participant.session) {
+    return { error: "Teilnehmer nicht gefunden." };
   }
 
-  const { choices, note } = validatePreferences(input);
+  if (participant.session.isArchived) {
+    return { error: "Diese Session ist archiviert." };
+  }
+
+  const validated = validatePreferences(input);
+  if (validated.error) {
+    return { error: validated.error };
+  }
+  const { choices, note } = validated;
 
   const deleteChoices = db
     .delete(categoryChoices)
@@ -126,7 +139,7 @@ export async function savePreferences(token: string, input: Preferences) {
 
   if (choices.length === 0) {
     await db.batch([deleteChoices, updateNote]);
-    return;
+    return { error: null };
   }
 
   await db.batch([
@@ -139,4 +152,5 @@ export async function savePreferences(token: string, input: Preferences) {
     ),
     updateNote,
   ]);
+  return { error: null };
 }
