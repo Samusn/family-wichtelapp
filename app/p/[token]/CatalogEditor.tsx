@@ -1,14 +1,24 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Ban, Check, CircleAlert, Heart, LoaderCircle } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Ban,
+  Check,
+  ChevronDown,
+  CircleAlert,
+  Heart,
+  LoaderCircle,
+} from "lucide-react";
 import {
   savePreferences,
   type Preferences,
   type Sentiment,
 } from "@/app/actions/catalog";
-import { CATALOG, NOTE_MAX_LENGTH } from "@/lib/catalog";
+import { GROUPS, NOTE_MAX_LENGTH, getCategory } from "@/lib/catalog";
 import CategoryIcon from "@/app/components/CategoryIcon";
+import Card, { CardTitle } from "@components/ui/Card";
+import { Textarea } from "@components/ui/Input";
 
 type Selection = Record<string, { sentiment: Sentiment; tags: string[] }>;
 
@@ -35,12 +45,13 @@ export default function CatalogEditor({
   const [selection, setSelection] = useState<Selection>(() =>
     toSelection(preferences),
   );
-  const [note, setNote] = useState(preferences.note);
+  const [notes, setNotes] = useState(preferences.notes);
+  const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<
     "idle" | "saving" | "saved" | "retrying" | "error"
   >("idle");
   const [error, setError] = useState("");
-  const latest = useRef({ selection, note });
+  const latest = useRef({ selection, notes });
   const dirty = useRef(false);
   const saving = useRef(false);
   const queued = useRef(false);
@@ -62,13 +73,13 @@ export default function CatalogEditor({
     try {
       do {
         queued.current = false;
-        const { selection, note } = latest.current;
+        const { selection, notes } = latest.current;
         const result = await savePreferences(token, {
           choices: Object.entries(selection).map(([categoryId, entry]) => ({
             categoryId,
             ...entry,
           })),
-          note,
+          notes,
         });
         if (result.error) {
           attempt.current = 0;
@@ -149,10 +160,11 @@ export default function CatalogEditor({
     });
   }
 
-  function handleNoteChange(value: string) {
-    latest.current.note = value;
+  function handleNoteChange(groupId: string, value: string) {
+    const next = { ...latest.current.notes, [groupId]: value };
+    latest.current.notes = next;
     dirty.current = true;
-    setNote(value);
+    setNotes(next);
     if (noteTimer.current) clearTimeout(noteTimer.current);
     noteTimer.current = setTimeout(() => {
       noteTimer.current = null;
@@ -160,151 +172,257 @@ export default function CatalogEditor({
     }, 800);
   }
 
-  return (
-    <section className="bg-white/10 backdrop-blur rounded-xl p-6 flex flex-col gap-4">
-      <div>
-        <h2 className="text-xl font-semibold text-white">Mein Wunschkatalog</h2>
-        <p className="text-white/50 text-sm mt-1">
-          Kreuze an, worüber du dich freust und was du lieber nicht möchtest.
-          Bei „Gern“ kannst du es noch genauer eingrenzen.
-        </p>
-      </div>
+  const choices = Object.values(selection);
+  const likeCount = choices.filter((c) => c.sentiment === "like").length;
+  const dislikeCount = choices.length - likeCount;
+  const noteCount = Object.values(notes).filter((note) => note.trim()).length;
+  const summary = [
+    likeCount > 0 && `${likeCount}× Gern`,
+    dislikeCount > 0 && `${dislikeCount}× Nein`,
+    noteCount > 0 && (noteCount === 1 ? "1 Notiz" : `${noteCount} Notizen`),
+  ].filter(Boolean);
 
-      <ul className="flex flex-col gap-2">
-        {CATALOG.map((category) => {
-          const entry = selection[category.id];
-          return (
-            <li
-              key={category.id}
-              className={`rounded-lg px-4 py-3 flex flex-col gap-3 transition ${
-                entry?.sentiment === "like"
-                  ? "bg-green-500/15 border border-green-500/40"
-                  : entry?.sentiment === "dislike"
-                    ? "bg-red-500/10 border border-red-500/30"
-                    : "bg-white/5 border border-transparent"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="flex items-center gap-3 text-white min-w-0">
-                  <CategoryIcon
-                    categoryId={category.id}
-                    className="w-5 h-5 shrink-0 text-white/70"
+  return (
+    <Card className="flex flex-col">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-controls="catalog-editor"
+        className="flex w-full items-center gap-3 text-left"
+      >
+        <CardTitle
+          icon={<Heart className="w-5 h-5" aria-hidden />}
+          className="flex-1"
+        >
+          <span className="flex flex-col">
+            Mein Wunschkatalog
+            <span className="text-sm font-semibold text-cream/60">
+              {summary.length > 0
+                ? summary.join(" · ")
+                : "Noch nichts angekreuzt – tippe zum Ausfüllen"}
+            </span>
+          </span>
+        </CardTitle>
+        <ChevronDown
+          className={`w-6 h-6 shrink-0 text-cream/70 transition-transform duration-300 ${
+            open ? "rotate-180" : ""
+          }`}
+          aria-hidden
+        />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            id="catalog-editor"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="flex flex-col gap-5 pt-5">
+              <p className="text-sm text-cream/70">
+                Kreuze an, worüber du dich freust und was du lieber nicht
+                möchtest. Bei „Gern“ kannst du es noch genauer eingrenzen, und
+                pro Bereich kannst du eine Notiz hinterlassen.
+              </p>
+
+              <div className="flex items-center justify-center gap-4 text-xs text-cream/60">
+                <span className="flex items-center gap-1.5">
+                  <Heart
+                    className="w-3.5 h-3.5 text-pine fill-current"
+                    aria-hidden
                   />
-                  {category.label}
+                  Gern
                 </span>
-                <div className="flex gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setSentiment(category.id, "like")}
-                    disabled={!isEditable}
-                    aria-pressed={entry?.sentiment === "like"}
-                    className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm transition disabled:cursor-not-allowed ${
-                      entry?.sentiment === "like"
-                        ? "bg-green-600 text-white"
-                        : "bg-white/10 text-white/60 hover:text-white"
-                    }`}
-                  >
-                    <Heart className="w-4 h-4" aria-hidden />
-                    Gern
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSentiment(category.id, "dislike")}
-                    disabled={!isEditable}
-                    aria-pressed={entry?.sentiment === "dislike"}
-                    className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm transition disabled:cursor-not-allowed ${
-                      entry?.sentiment === "dislike"
-                        ? "bg-red-600 text-white"
-                        : "bg-white/10 text-white/60 hover:text-white"
-                    }`}
-                  >
-                    <Ban className="w-4 h-4" aria-hidden />
-                    Nein
-                  </button>
-                </div>
+                <span className="flex items-center gap-1.5">
+                  <Ban className="w-3.5 h-3.5 text-berry" aria-hidden />
+                  Bitte nicht
+                </span>
               </div>
 
-              {entry?.sentiment === "like" && (
-                <div className="flex flex-wrap gap-2">
-                  {category.tags.map((tag) => {
-                    const active = entry.tags.includes(tag.id);
-                    return (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() => toggleTag(category.id, tag.id)}
-                        disabled={!isEditable}
-                        aria-pressed={active}
-                        className={`flex items-center gap-1 rounded-full px-3 py-1 text-sm transition disabled:cursor-not-allowed ${
-                          active
-                            ? "bg-white text-purple-900"
-                            : "bg-white/10 text-white/70 hover:text-white"
-                        }`}
-                      >
-                        {active && <Check className="w-3.5 h-3.5" aria-hidden />}
-                        {tag.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+              {GROUPS.map((group) => (
+                <section key={group.id} className="flex flex-col gap-2">
+                  <h3 className="px-1 text-xs font-extrabold uppercase tracking-wider text-gold-soft/80">
+                    {group.label}
+                  </h3>
+                  <ul className="flex flex-col gap-2">
+                    {group.categoryIds.map((categoryId) => {
+                      const category = getCategory(categoryId)!;
+                      const entry = selection[category.id];
+                      return (
+                        <li
+                          key={category.id}
+                          className={`flex flex-col gap-3 rounded-2xl p-3 ring-1 transition ${
+                            entry?.sentiment === "like"
+                              ? "bg-pine/20 ring-pine/60"
+                              : entry?.sentiment === "dislike"
+                                ? "bg-berry/15 ring-berry/40"
+                                : "bg-white/5 ring-white/10"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`grid place-items-center w-10 h-10 shrink-0 rounded-xl transition ${
+                                entry?.sentiment === "like"
+                                  ? "bg-pine text-cream"
+                                  : entry?.sentiment === "dislike"
+                                    ? "bg-berry/40 text-cream/70"
+                                    : "bg-white/10 text-gold-soft"
+                              }`}
+                            >
+                              <CategoryIcon
+                                categoryId={category.id}
+                                className="w-5 h-5"
+                              />
+                            </span>
+                            <span
+                              className={`flex-1 min-w-0 font-bold leading-tight ${
+                                entry?.sentiment === "dislike"
+                                  ? "text-cream/60 line-through decoration-berry/70"
+                                  : "text-cream"
+                              }`}
+                            >
+                              {category.label}
+                            </span>
+                            <div className="flex shrink-0 gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSentiment(category.id, "like")
+                                }
+                                disabled={!isEditable}
+                                aria-pressed={entry?.sentiment === "like"}
+                                aria-label={`${category.label}: Gern`}
+                                className={`grid place-items-center w-10 h-10 rounded-xl transition active:scale-90 disabled:cursor-not-allowed ${
+                                  entry?.sentiment === "like"
+                                    ? "bg-pine text-cream shadow-[0_0_14px_rgb(34_160_107/0.6)]"
+                                    : "bg-white/10 text-cream/50 hover:text-cream hover:bg-white/15"
+                                }`}
+                              >
+                                <Heart
+                                  className={`w-5 h-5 ${entry?.sentiment === "like" ? "fill-current" : ""}`}
+                                  aria-hidden
+                                />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSentiment(category.id, "dislike")
+                                }
+                                disabled={!isEditable}
+                                aria-pressed={entry?.sentiment === "dislike"}
+                                aria-label={`${category.label}: Bitte nicht`}
+                                className={`grid place-items-center w-10 h-10 rounded-xl transition active:scale-90 disabled:cursor-not-allowed ${
+                                  entry?.sentiment === "dislike"
+                                    ? "bg-berry text-cream shadow-[0_0_14px_rgb(224_49_63/0.6)]"
+                                    : "bg-white/10 text-cream/50 hover:text-cream hover:bg-white/15"
+                                }`}
+                              >
+                                <Ban className="w-5 h-5" aria-hidden />
+                              </button>
+                            </div>
+                          </div>
 
-      <label className="flex flex-col gap-2 text-white/70 text-sm">
-        Notiz (optional)
-        <textarea
-          value={note}
-          onChange={(e) => handleNoteChange(e.target.value)}
-          onBlur={flushNote}
-          disabled={!isEditable}
-          maxLength={NOTE_MAX_LENGTH}
-          rows={3}
-          placeholder="z. B. Kleidergröße M, keine Nüsse, lese gern Krimis"
-          className="rounded-lg px-4 py-3 bg-white/10 text-white border border-white/20 focus:border-white/50 outline-none resize-none"
-        />
-      </label>
+                          {entry?.sentiment === "like" && (
+                            <div className="flex flex-wrap gap-2 pl-[52px]">
+                              {category.tags.map((tag) => {
+                                const active = entry.tags.includes(tag.id);
+                                return (
+                                  <button
+                                    key={tag.id}
+                                    type="button"
+                                    onClick={() =>
+                                      toggleTag(category.id, tag.id)
+                                    }
+                                    disabled={!isEditable}
+                                    aria-pressed={active}
+                                    className={`flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold transition active:scale-95 disabled:cursor-not-allowed ${
+                                      active
+                                        ? "bg-gold text-night shadow-[0_0_12px_rgb(248_201_74/0.5)]"
+                                        : "bg-white/10 text-cream/80 ring-1 ring-white/15 hover:bg-white/20"
+                                    }`}
+                                  >
+                                    {active && (
+                                      <Check
+                                        className="w-3.5 h-3.5"
+                                        aria-hidden
+                                      />
+                                    )}
+                                    {tag.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <Textarea
+                    value={notes[group.id] ?? ""}
+                    onChange={(e) => handleNoteChange(group.id, e.target.value)}
+                    onBlur={flushNote}
+                    disabled={!isEditable}
+                    maxLength={NOTE_MAX_LENGTH}
+                    rows={2}
+                    aria-label={`Notiz zu ${group.label}`}
+                    placeholder={`Notiz zu ${group.label} (optional)`}
+                    className="text-sm"
+                  />
+                </section>
+              ))}
 
-      <p
-        aria-live="polite"
-        className={`min-h-5 flex flex-wrap items-center justify-center gap-1.5 text-sm text-center ${
-          status === "error" ? "text-orange-400" : "text-white/50"
-        }`}
-      >
-        {status === "saving" && (
-          <>
-            <LoaderCircle className="w-4 h-4 animate-spin" aria-hidden />
-            Speichert…
-          </>
+              <p
+                aria-live="polite"
+                className={`min-h-5 flex flex-wrap items-center justify-center gap-1.5 text-sm text-center ${
+                  status === "error" ? "text-orange-300" : "text-cream/60"
+                }`}
+              >
+                {status === "saving" && (
+                  <>
+                    <LoaderCircle
+                      className="w-4 h-4 animate-spin"
+                      aria-hidden
+                    />
+                    Speichert…
+                  </>
+                )}
+                {status === "saved" && (
+                  <>
+                    <Check className="w-4 h-4 text-pine" aria-hidden />
+                    Gespeichert
+                  </>
+                )}
+                {status === "retrying" && (
+                  <>
+                    <LoaderCircle
+                      className="w-4 h-4 animate-spin"
+                      aria-hidden
+                    />
+                    Speichern fehlgeschlagen, neuer Versuch…
+                  </>
+                )}
+                {status === "error" && (
+                  <>
+                    <CircleAlert className="w-4 h-4 shrink-0" aria-hidden />
+                    {error}
+                    <button
+                      type="button"
+                      onClick={save}
+                      className="ml-1 font-bold underline hover:text-orange-200 transition"
+                    >
+                      Erneut versuchen
+                    </button>
+                  </>
+                )}
+              </p>
+            </div>
+          </motion.div>
         )}
-        {status === "saved" && (
-          <>
-            <Check className="w-4 h-4 text-green-400" aria-hidden />
-            Gespeichert
-          </>
-        )}
-        {status === "retrying" && (
-          <>
-            <LoaderCircle className="w-4 h-4 animate-spin" aria-hidden />
-            Speichern fehlgeschlagen, neuer Versuch…
-          </>
-        )}
-        {status === "error" && (
-          <>
-            <CircleAlert className="w-4 h-4 shrink-0" aria-hidden />
-            {error}
-            <button
-              type="button"
-              onClick={save}
-              className="ml-1 underline hover:text-orange-300 transition"
-            >
-              Erneut versuchen
-            </button>
-          </>
-        )}
-      </p>
-    </section>
+      </AnimatePresence>
+    </Card>
   );
 }

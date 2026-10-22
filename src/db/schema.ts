@@ -33,7 +33,6 @@ export const participants = pgTable("participants", {
     .notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   urlToken: varchar("url_token", { length: 32 }).unique().notNull(),
-  note: varchar("note", { length: 500 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -47,6 +46,8 @@ export const participantsRelations = relations(
       references: [sessions.id],
     }),
     categoryChoices: many(categoryChoices),
+    groupNotes: many(groupNotes),
+    wishItems: many(wishItems, { relationName: "owner" }),
     givenDraws: many(draws, { relationName: "giver" }),
     receivedDraws: many(draws, { relationName: "receiver" }),
   }),
@@ -62,7 +63,10 @@ export const categoryChoices = pgTable(
     sentiment: varchar("sentiment", { length: 10 })
       .$type<"like" | "dislike">()
       .notNull(),
-    tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+    tags: text("tags")
+      .array()
+      .default(sql`'{}'::text[]`)
+      .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -79,6 +83,54 @@ export const categoryChoicesRelations = relations(
     }),
   }),
 );
+
+export const groupNotes = pgTable(
+  "group_notes",
+  {
+    participantId: uuid("participant_id")
+      .references(() => participants.id, { onDelete: "cascade" })
+      .notNull(),
+    groupId: varchar("group_id", { length: 50 }).notNull(),
+    note: varchar("note", { length: 500 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.participantId, table.groupId] })],
+);
+
+export const groupNotesRelations = relations(groupNotes, ({ one }) => ({
+  participant: one(participants, {
+    fields: [groupNotes.participantId],
+    references: [participants.id],
+  }),
+}));
+
+export const wishItems = pgTable("wish_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  participantId: uuid("participant_id")
+    .references(() => participants.id, { onDelete: "cascade" })
+    .notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  url: text("url"),
+  imageUrl: text("image_url"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  reservedById: uuid("reserved_by_id").references(() => participants.id, {
+    onDelete: "set null",
+  }),
+  reservedAt: timestamp("reserved_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const wishItemsRelations = relations(wishItems, ({ one }) => ({
+  participant: one(participants, {
+    fields: [wishItems.participantId],
+    references: [participants.id],
+    relationName: "owner",
+  }),
+}));
 
 export const draws = pgTable("draws", {
   id: uuid("id").defaultRandom().primaryKey(),

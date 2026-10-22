@@ -6,7 +6,12 @@ import {
   checkAdminSession,
   logoutAdmin,
 } from "@/app/actions/admin";
+import { KeyRound, LoaderCircle } from "lucide-react";
 import SessionOverview from "./SessionOverview";
+import Button from "@components/ui/Button";
+import Card, { CardTitle } from "@components/ui/Card";
+import Input from "@components/ui/Input";
+import Page from "@components/ui/Page";
 
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -40,38 +45,30 @@ export default function AdminPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-white/40">Laden...</p>
-      </div>
+      <Page className="items-center justify-center">
+        <LoaderCircle className="w-8 h-8 animate-spin text-gold" aria-label="Laden" />
+      </Page>
     );
   }
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <form
-          onSubmit={handleLogin}
-          className="bg-white/10 backdrop-blur rounded-xl p-8 w-full max-w-sm flex flex-col gap-4"
-        >
-          <h1 className="text-2xl font-bold text-white text-center">
-            Admin Zugang
-          </h1>
-          <input
+      <Page className="justify-center">
+        <Card as="form" onSubmit={handleLogin} className="flex flex-col gap-4">
+          <CardTitle icon={<KeyRound className="w-5 h-5" aria-hidden />}>
+            Admin-Zugang
+          </CardTitle>
+          <Input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Passwort"
-            className="rounded-lg px-4 py-3 bg-white/10 text-white border border-white/20 focus:border-white/50 outline-none"
+            autoFocus
           />
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          <button
-            type="submit"
-            className="bg-white/20 hover:bg-white/30 text-white font-semibold py-3 rounded-lg transition"
-          >
-            Anmelden
-          </button>
-        </form>
-      </div>
+          {error && <p className="text-sm text-red-300">{error}</p>}
+          <Button type="submit">Anmelden</Button>
+        </Card>
+      </Page>
     );
   }
 

@@ -4,6 +4,25 @@ import { useState, useEffect, useCallback } from "react";
 import { getSession, archiveSession } from "@/app/actions/sessions";
 import { addParticipant, removeParticipant } from "@/app/actions/participants";
 import { performDraw, getDrawsForSession } from "@/app/actions/draws";
+import {
+  Archive,
+  ArrowRight,
+  ChevronLeft,
+  Copy,
+  Gift,
+  LoaderCircle,
+  Lock,
+  Plus,
+  Shuffle,
+  Trash2,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import Button from "@components/ui/Button";
+import Card, { CardTitle } from "@components/ui/Card";
+import Input from "@components/ui/Input";
+import Page from "@components/ui/Page";
+import Title from "@components/ui/Title";
 
 type Participant = {
   id: string;
@@ -120,133 +139,140 @@ export default function SessionDetail({
 
   if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-white/40">Laden...</p>
-      </div>
+      <Page className="items-center justify-center">
+        <LoaderCircle className="w-8 h-8 animate-spin text-gold" aria-label="Laden" />
+      </Page>
     );
   }
 
   const isEditable = !session.isArchived;
 
   return (
-    <div className="min-h-screen p-6 max-w-2xl mx-auto flex flex-col gap-6">
-      <button
-        onClick={onBack}
-        className="text-white/50 hover:text-white text-sm self-start transition"
-      >
-        ← Zurück
-      </button>
+    <Page wide>
+      <Button variant="ghost" size="sm" onClick={onBack} className="self-start">
+        <ChevronLeft className="w-4 h-4" aria-hidden />
+        Zurück
+      </Button>
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">{session.name}</h1>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <Title className="text-4xl">{session.name}</Title>
         {session.isArchived && (
-          <span className="text-orange-400 text-sm border border-orange-400/30 px-3 py-1 rounded-full">
+          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-sm text-gold-soft ring-1 ring-white/15">
+            <Lock className="w-4 h-4" aria-hidden />
             Archiviert
           </span>
         )}
-      </div>
+      </header>
 
       {message && (
-        <div className="bg-green-500/20 border border-green-500/50 text-green-300 px-4 py-2 rounded-lg">
+        <p className="rounded-2xl bg-pine/20 px-4 py-2 text-cream ring-1 ring-pine/50">
           {message}
-        </div>
+        </p>
       )}
 
       {isEditable && (
-        <section className="bg-white/10 backdrop-blur rounded-xl p-6 flex flex-col gap-4">
-          <h2 className="text-xl font-semibold text-white">
+        <Card className="flex flex-col gap-4">
+          <CardTitle icon={<UserPlus className="w-5 h-5" aria-hidden />}>
             Teilnehmer hinzufügen
-          </h2>
+          </CardTitle>
           <form onSubmit={handleAddParticipant} className="flex gap-2">
-            <input
+            <Input
               type="text"
               value={newParticipantName}
               onChange={(e) => setNewParticipantName(e.target.value)}
               placeholder="Name des Teilnehmers"
-              className="flex-1 rounded-lg px-4 py-3 bg-white/10 text-white border border-white/20 focus:border-white/50 outline-none"
             />
-            <button
+            <Button
               type="submit"
+              variant="pine"
               disabled={loading}
-              className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold px-6 py-3 rounded-lg transition"
+              aria-label="Hinzufügen"
             >
-              +
-            </button>
+              <Plus className="w-5 h-5" aria-hidden />
+            </Button>
           </form>
-        </section>
+        </Card>
       )}
 
-      <section className="bg-white/10 backdrop-blur rounded-xl p-6 flex flex-col gap-3">
-        <h2 className="text-xl font-semibold text-white">
+      <Card className="flex flex-col gap-3">
+        <CardTitle icon={<Users className="w-5 h-5" aria-hidden />}>
           Teilnehmer ({session.participants.length})
-        </h2>
+        </CardTitle>
         {session.participants.length === 0 ? (
-          <p className="text-white/40 text-sm">
+          <p className="text-sm text-cream/60">
             Noch keine Teilnehmer hinzugefügt.
           </p>
         ) : (
           session.participants.map((p) => (
             <div
               key={p.id}
-              className="flex items-center justify-between bg-white/5 rounded-lg px-4 py-3"
+              className="flex items-center justify-between gap-3 rounded-2xl bg-white/5 px-4 py-2 ring-1 ring-white/10"
             >
-              <span className="text-white">{p.name}</span>
-              <div className="flex gap-2">
-                <button
+              <span className="font-bold">{p.name}</span>
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => copyLink(p.urlToken)}
-                  className="text-blue-400 hover:text-blue-300 text-sm transition"
                 >
-                  Link kopieren
-                </button>
+                  <Copy className="w-4 h-4" aria-hidden />
+                  Link
+                </Button>
                 {isEditable && draws.length === 0 && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleRemoveParticipant(p.id)}
-                    className="text-red-400 hover:text-red-300 text-sm transition"
+                    aria-label={`${p.name} entfernen`}
+                    className="text-red-300 hover:text-red-200"
                   >
-                    Entfernen
-                  </button>
+                    <Trash2 className="w-4 h-4" aria-hidden />
+                  </Button>
                 )}
               </div>
             </div>
           ))
         )}
-      </section>
+      </Card>
 
       {draws.length > 0 && (
-        <section className="bg-white/10 backdrop-blur rounded-xl p-6 flex flex-col gap-3">
-          <h2 className="text-xl font-semibold text-white">Ziehung</h2>
+        <Card className="flex flex-col gap-3">
+          <CardTitle icon={<Gift className="w-5 h-5" aria-hidden />}>
+            Ziehung
+          </CardTitle>
           {draws.map((d) => (
             <div
               key={d.id}
-              className="bg-white/5 rounded-lg px-4 py-2 text-white text-sm"
+              className="flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2 text-sm ring-1 ring-white/10"
             >
-              {d.giver.name} → {d.receiver.name}
+              <span className="font-bold">{d.giver.name}</span>
+              <ArrowRight className="w-4 h-4 text-gold" aria-hidden />
+              <span className="font-bold">{d.receiver.name}</span>
             </div>
           ))}
-        </section>
+        </Card>
       )}
 
       {isEditable && (
-        <div className="flex flex-col gap-3 mt-4">
+        <div className="mt-2 flex flex-col gap-3">
           {draws.length === 0 && (
-            <button
+            <Button
+              variant="festive"
+              size="lg"
               onClick={handleDraw}
               disabled={loading || session.participants.length < 3}
-              className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
             >
+              <Shuffle className="w-5 h-5" aria-hidden />
               Wichtel-Ziehung starten
-            </button>
+            </Button>
           )}
 
-          <button
-            onClick={handleArchive}
-            disabled={loading}
-            className="bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-400 font-semibold py-3 rounded-lg transition"
-          >
+          <Button variant="danger" onClick={handleArchive} disabled={loading}>
+            <Archive className="w-4 h-4" aria-hidden />
             Session archivieren (endgültig)
-          </button>
+          </Button>
         </div>
       )}
-    </div>
+    </Page>
   );
 }
