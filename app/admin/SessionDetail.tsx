@@ -1,14 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion } from "framer-motion";
 import { getSession, archiveSession } from "@/app/actions/sessions";
 import { addParticipant, removeParticipant } from "@/app/actions/participants";
-import { performDraw, getDrawsForSession } from "@/app/actions/draws";
+import {
+  performDraw,
+  getDrawsForSession,
+  getDrawStatusForSession,
+} from "@/app/actions/draws";
 import {
   Archive,
   ArrowRight,
+  Check,
   ChevronLeft,
   Copy,
+  Eye,
+  EyeOff,
   Gift,
   LoaderCircle,
   Lock,
@@ -30,11 +38,13 @@ type Participant = {
   urlToken: string;
 };
 
-type Draw = {
+type DrawStatus = {
   id: string;
-  giver: { name: string };
-  receiver: { name: string };
+  giverName: string;
+  isRevealed: boolean;
 };
+
+const REVEAL_MS = 15000;
 
 type Session = {
   id: string;
@@ -53,7 +63,11 @@ export default function SessionDetail({
   onBack: () => void;
 }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [draws, setDraws] = useState<Draw[]>([]);
+  const [draws, setDraws] = useState<DrawStatus[]>([]);
+  const [receivers, setReceivers] = useState<Record<string, string> | null>(
+    null,
+  );
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [newParticipantName, setNewParticipantName] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -62,14 +76,44 @@ export default function SessionDetail({
     const data = await getSession(sessionId);
     if (data) {
       setSession(data as unknown as Session);
-      const drawData = await getDrawsForSession(sessionId);
-      setDraws(drawData as Draw[]);
+      setDraws(await getDrawStatusForSession(sessionId));
     }
   }, [sessionId]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(
+    () => () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    },
+    [],
+  );
+
+  function hideReceivers() {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = null;
+    setReceivers(null);
+  }
+
+  async function showReceivers() {
+    if (
+      !confirm(
+        "Zuordnung wirklich anzeigen? Wenn du selbst mitmachst, siehst du auch, wen du gezogen hast.",
+      )
+    )
+      return;
+    const drawData = await getDrawsForSession(sessionId);
+    setReceivers(
+      Object.fromEntries(drawData.map((d) => [d.id, d.receiver.name])),
+    );
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => {
+      hideTimer.current = null;
+      setReceivers(null);
+    }, REVEAL_MS);
+  }
 
   async function handleAddParticipant(e: React.FormEvent) {
     e.preventDefault();
@@ -113,9 +157,7 @@ export default function SessionDetail({
   async function handleArchive() {
     if (!session) return;
     if (
-      !confirm(
-        "Session archivieren? Das kann NICHT rückgängig gemacht werden!",
-      )
+      !confirm("Session archivieren? Das kann NICHT rückgängig gemacht werden!")
     )
       return;
     setLoading(true);
@@ -140,7 +182,10 @@ export default function SessionDetail({
   if (!session) {
     return (
       <Page className="items-center justify-center">
-        <LoaderCircle className="w-8 h-8 animate-spin text-gold" aria-label="Laden" />
+        <LoaderCircle
+          className="w-8 h-8 animate-spin text-gold"
+          aria-label="Laden"
+        />
       </Page>
     );
   }
@@ -172,7 +217,7 @@ export default function SessionDetail({
 
       {isEditable && (
         <Card className="flex flex-col gap-4">
-          <CardTitle icon={<UserPlus className="w-5 h-5" aria-hidden />}>
+          <CardTitle icon={<UserPlus aria-hidden />}>
             Teilnehmer hinzufügen
           </CardTitle>
           <form onSubmit={handleAddParticipant} className="flex gap-2">
@@ -195,7 +240,7 @@ export default function SessionDetail({
       )}
 
       <Card className="flex flex-col gap-3">
-        <CardTitle icon={<Users className="w-5 h-5" aria-hidden />}>
+        <CardTitle icon={<Users aria-hidden />}>
           Teilnehmer ({session.participants.length})
         </CardTitle>
         {session.participants.length === 0 ? (
@@ -237,17 +282,53 @@ export default function SessionDetail({
 
       {draws.length > 0 && (
         <Card className="flex flex-col gap-3">
-          <CardTitle icon={<Gift className="w-5 h-5" aria-hidden />}>
-            Ziehung
-          </CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle icon={<Gift aria-hidden />}>Ziehung</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={receivers ? hideReceivers : showReceivers}
+            >
+              {receivers ? (
+                <EyeOff className="w-4 h-4" aria-hidden />
+              ) : (
+                <Eye className="w-4 h-4" aria-hidden />
+              )}
+              {receivers ? "Ausblenden" : "Zuordnung anzeigen"}
+            </Button>
+          </div>
+          {receivers && (
+            <div className="h-1 overflow-hidden rounded-full bg-white/10">
+              <motion.div
+                initial={{ scaleX: 1 }}
+                animate={{ scaleX: 0 }}
+                transition={{ duration: REVEAL_MS / 1000, ease: "linear" }}
+                className="h-full origin-left bg-gold"
+                aria-hidden
+              />
+            </div>
+          )}
           {draws.map((d) => (
             <div
               key={d.id}
               className="flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2 text-sm ring-1 ring-white/10"
             >
-              <span className="font-bold">{d.giver.name}</span>
-              <ArrowRight className="w-4 h-4 text-gold" aria-hidden />
-              <span className="font-bold">{d.receiver.name}</span>
+              <span className="font-bold">{d.giverName}</span>
+              {receivers ? (
+                <>
+                  <ArrowRight className="w-4 h-4 text-gold" aria-hidden />
+                  <span className="font-bold">{receivers[d.id]}</span>
+                </>
+              ) : (
+                <span
+                  className={`ml-auto flex items-center gap-1.5 text-xs font-semibold ${
+                    d.isRevealed ? "text-pine" : "text-cream/50"
+                  }`}
+                >
+                  {d.isRevealed && <Check className="w-4 h-4" aria-hidden />}
+                  {d.isRevealed ? "Los geöffnet" : "Noch nicht geöffnet"}
+                </span>
+              )}
             </div>
           ))}
         </Card>

@@ -46,7 +46,10 @@ export default function AdminPage() {
   if (checking) {
     return (
       <Page className="items-center justify-center">
-        <LoaderCircle className="w-8 h-8 animate-spin text-gold" aria-label="Laden" />
+        <LoaderCircle
+          className="w-8 h-8 animate-spin text-gold"
+          aria-label="Laden"
+        />
       </Page>
     );
   }
@@ -54,10 +57,13 @@ export default function AdminPage() {
   if (!authenticated) {
     return (
       <Page className="justify-center">
-        <Card as="form" onSubmit={handleLogin} className="flex flex-col gap-4">
-          <CardTitle icon={<KeyRound className="w-5 h-5" aria-hidden />}>
-            Admin-Zugang
-          </CardTitle>
+        <Card
+          holly
+          as="form"
+          onSubmit={handleLogin}
+          className="flex flex-col gap-4"
+        >
+          <CardTitle icon={<KeyRound aria-hidden />}>Admin-Zugang</CardTitle>
           <Input
             type="password"
             value={password}

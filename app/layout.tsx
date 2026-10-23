@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#140a07",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -35,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body
-        className={`${nunito.variable} ${mountains.variable} font-sans antialiased min-h-screen`}
+        className={`${nunito.variable} ${mountains.variable} font-sans antialiased min-h-dvh`}
       >
         <Background />
         {children}

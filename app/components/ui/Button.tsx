@@ -9,7 +9,7 @@ const VARIANTS = {
 } as const;
 
 const SIZES = {
-  sm: "px-3 py-1.5 text-sm rounded-xl gap-1.5",
+  sm: "min-h-11 min-w-11 px-3 py-1.5 text-sm rounded-xl gap-1.5",
   md: "px-5 py-3 rounded-2xl gap-2",
   lg: "px-7 py-4 text-lg rounded-2xl gap-2.5",
 } as const;

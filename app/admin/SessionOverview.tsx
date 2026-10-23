@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { getAllSessions, createSession } from "@/app/actions/sessions";
 import {
-  Archive,
   ChevronRight,
   LogOut,
-  Plus,
+  Snowflake,
+  Sparkles,
   TreePine,
   Users,
 } from "lucide-react";
@@ -26,7 +26,11 @@ type Session = {
   participants: { id: string; name: string }[];
 };
 
-export default function SessionOverview({ onLogout }: { onLogout: () => void }) {
+export default function SessionOverview({
+  onLogout,
+}: {
+  onLogout: () => void;
+}) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null,
@@ -80,10 +84,11 @@ export default function SessionOverview({ onLogout }: { onLogout: () => void }) 
       </header>
 
       <Card className="flex flex-col gap-4">
-        <CardTitle icon={<Plus className="w-5 h-5" aria-hidden />}>
-          Neue Session
-        </CardTitle>
-        <form onSubmit={handleCreate} className="flex flex-col gap-3 sm:flex-row">
+        <CardTitle icon={<Sparkles aria-hidden />}>Neue Session</CardTitle>
+        <form
+          onSubmit={handleCreate}
+          className="flex flex-col gap-3 sm:flex-row"
+        >
           <Input
             type="text"
             value={newName}
@@ -106,9 +111,7 @@ export default function SessionOverview({ onLogout }: { onLogout: () => void }) 
 
       {activeSessions.length > 0 && (
         <Card className="flex flex-col gap-3">
-          <CardTitle icon={<TreePine className="w-5 h-5" aria-hidden />}>
-            Aktive Sessions
-          </CardTitle>
+          <CardTitle icon={<TreePine aria-hidden />}>Aktive Sessions</CardTitle>
           {activeSessions.map((s) => (
             <SessionRow key={s.id} session={s} onOpen={setSelectedSessionId} />
           ))}
@@ -117,9 +120,7 @@ export default function SessionOverview({ onLogout }: { onLogout: () => void }) 
 
       {archivedSessions.length > 0 && (
         <Card className="flex flex-col gap-3 opacity-80">
-          <CardTitle icon={<Archive className="w-5 h-5" aria-hidden />}>
-            Archiv
-          </CardTitle>
+          <CardTitle icon={<Snowflake aria-hidden />}>Archiv</CardTitle>
           {archivedSessions.map((s) => (
             <SessionRow key={s.id} session={s} onOpen={setSelectedSessionId} />
           ))}

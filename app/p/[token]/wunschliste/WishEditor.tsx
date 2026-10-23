@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ImagePlus, Pencil, Plus, Star, Trash2, X } from "lucide-react";
+import { ImagePlus, Pencil, Plus, Trash2, X } from "lucide-react";
 import {
   addWish,
   deleteWish,
@@ -11,7 +11,7 @@ import {
 } from "@/app/actions/wishes";
 import WishContent from "@components/WishContent";
 import Button from "@components/ui/Button";
-import Card, { CardTitle } from "@components/ui/Card";
+import Card from "@components/ui/Card";
 import Input from "@components/ui/Input";
 import { resizeImage } from "./resizeImage";
 
@@ -97,15 +97,10 @@ export default function WishEditor({
   }
 
   return (
-    <Card className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <CardTitle icon={<Star className="w-5 h-5" aria-hidden />}>
-          Meine Wünsche
-        </CardTitle>
-        <p className="text-sm text-cream/70">
-          Etwas Bestimmtes im Kopf? Füge es mit Bild oder Link hinzu.
-        </p>
-      </div>
+    <Card holly className="flex flex-col gap-4">
+      {wishes.length === 0 && !formOpen && (
+        <p className="text-center text-cream/60">Noch keine Wünsche.</p>
+      )}
 
       {wishes.length > 0 && (
         <ul className="flex flex-col gap-2">
