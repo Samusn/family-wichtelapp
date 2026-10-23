@@ -7,9 +7,18 @@ import {
   Check,
   ChevronDown,
   CircleAlert,
+  UtensilsCrossed,
+  Dices,
+  Dumbbell,
+  Gamepad2,
   Heart,
+  Lamp,
   LoaderCircle,
+  Music,
+  Shirt,
   StickyNote,
+  Ticket,
+  type LucideIcon,
 } from "lucide-react";
 import {
   savePreferences,
@@ -22,6 +31,17 @@ import Card from "@components/ui/Card";
 import { Textarea } from "@components/ui/Input";
 
 type Selection = Record<string, { sentiment: Sentiment; tags: string[] }>;
+
+const GROUP_ICONS: Record<string, LucideIcon> = {
+  food: UtensilsCrossed,
+  style: Shirt,
+  tech: Gamepad2,
+  culture: Music,
+  leisure: Dices,
+  home: Lamp,
+  active: Dumbbell,
+  experiences: Ticket,
+};
 
 const RETRY_DELAYS = [2000, 5000, 15000];
 
@@ -214,6 +234,14 @@ export default function CatalogEditor({
               aria-controls={`group-${group.id}`}
               className="flex min-h-14 w-full items-center gap-3 px-5 py-3 text-left"
             >
+              {(() => {
+                const Icon = GROUP_ICONS[group.id];
+                return Icon ? (
+                  <span className="grid place-items-center w-9 h-9 shrink-0 rounded-xl bg-gradient-to-b from-gold-soft/20 to-gold/10 text-gold">
+                    <Icon className="w-[18px] h-[18px]" strokeWidth={2} aria-hidden />
+                  </span>
+                ) : null;
+              })()}
               <span className="flex-1 font-extrabold text-cream">
                 {group.label}
               </span>
@@ -272,20 +300,15 @@ export default function CatalogEditor({
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <span
-                                className={`grid place-items-center w-10 h-10 shrink-0 rounded-xl transition ${
-                                  entry?.sentiment === "like"
-                                    ? "bg-pine text-cream"
-                                    : entry?.sentiment === "dislike"
-                                      ? "bg-berry/40 text-cream/70"
-                                      : "bg-white/10 text-gold-soft"
+                              <img
+                                src={`/images/catalog/${category.id}.jpg`}
+                                alt=""
+                                className={`w-10 h-10 shrink-0 rounded-xl object-cover transition ${
+                                  entry?.sentiment === "dislike"
+                                    ? "opacity-40 grayscale"
+                                    : ""
                                 }`}
-                              >
-                                <CategoryIcon
-                                  categoryId={category.id}
-                                  className="w-5 h-5"
-                                />
-                              </span>
+                              />
                               <span
                                 className={`flex-1 min-w-0 font-bold leading-tight ${
                                   entry?.sentiment === "dislike"

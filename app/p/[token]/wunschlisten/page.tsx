@@ -16,7 +16,7 @@ function summarize(person: {
       (person.wishes.length === 1
         ? "1 Wunsch"
         : `${person.wishes.length} Wünsche`),
-    likeCount > 0 && `freut sich über ${likeCount} Bereiche`,
+    likeCount > 0 && `freut sich über ${likeCount} Kategorien`,
   ].filter(Boolean);
   return parts.length > 0 ? parts.join(" · ") : "Noch nichts eingetragen";
 }
@@ -39,7 +39,7 @@ export default async function WishlistsPage({
     <Page>
       <header className="flex flex-col items-center gap-1 text-center">
         <Title>Wunschlisten</Title>
-        <p className="text-cream/70">
+        <p className="text-cream/80">
           Tippe auf eine Person, um ihre Wunschliste zu sehen.
         </p>
       </header>
@@ -59,7 +59,7 @@ export default async function WishlistsPage({
                   <span className="block truncate text-[16px] font-bold">
                     {person.name}
                   </span>
-                  <span className="block text-[13px] text-cream/55 mt-0.5">
+                  <span className="block text-[13px] text-cream/80 mt-0.5">
                     {summarize(person)}
                   </span>
                 </span>

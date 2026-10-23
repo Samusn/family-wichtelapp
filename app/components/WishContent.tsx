@@ -1,15 +1,12 @@
 import { ExternalLink, Gift } from "lucide-react";
 import type { Wish } from "@/app/actions/wishes";
+import ImagePreview from "@components/ImagePreview";
 
 export default function WishContent({ wish }: { wish: Wish }) {
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3.5">
       {wish.imageUrl ? (
-        <img
-          src={wish.imageUrl}
-          alt=""
-          className="w-14 h-14 shrink-0 rounded-2xl object-cover border border-white/12"
-        />
+        <ImagePreview src={wish.imageUrl} alt={wish.title} />
       ) : (
         <span className="grid place-items-center w-14 h-14 shrink-0 rounded-2xl bg-white/8 text-gold-soft">
           <Gift className="w-6 h-6" aria-hidden />

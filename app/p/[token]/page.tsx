@@ -4,6 +4,7 @@ import { ChevronRight, Gift, ScrollText, Users } from "lucide-react";
 import { getParticipantByToken } from "@/app/actions/participants";
 import Animation from "@components/ui/Animation";
 import Card from "@components/ui/Card";
+import Countdown from "@components/Countdown";
 import LocationMapLoader from "@components/LocationMapLoader";
 import Page from "@components/ui/Page";
 import Title from "@components/ui/Title";
@@ -45,11 +46,13 @@ export default async function StartPage({
   return (
     <Page>
       <header className="flex flex-col items-center text-center">
-        <Animation name="christmas-tenten" className="w-100 h-100 mb-2" />
-        <Title>Hallo {participant.name}!</Title>
-        <p className="mt-2 text-cream/80">
-          Willkommen beim Familien-Wichteln. So funktioniert’s:
-        </p>
+        <div className="flex flex-col items-center">
+          <span className="font-display font-bold text-shimmer text-5xl">Willkommen</span>
+          <Title className="text-7xl">{participant.name}!</Title>
+        </div>
+        <Animation name="christmas-tenten" className="w-100 h-100 -mt-4" />
+        <Countdown />
+        <h2 className="mt-6 -mb-3 text-lg font-bold text-gold">So funktioniert’s</h2>
       </header>
 
       <Card holly className="flex flex-col p-0">
@@ -68,7 +71,7 @@ export default async function StartPage({
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className="block font-bold text-[15px]">{title}</span>
-                  <span className="block text-[13px] leading-snug text-cream/60 mt-0.5">{text}</span>
+                  <span className="block text-[13px] leading-snug text-cream/80 mt-0.5">{text}</span>
                 </span>
                 <ChevronRight
                   className="w-5 h-5 shrink-0 text-cream/30 transition-transform group-hover:translate-x-0.5"
