@@ -44,29 +44,34 @@ export default async function WishlistsPage({
         </p>
       </header>
 
-      <ul className="flex flex-col gap-3">
-        {people.map((person) => (
-          <li key={person.key}>
-            <Link
-              href={`/p/${token}/wunschlisten/${person.key}`}
-              className="group relative flex items-center gap-4 glass rounded-3xl px-5 py-4 transition hover:brightness-125 active:scale-[0.98]"
-            >
-              <span className="flex-1 min-w-0">
-                <span className="block truncate text-lg font-extrabold">
-                  {person.name}
+      <div className="glass overflow-hidden rounded-[20px]">
+        <ul className="flex flex-col divide-y divide-white/8">
+          {people.map((person) => (
+            <li key={person.key}>
+              <Link
+                href={`/p/${token}/wunschlisten/${person.key}`}
+                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/6 active:bg-white/10"
+              >
+                <span className="grid place-items-center w-10 h-10 shrink-0 rounded-full bg-gradient-to-b from-gold-soft/25 to-gold/15 text-gold font-bold text-sm">
+                  {person.name.charAt(0)}
                 </span>
-                <span className="block text-sm text-cream/70">
-                  {summarize(person)}
+                <span className="flex-1 min-w-0">
+                  <span className="block truncate text-[16px] font-bold">
+                    {person.name}
+                  </span>
+                  <span className="block text-[13px] text-cream/55 mt-0.5">
+                    {summarize(person)}
+                  </span>
                 </span>
-              </span>
-              <ChevronRight
-                className="w-6 h-6 shrink-0 text-cream/70 transition group-hover:translate-x-1"
-                aria-hidden
-              />
-            </Link>
-          </li>
-        ))}
-      </ul>
+                <ChevronRight
+                  className="w-5 h-5 shrink-0 text-cream/30 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
     </Page>
   );
 }

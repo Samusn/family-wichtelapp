@@ -12,7 +12,7 @@ export default function Animation({
   lottieRef,
   onComplete,
 }: {
-  name: "gift-box" | "santa" | "snow-globe";
+  name: "gift-box" | "santa" | "snow-globe" | "christmas-tenten" | "reindeer";
   className?: string;
   loop?: boolean;
   autoplay?: boolean;
@@ -20,14 +20,15 @@ export default function Animation({
   onComplete?: () => void;
 }) {
   return (
-    <LottieSvg
-      src={`/lottie/${name}.json`}
-      loop={loop}
-      autoplay={autoplay}
-      lottieRef={lottieRef}
-      subscriptions={onComplete ? { complete: onComplete } : undefined}
-      className={`pointer-events-none ${className}`}
-      aria-hidden
-    />
+    <div className={`pointer-events-none ${className}`} aria-hidden>
+      <LottieSvg
+        src={`/lottie/${name}.json`}
+        loop={loop}
+        autoplay={autoplay}
+        lottieRef={lottieRef}
+        subscriptions={onComplete ? { complete: onComplete } : undefined}
+        className="w-full h-full"
+      />
+    </div>
   );
 }

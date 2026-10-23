@@ -4,6 +4,7 @@ import { ChevronRight, Gift, ScrollText, Users } from "lucide-react";
 import { getParticipantByToken } from "@/app/actions/participants";
 import Animation from "@components/ui/Animation";
 import Card from "@components/ui/Card";
+import LocationMapLoader from "@components/LocationMapLoader";
 import Page from "@components/ui/Page";
 import Title from "@components/ui/Title";
 
@@ -44,33 +45,33 @@ export default async function StartPage({
   return (
     <Page>
       <header className="flex flex-col items-center text-center">
-        <Animation name="santa" className="w-44 h-44 -mb-4" />
+        <Animation name="christmas-tenten" className="w-100 h-100 mb-2" />
         <Title>Hallo {participant.name}!</Title>
         <p className="mt-2 text-cream/80">
           Willkommen beim Familien-Wichteln. So funktioniert’s:
         </p>
       </header>
 
-      <Card holly className="flex flex-col gap-2 p-3">
-        <ol className="flex flex-col gap-1">
+      <Card holly className="flex flex-col p-0">
+        <ol className="flex flex-col divide-y divide-white/8">
           {steps.map(({ href, icon: Icon, title, text }, index) => (
             <li key={href}>
               <Link
                 href={href}
-                className="group flex items-center gap-4 rounded-2xl p-3 transition hover:bg-white/10 active:scale-[0.98]"
+                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/6 active:bg-white/10"
               >
-                <span className="relative grid place-items-center w-11 h-11 shrink-0 rounded-full bg-[radial-gradient(circle_at_35%_30%,var(--color-gold-soft),var(--color-gold)_45%,var(--color-gold-deep))] text-berry-deep shadow-[0_0_16px_rgb(248_201_74/0.4)]">
-                  <Icon className="w-5 h-5" strokeWidth={2.25} aria-hidden />
-                  <span className="absolute -right-1 -top-1 grid place-items-center w-5 h-5 rounded-full bg-berry text-[11px] font-extrabold text-cream ring-2 ring-night/40">
+                <span className="relative grid place-items-center w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-b from-gold-soft/20 to-gold/10 text-gold shadow-sm">
+                  <Icon className="w-5 h-5" strokeWidth={2} aria-hidden />
+                  <span className="absolute -right-1.5 -top-1.5 grid place-items-center w-5 h-5 rounded-full bg-berry text-[11px] font-bold text-cream">
                     {index + 1}
                   </span>
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className="block font-extrabold">{title}</span>
-                  <span className="block text-sm text-cream/70">{text}</span>
+                  <span className="block font-bold text-[15px]">{title}</span>
+                  <span className="block text-[13px] leading-snug text-cream/60 mt-0.5">{text}</span>
                 </span>
                 <ChevronRight
-                  className="w-5 h-5 shrink-0 text-cream/50 transition group-hover:translate-x-1"
+                  className="w-5 h-5 shrink-0 text-cream/30 transition-transform group-hover:translate-x-0.5"
                   aria-hidden
                 />
               </Link>
@@ -78,6 +79,8 @@ export default async function StartPage({
           ))}
         </ol>
       </Card>
+
+      <LocationMapLoader />
     </Page>
   );
 }

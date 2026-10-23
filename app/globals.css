@@ -93,49 +93,19 @@ body {
 }
 
 @utility glass {
-  background:
-    radial-gradient(
-      120% 80% at 0% 0%,
-      rgb(255 255 255 / 0.14),
-      transparent 55%
-    ),
-    linear-gradient(
-      160deg,
-      rgb(255 255 255 / 0.1),
-      rgb(255 255 255 / 0.03) 45%,
-      rgb(255 255 255 / 0.06)
-    );
-  -webkit-backdrop-filter: blur(30px) saturate(190%) brightness(1.1);
-  backdrop-filter: blur(30px) saturate(190%) brightness(1.1);
+  background: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 0.12),
+    rgb(255 255 255 / 0.04) 50%,
+    rgb(255 255 255 / 0.08)
+  );
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
   box-shadow:
-    inset 1px 1px 1px rgb(255 255 255 / 0.3),
-    inset -1px -1px 1px rgb(255 255 255 / 0.08),
-    inset 0 0 24px rgb(255 255 255 / 0.05),
-    0 10px 36px rgb(0 0 0 / 0.32);
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      135deg,
-      rgb(255 255 255 / 0.65),
-      rgb(255 255 255 / 0.08) 35%,
-      rgb(255 255 255 / 0.04) 65%,
-      rgb(255 255 255 / 0.4)
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
+    inset 0 0.5px 0 rgb(255 255 255 / 0.2),
+    0 2px 16px rgb(0 0 0 / 0.18),
+    0 8px 32px rgb(0 0 0 / 0.12);
+  border: 0.5px solid rgb(255 255 255 / 0.15);
 }
 
 @utility animate-glow {
