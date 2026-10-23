@@ -5,9 +5,9 @@ export default function BackLink({ href }: { href: string }) {
   return (
     <Link
       href={href}
-      className="-ml-2 flex min-h-11 items-center gap-1 self-start rounded-xl px-2 text-sm font-semibold text-cream/70 transition hover:text-cream"
+      className="-ml-1 flex min-h-11 items-center gap-0.5 self-start rounded-full px-3 text-[15px] font-semibold text-gold transition-colors hover:text-gold-soft active:opacity-70"
     >
-      <ChevronLeft className="w-4 h-4" aria-hidden />
+      <ChevronLeft className="w-5 h-5" aria-hidden />
       Zurück
     </Link>
   );
