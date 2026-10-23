@@ -1,10 +1,16 @@
 "use server";
 
 import { db } from "@db/index";
-import { categoryChoices, participants } from "@db/schema";
+import {
+  categoryChoices,
+  groupNotes,
+  participants,
+  wishItems,
+} from "@db/schema";
+import type { Reservation } from "@/app/actions/wishes";
 import { eq, and, ne, asc } from "drizzle-orm";
 import { getParticipantByToken } from "@/app/actions/participants";
-import { CATALOG, NOTE_MAX_LENGTH, getCategory } from "@/lib/catalog";
+import { CATALOG, NOTE_MAX_LENGTH, getCategory, getGroup } from "@/lib/catalog";
 
 export type Sentiment = "like" | "dislike";
 
@@ -16,14 +22,14 @@ export type Choice = {
 
 export type Preferences = {
   choices: Choice[];
-  note: string;
+  notes: Record<string, string>;
 };
 
 const catalogOrder = new Map(CATALOG.map((category, i) => [category.id, i]));
 
 function toPreferences(
   rows: { categoryId: string; sentiment: Sentiment; tags: string[] }[],
-  note: string | null,
+  noteRows: { groupId: string; note: string }[],
 ): Preferences {
   return {
     choices: rows
@@ -37,7 +43,11 @@ function toPreferences(
         sentiment,
         tags,
       })),
-    note: note ?? "",
+    notes: Object.fromEntries(
+      noteRows
+        .filter((row) => getGroup(row.groupId))
+        .map((row) => [row.groupId, row.note]),
+    ),
   };
 }
 
@@ -57,17 +67,26 @@ function validatePreferences(input: Preferences) {
         ? [...new Set(choice.tags)].filter((tag) => allowedTags.has(tag))
         : [];
 
-    choices.push({ categoryId: category.id, sentiment: choice.sentiment, tags });
+    choices.push({
+      categoryId: category.id,
+      sentiment: choice.sentiment,
+      tags,
+    });
   }
 
-  const note = input.note.trim();
-  if (note.length > NOTE_MAX_LENGTH) {
-    return {
-      error: `Die Notiz darf höchstens ${NOTE_MAX_LENGTH} Zeichen haben.`,
-    } as const;
+  const notes: { groupId: string; note: string }[] = [];
+  for (const [groupId, rawNote] of Object.entries(input.notes)) {
+    const note = String(rawNote).trim();
+    if (!getGroup(groupId) || !note) continue;
+    if (note.length > NOTE_MAX_LENGTH) {
+      return {
+        error: `Eine Notiz darf höchstens ${NOTE_MAX_LENGTH} Zeichen haben.`,
+      } as const;
+    }
+    notes.push({ groupId, note });
   }
 
-  return { choices, note: note || null, error: null };
+  return { choices, notes, error: null };
 }
 
 async function getParticipant(token: string) {
@@ -83,11 +102,16 @@ async function getParticipant(token: string) {
 export async function getOwnPreferences(token: string) {
   const participant = await getParticipant(token);
 
-  const rows = await db.query.categoryChoices.findMany({
-    where: eq(categoryChoices.participantId, participant.id),
-  });
+  const [rows, noteRows] = await Promise.all([
+    db.query.categoryChoices.findMany({
+      where: eq(categoryChoices.participantId, participant.id),
+    }),
+    db.query.groupNotes.findMany({
+      where: eq(groupNotes.participantId, participant.id),
+    }),
+  ]);
 
-  return toPreferences(rows, participant.note);
+  return toPreferences(rows, noteRows);
 }
 
 export async function getSessionPreferences(token: string) {
@@ -99,13 +123,35 @@ export async function getSessionPreferences(token: string) {
       ne(participants.id, participant.id),
     ),
     orderBy: [asc(participants.name)],
-    columns: { name: true, note: true },
-    with: { categoryChoices: true },
+    columns: { id: true, name: true },
+    with: {
+      categoryChoices: true,
+      groupNotes: true,
+      wishItems: {
+        orderBy: [asc(wishItems.sortOrder), asc(wishItems.createdAt)],
+        columns: {
+          id: true,
+          title: true,
+          url: true,
+          imageUrl: true,
+          reservedById: true,
+        },
+      },
+    },
   });
 
   return others.map((other) => ({
+    key: other.id,
     name: other.name,
-    ...toPreferences(other.categoryChoices, other.note),
+    ...toPreferences(other.categoryChoices, other.groupNotes),
+    wishes: other.wishItems.map(({ reservedById, ...wish }) => ({
+      ...wish,
+      reservation: (reservedById === null
+        ? "free"
+        : reservedById === participant.id
+          ? "mine"
+          : "taken") as Reservation,
+    })),
   }));
 }
 
@@ -127,30 +173,37 @@ export async function savePreferences(
   if (validated.error) {
     return { error: validated.error };
   }
-  const { choices, note } = validated;
+  const { choices, notes } = validated;
 
   const deleteChoices = db
     .delete(categoryChoices)
     .where(eq(categoryChoices.participantId, participant.id));
-  const updateNote = db
-    .update(participants)
-    .set({ note })
-    .where(eq(participants.id, participant.id));
-
-  if (choices.length === 0) {
-    await db.batch([deleteChoices, updateNote]);
-    return { error: null };
-  }
+  const deleteNotes = db
+    .delete(groupNotes)
+    .where(eq(groupNotes.participantId, participant.id));
 
   await db.batch([
     deleteChoices,
-    db.insert(categoryChoices).values(
-      choices.map((choice) => ({
-        participantId: participant.id,
-        ...choice,
-      })),
-    ),
-    updateNote,
+    deleteNotes,
+    ...(choices.length > 0
+      ? [
+          db.insert(categoryChoices).values(
+            choices.map((choice) => ({
+              participantId: participant.id,
+              ...choice,
+            })),
+          ),
+        ]
+      : []),
+    ...(notes.length > 0
+      ? [
+          db
+            .insert(groupNotes)
+            .values(
+              notes.map((note) => ({ participantId: participant.id, ...note })),
+            ),
+        ]
+      : []),
   ]);
   return { error: null };
 }

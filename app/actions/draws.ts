@@ -2,7 +2,8 @@
 
 import { db } from "@db/index";
 import { draws, participants } from "@db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
+import { getParticipantByToken } from "@/app/actions/participants";
 
 function shuffle<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -67,4 +68,35 @@ export async function getDrawForParticipant(
     ),
     with: { receiver: true },
   });
+}
+
+export async function markDrawRevealed(
+  token: string,
+): Promise<{ error: string | null }> {
+  const participant = await getParticipantByToken(token);
+
+  if (!participant) {
+    return { error: "Teilnehmer nicht gefunden." };
+  }
+
+  await db
+    .update(draws)
+    .set({ revealedAt: new Date() })
+    .where(and(eq(draws.giverId, participant.id), isNull(draws.revealedAt)));
+
+  return { error: null };
+}
+
+export async function getDrawStatusForSession(sessionId: string) {
+  const rows = await db.query.draws.findMany({
+    where: eq(draws.sessionId, sessionId),
+    columns: { id: true, revealedAt: true },
+    with: { giver: { columns: { name: true } } },
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    giverName: row.giver.name,
+    isRevealed: row.revealedAt !== null,
+  }));
 }

@@ -4,7 +4,56 @@ export type Category = {
   tags: { id: string; label: string }[];
 };
 
+export type CategoryGroup = {
+  id: string;
+  label: string;
+  categoryIds: string[];
+};
+
 export const NOTE_MAX_LENGTH = 500;
+
+export const GROUPS: CategoryGroup[] = [
+  {
+    id: "food",
+    label: "Essen & Trinken",
+    categoryIds: ["sweets", "delicatessen", "drinks", "cooking"],
+  },
+  {
+    id: "style",
+    label: "Mode & Pflege",
+    categoryIds: ["clothing", "accessories", "beauty", "wellness"],
+  },
+  {
+    id: "tech",
+    label: "Technik & Gaming",
+    categoryIds: ["tech", "gaming"],
+  },
+  {
+    id: "culture",
+    label: "Lesen, Musik & Film",
+    categoryIds: ["books", "music", "movies"],
+  },
+  {
+    id: "leisure",
+    label: "Spiel & Kreatives",
+    categoryIds: ["games", "creative", "learning", "handmade"],
+  },
+  {
+    id: "home",
+    label: "Zuhause & Garten",
+    categoryIds: ["home", "garden", "pets"],
+  },
+  {
+    id: "active",
+    label: "Sport & Draußen",
+    categoryIds: ["fitness", "outdoor"],
+  },
+  {
+    id: "experiences",
+    label: "Erlebnisse & Gutscheine",
+    categoryIds: ["experiences", "travel", "vouchers"],
+  },
+];
 
 export const CATALOG: Category[] = [
   {
@@ -289,4 +338,8 @@ export const CATALOG: Category[] = [
 
 export function getCategory(categoryId: string) {
   return CATALOG.find((category) => category.id === categoryId);
+}
+
+export function getGroup(groupId: string) {
+  return GROUPS.find((group) => group.id === groupId);
 }

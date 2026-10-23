@@ -1,15 +1,18 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Mountains_of_Christmas, Nunito } from "next/font/google";
+import Background from "@components/Background";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const mountains = Mountains_of_Christmas({
+  variable: "--font-mountains",
   subsets: ["latin"],
+  weight: ["400", "700"],
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
@@ -20,6 +23,11 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#140a07",
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,8 +36,9 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 min-h-screen`}
+        className={`${nunito.variable} ${mountains.variable} font-sans antialiased min-h-dvh`}
       >
+        <Background />
         {children}
       </body>
     </html>

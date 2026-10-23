@@ -2,7 +2,20 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { getAllSessions, createSession } from "@/app/actions/sessions";
+import {
+  ChevronRight,
+  LogOut,
+  Snowflake,
+  Sparkles,
+  TreePine,
+  Users,
+} from "lucide-react";
 import SessionDetail from "./SessionDetail";
+import Button from "@components/ui/Button";
+import Card, { CardTitle } from "@components/ui/Card";
+import Input from "@components/ui/Input";
+import Page from "@components/ui/Page";
+import Title from "@components/ui/Title";
 
 type Session = {
   id: string;
@@ -13,7 +26,11 @@ type Session = {
   participants: { id: string; name: string }[];
 };
 
-export default function SessionOverview({ onLogout }: { onLogout: () => void }) {
+export default function SessionOverview({
+  onLogout,
+}: {
+  onLogout: () => void;
+}) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null,
@@ -57,82 +74,86 @@ export default function SessionOverview({ onLogout }: { onLogout: () => void }) 
   const archivedSessions = sessions.filter((s) => s.isArchived);
 
   return (
-    <div className="min-h-screen p-6 max-w-2xl mx-auto flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-        <button
-          onClick={onLogout}
-          className="text-white/40 hover:text-white text-sm transition"
-        >
+    <Page wide>
+      <header className="flex items-center justify-between gap-4">
+        <Title className="text-4xl">Admin</Title>
+        <Button variant="ghost" size="sm" onClick={onLogout}>
+          <LogOut className="w-4 h-4" aria-hidden />
           Abmelden
-        </button>
-      </div>
+        </Button>
+      </header>
 
-      <section className="bg-white/10 backdrop-blur rounded-xl p-6 flex flex-col gap-4">
-        <h2 className="text-xl font-semibold text-white">Neue Session</h2>
-        <form onSubmit={handleCreate} className="flex flex-col gap-3">
-          <input
+      <Card className="flex flex-col gap-4">
+        <CardTitle icon={<Sparkles aria-hidden />}>Neue Session</CardTitle>
+        <form
+          onSubmit={handleCreate}
+          className="flex flex-col gap-3 sm:flex-row"
+        >
+          <Input
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="z.B. Weihnachten 2026"
-            className="rounded-lg px-4 py-3 bg-white/10 text-white border border-white/20 focus:border-white/50 outline-none"
+            placeholder="z. B. Weihnachten 2026"
+            className="sm:flex-1"
           />
-          <input
+          <Input
             type="number"
             value={newYear}
             onChange={(e) => setNewYear(Number(e.target.value))}
-            className="rounded-lg px-4 py-3 bg-white/10 text-white border border-white/20 focus:border-white/50 outline-none"
+            aria-label="Jahr"
+            className="sm:w-28"
           />
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
-          >
-            Session erstellen
-          </button>
+          <Button type="submit" variant="pine" disabled={loading}>
+            Erstellen
+          </Button>
         </form>
-      </section>
+      </Card>
 
       {activeSessions.length > 0 && (
-        <section className="bg-white/10 backdrop-blur rounded-xl p-6 flex flex-col gap-3">
-          <h2 className="text-xl font-semibold text-white">Aktive Sessions</h2>
+        <Card className="flex flex-col gap-3">
+          <CardTitle icon={<TreePine aria-hidden />}>Aktive Sessions</CardTitle>
           {activeSessions.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setSelectedSessionId(s.id)}
-              className="flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-lg px-4 py-3 transition text-left w-full"
-            >
-              <span className="text-white">
-                {s.name} ({s.year})
-              </span>
-              <span className="text-white/40 text-sm">
-                {s.participants.length} Teilnehmer →
-              </span>
-            </button>
+            <SessionRow key={s.id} session={s} onOpen={setSelectedSessionId} />
           ))}
-        </section>
+        </Card>
       )}
 
       {archivedSessions.length > 0 && (
-        <section className="bg-white/10 backdrop-blur rounded-xl p-6 flex flex-col gap-3">
-          <h2 className="text-xl font-semibold text-white">Archiv</h2>
+        <Card className="flex flex-col gap-3 opacity-80">
+          <CardTitle icon={<Snowflake aria-hidden />}>Archiv</CardTitle>
           {archivedSessions.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setSelectedSessionId(s.id)}
-              className="flex items-center justify-between bg-white/5 hover:bg-white/10 rounded-lg px-4 py-3 transition text-left w-full"
-            >
-              <span className="text-white/50">
-                {s.name} ({s.year})
-              </span>
-              <span className="text-white/30 text-sm">
-                {s.participants.length} Teilnehmer →
-              </span>
-            </button>
+            <SessionRow key={s.id} session={s} onOpen={setSelectedSessionId} />
           ))}
-        </section>
+        </Card>
       )}
-    </div>
+    </Page>
+  );
+}
+
+function SessionRow({
+  session,
+  onOpen,
+}: {
+  session: Session;
+  onOpen: (id: string) => void;
+}) {
+  return (
+    <button
+      onClick={() => onOpen(session.id)}
+      className="group flex w-full items-center justify-between gap-3 rounded-2xl bg-white/5 px-4 py-3 text-left ring-1 ring-white/10 transition hover:bg-white/10"
+    >
+      <span className="font-bold">
+        {session.name}{" "}
+        <span className="font-normal text-cream/60">({session.year})</span>
+      </span>
+      <span className="flex items-center gap-1 text-sm text-cream/60">
+        <Users className="w-4 h-4" aria-hidden />
+        {session.participants.length}
+        <ChevronRight
+          className="w-4 h-4 transition group-hover:translate-x-0.5"
+          aria-hidden
+        />
+      </span>
+    </button>
   );
 }
