@@ -33,7 +33,7 @@ export default function ParticipantView({ participant, session, draw }: Props) {
             isRevealed={draw.isRevealed}
           />
         ) : (
-          <div className="flex h-[22rem] flex-col items-center justify-center gap-2 text-center">
+          <div className="flex h-[28rem] flex-col items-center justify-center gap-2 text-center">
             <Animation name="snow-globe" className="w-48 h-48" />
             <p className="text-cream/80">
               Die Ziehung hat noch nicht stattgefunden.
