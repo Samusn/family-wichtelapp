@@ -2,6 +2,8 @@ import Link from "next/link";
 import Page from "@components/ui/Page";
 import Title from "@components/ui/Title";
 import Card from "@components/ui/Card";
+import { CONTACT_ADDRESS, CONTACT_EMAIL, CONTACT_NAME } from "./contact";
+import { ProtectedEmail, ProtectedLines, ProtectedText } from "./Protected";
 
 export default function ImpressumPage() {
   return (
@@ -14,21 +16,11 @@ export default function ImpressumPage() {
         <section>
           <h2 className="text-lg font-bold text-gold">Verantwortlich</h2>
           <p className="mt-2 text-cream/80">
-            Samuel Soun
+            <ProtectedText value={CONTACT_NAME} />
             <br />
-            Tramstrasse 64
+            <ProtectedLines values={CONTACT_ADDRESS} />
             <br />
-            5034 Suhr
-            <br />
-            Schweiz
-            <br />
-            E-Mail:{" "}
-            <a
-              href="mailto:sounsamuel07@gmail.com"
-              className="text-gold-soft underline-offset-2 hover:underline"
-            >
-              sounsamuel07@gmail.com
-            </a>
+            E-Mail: <ProtectedEmail value={CONTACT_EMAIL} />
           </p>
           <p className="mt-2 text-sm text-cream/60">
             Diese Anwendung wird privat betrieben und richtet sich
@@ -38,9 +30,7 @@ export default function ImpressumPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-gold">
-            Zweck der Anwendung
-          </h2>
+          <h2 className="text-lg font-bold text-gold">Zweck der Anwendung</h2>
           <p className="mt-2 text-cream/80">
             Diese Anwendung dient der internen Kommunikation, Organisation und
             Unterhaltung innerhalb der Familie und des engeren Bekanntenkreises.
@@ -97,13 +87,7 @@ export default function ImpressumPage() {
           </p>
           <p className="mt-2 text-cream/80">
             Anfragen zum Datenschutz können jederzeit an{" "}
-            <a
-              href="mailto:sounsamuel07@gmail.com"
-              className="text-gold-soft underline-offset-2 hover:underline"
-            >
-              sounsamuel07@gmail.com
-            </a>{" "}
-            gerichtet werden.
+            <ProtectedEmail value={CONTACT_EMAIL} /> gerichtet werden.
           </p>
         </section>
 
@@ -122,13 +106,7 @@ export default function ImpressumPage() {
           <p className="mt-2 text-cream/80">
             Letzte Aktualisierung: Oktober 2026
             <br />
-            Kontaktadresse:{" "}
-            <a
-              href="mailto:sounsamuel07@gmail.com"
-              className="text-gold-soft underline-offset-2 hover:underline"
-            >
-              sounsamuel07@gmail.com
-            </a>
+            Kontaktadresse: <ProtectedEmail value={CONTACT_EMAIL} />
           </p>
         </section>
 
