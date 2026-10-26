@@ -119,8 +119,12 @@ export default function SessionDetail({
     e.preventDefault();
     if (!newParticipantName.trim() || !session) return;
     setLoading(true);
-    await addParticipant(session.id, newParticipantName.trim());
-    setNewParticipantName("");
+    const { error } = await addParticipant(
+      session.id,
+      newParticipantName.trim(),
+    );
+    if (error) showMessage(error);
+    else setNewParticipantName("");
     await loadData();
     setLoading(false);
   }
@@ -128,7 +132,8 @@ export default function SessionDetail({
   async function handleRemoveParticipant(participantId: string) {
     if (!confirm("Teilnehmer wirklich entfernen?")) return;
     setLoading(true);
-    await removeParticipant(participantId);
+    const { error } = await removeParticipant(participantId);
+    if (error) showMessage(error);
     await loadData();
     setLoading(false);
   }
@@ -142,15 +147,9 @@ export default function SessionDetail({
     )
       return;
     setLoading(true);
-    try {
-      await performDraw(session.id);
-      await loadData();
-      showMessage("Ziehung erfolgreich!");
-    } catch (err) {
-      showMessage(
-        err instanceof Error ? err.message : "Fehler bei der Ziehung.",
-      );
-    }
+    const { error } = await performDraw(session.id);
+    await loadData();
+    showMessage(error ?? "Ziehung erfolgreich!");
     setLoading(false);
   }
 
