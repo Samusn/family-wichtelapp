@@ -15,6 +15,16 @@ function shuffle<T>(array: T[]): T[] {
   return shuffled;
 }
 
+function isUniqueViolation(err: unknown) {
+  const cause = err instanceof Error ? err.cause : undefined;
+  return (
+    typeof cause === "object" &&
+    cause !== null &&
+    "code" in cause &&
+    cause.code === "23505"
+  );
+}
+
 function isValidAssignment(
   givers: { id: string }[],
   receivers: { id: string }[],
@@ -49,15 +59,6 @@ export async function performDraw(
     return { error: "Die Session ist archiviert." };
   }
 
-  const existingDraw = await db.query.draws.findFirst({
-    where: eq(draws.sessionId, sessionId),
-    columns: { id: true },
-  });
-
-  if (existingDraw) {
-    return { error: "Es wurde bereits gezogen für diese Session." };
-  }
-
   const givers = await db.query.participants.findMany({
     where: eq(participants.sessionId, sessionId),
     columns: { id: true },
@@ -84,8 +85,11 @@ export async function performDraw(
         receiverId: receivers[i].id,
       })),
     );
-  } catch {
-    return { error: "Es wurde bereits gezogen für diese Session." };
+  } catch (err) {
+    if (isUniqueViolation(err)) {
+      return { error: "Es wurde bereits gezogen für diese Session." };
+    }
+    throw err;
   }
 
   return { error: null };
