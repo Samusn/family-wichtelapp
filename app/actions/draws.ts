@@ -4,6 +4,7 @@ import { db } from "@db/index";
 import { draws, participants } from "@db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { getParticipantByToken } from "@/app/actions/participants";
+import { requireAdmin } from "@/lib/adminAuth";
 
 function shuffle<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -15,6 +16,8 @@ function shuffle<T>(array: T[]): T[] {
 }
 
 export async function performDraw(sessionId: string) {
+  await requireAdmin();
+
   const existingDraws = await db.query.draws.findMany({
     where: eq(draws.sessionId, sessionId),
   });
@@ -51,23 +54,30 @@ export async function performDraw(sessionId: string) {
 }
 
 export async function getDrawsForSession(sessionId: string) {
+  await requireAdmin();
+
   return db.query.draws.findMany({
     where: eq(draws.sessionId, sessionId),
     with: { giver: true, receiver: true },
   });
 }
 
-export async function getDrawForParticipant(
-  sessionId: string,
-  participantId: string,
-) {
-  return db.query.draws.findFirst({
+export async function getDrawForToken(token: string) {
+  const participant = await getParticipantByToken(token);
+  if (!participant) return null;
+
+  const draw = await db.query.draws.findFirst({
     where: and(
-      eq(draws.sessionId, sessionId),
-      eq(draws.giverId, participantId),
+      eq(draws.sessionId, participant.sessionId),
+      eq(draws.giverId, participant.id),
     ),
-    with: { receiver: true },
+    columns: { revealedAt: true },
+    with: { receiver: { columns: { name: true } } },
   });
+
+  return draw
+    ? { receiverName: draw.receiver.name, revealedAt: draw.revealedAt }
+    : null;
 }
 
 export async function markDrawRevealed(
@@ -88,6 +98,8 @@ export async function markDrawRevealed(
 }
 
 export async function getDrawStatusForSession(sessionId: string) {
+  await requireAdmin();
+
   const rows = await db.query.draws.findMany({
     where: eq(draws.sessionId, sessionId),
     columns: { id: true, revealedAt: true },
