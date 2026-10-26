@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@db/index";
-import { draws, participants } from "@db/schema";
+import { draws, participants, sessions } from "@db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { getParticipantByToken } from "@/app/actions/participants";
 
@@ -14,40 +14,78 @@ function shuffle<T>(array: T[]): T[] {
   return shuffled;
 }
 
-export async function performDraw(sessionId: string) {
-  const existingDraws = await db.query.draws.findMany({
+function isValidAssignment(
+  givers: { id: string }[],
+  receivers: { id: string }[],
+) {
+  const giverIds = new Set(givers.map((giver) => giver.id));
+  const receiverIds = new Set(receivers.map((receiver) => receiver.id));
+
+  return (
+    givers.length === receivers.length &&
+    giverIds.size === givers.length &&
+    receiverIds.size === receivers.length &&
+    receivers.every((receiver) => giverIds.has(receiver.id)) &&
+    givers.every((giver, i) => giver.id !== receivers[i].id)
+  );
+}
+
+export async function performDraw(
+  sessionId: string,
+): Promise<{ error: string | null }> {
+  const session = await db.query.sessions.findFirst({
+    where: eq(sessions.id, sessionId),
+    columns: { isArchived: true },
+  });
+
+  if (!session) {
+    return { error: "Session nicht gefunden." };
+  }
+
+  if (session.isArchived) {
+    return { error: "Die Session ist archiviert." };
+  }
+
+  const existingDraw = await db.query.draws.findFirst({
     where: eq(draws.sessionId, sessionId),
+    columns: { id: true },
   });
 
-  if (existingDraws.length > 0) {
-    throw new Error("Es wurde bereits gezogen für diese Session.");
+  if (existingDraw) {
+    return { error: "Es wurde bereits gezogen für diese Session." };
   }
 
-  const sessionParticipants = await db.query.participants.findMany({
+  const givers = await db.query.participants.findMany({
     where: eq(participants.sessionId, sessionId),
+    columns: { id: true },
   });
 
-  if (sessionParticipants.length < 3) {
-    throw new Error("Mindestens 3 Teilnehmer für eine Ziehung nötig.");
+  if (givers.length < 3) {
+    return { error: "Mindestens 3 Teilnehmer für eine Ziehung nötig." };
   }
 
-  const givers = [...sessionParticipants];
   let receivers: typeof givers;
-
-  // Shuffle until no one draws themselves
   do {
-    receivers = shuffle(sessionParticipants);
-  } while (givers.some((g, i) => g.id === receivers[i].id));
+    receivers = shuffle(givers);
+  } while (givers.some((giver, i) => giver.id === receivers[i].id));
 
-  const drawEntries = givers.map((giver, i) => ({
-    sessionId,
-    giverId: giver.id,
-    receiverId: receivers[i].id,
-  }));
+  if (!isValidAssignment(givers, receivers)) {
+    return { error: "Die Ziehung ist fehlgeschlagen. Bitte erneut versuchen." };
+  }
 
-  await db.insert(draws).values(drawEntries);
+  try {
+    await db.insert(draws).values(
+      givers.map((giver, i) => ({
+        sessionId,
+        giverId: giver.id,
+        receiverId: receivers[i].id,
+      })),
+    );
+  } catch {
+    return { error: "Es wurde bereits gezogen für diese Session." };
+  }
 
-  return drawEntries;
+  return { error: null };
 }
 
 export async function getDrawsForSession(sessionId: string) {

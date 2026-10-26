@@ -1,19 +1,34 @@
 "use server";
 
 import { db } from "@db/index";
-import { participants } from "@db/schema";
+import { draws, participants } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { generateUrlToken } from "@/lib/tokens";
 
-export async function addParticipant(sessionId: string, name: string) {
+const LOCKED_ERROR =
+  "Nach der Ziehung können keine Teilnehmer mehr geändert werden.";
+
+async function hasDraws(sessionId: string) {
+  const draw = await db.query.draws.findFirst({
+    where: eq(draws.sessionId, sessionId),
+    columns: { id: true },
+  });
+  return draw !== undefined;
+}
+
+export async function addParticipant(
+  sessionId: string,
+  name: string,
+): Promise<{ error: string | null }> {
+  if (await hasDraws(sessionId)) {
+    return { error: LOCKED_ERROR };
+  }
+
   const urlToken = generateUrlToken();
 
-  const [participant] = await db
-    .insert(participants)
-    .values({ sessionId, name, urlToken })
-    .returning();
+  await db.insert(participants).values({ sessionId, name, urlToken });
 
-  return participant;
+  return { error: null };
 }
 
 export async function getParticipantsBySession(sessionId: string) {
@@ -29,6 +44,23 @@ export async function getParticipantByToken(token: string) {
   });
 }
 
-export async function removeParticipant(participantId: string) {
+export async function removeParticipant(
+  participantId: string,
+): Promise<{ error: string | null }> {
+  const participant = await db.query.participants.findFirst({
+    where: eq(participants.id, participantId),
+    columns: { sessionId: true },
+  });
+
+  if (!participant) {
+    return { error: "Teilnehmer nicht gefunden." };
+  }
+
+  if (await hasDraws(participant.sessionId)) {
+    return { error: LOCKED_ERROR };
+  }
+
   await db.delete(participants).where(eq(participants.id, participantId));
+
+  return { error: null };
 }
