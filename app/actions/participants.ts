@@ -4,6 +4,7 @@ import { db } from "@db/index";
 import { draws, participants } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { generateUrlToken } from "@/lib/tokens";
+import { requireAdmin } from "@/lib/adminAuth";
 
 const LOCKED_ERROR =
   "Nach der Ziehung können keine Teilnehmer mehr geändert werden.";
@@ -20,6 +21,8 @@ export async function addParticipant(
   sessionId: string,
   name: string,
 ): Promise<{ error: string | null }> {
+  await requireAdmin();
+
   if (await hasDraws(sessionId)) {
     return { error: LOCKED_ERROR };
   }
@@ -29,12 +32,6 @@ export async function addParticipant(
   await db.insert(participants).values({ sessionId, name, urlToken });
 
   return { error: null };
-}
-
-export async function getParticipantsBySession(sessionId: string) {
-  return db.query.participants.findMany({
-    where: eq(participants.sessionId, sessionId),
-  });
 }
 
 export async function getParticipantByToken(token: string) {
@@ -47,6 +44,8 @@ export async function getParticipantByToken(token: string) {
 export async function removeParticipant(
   participantId: string,
 ): Promise<{ error: string | null }> {
+  await requireAdmin();
+
   const participant = await db.query.participants.findFirst({
     where: eq(participants.id, participantId),
     columns: { sessionId: true },
