@@ -25,7 +25,7 @@ export default function ParticipantView({ participant, session, draw }: Props) {
         </p>
       )}
 
-      <Card holly className="flex flex-col gap-5">
+      <Card holly className="flex flex-1 flex-col items-center justify-center gap-5">
         {draw ? (
           <DrawReveal
             token={participant.token}
@@ -35,7 +35,7 @@ export default function ParticipantView({ participant, session, draw }: Props) {
         ) : (
           <div className="flex h-[22rem] flex-col items-center justify-center gap-2 text-center">
             <Animation name="snow-globe" className="w-48 h-48" />
-            <p className="text-cream/70">
+            <p className="text-cream/80">
               Die Ziehung hat noch nicht stattgefunden.
               <br />
               Schau bald wieder vorbei!

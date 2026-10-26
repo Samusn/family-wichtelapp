@@ -53,7 +53,7 @@ export default function LocationMap() {
           href={`https://www.google.com/maps/dir/?api=1&destination=${LOCATION.lat},${LOCATION.lng}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 bg-white/8 px-5 py-3 text-[15px] font-semibold text-gold transition-colors hover:bg-white/12 active:bg-white/15"
+          className="flex items-center justify-center gap-2 glass px-5 py-3.5 text-[15px] font-semibold text-gold transition-colors hover:bg-white/12 active:bg-white/15"
         >
           Route zu {LOCATION.address}
         </a>

@@ -14,19 +14,19 @@ export const NOTE_MAX_LENGTH = 500;
 
 export const GROUPS: CategoryGroup[] = [
   {
-    id: "food",
-    label: "Essen & Trinken",
-    categoryIds: ["sweets", "delicatessen", "drinks", "cooking"],
-  },
-  {
-    id: "style",
-    label: "Mode & Pflege",
-    categoryIds: ["clothing", "accessories", "beauty", "wellness"],
+    id: "home",
+    label: "Zuhause & Garten",
+    categoryIds: ["home", "garden", "pets"],
   },
   {
     id: "tech",
     label: "Technik & Gaming",
     categoryIds: ["tech", "gaming"],
+  },
+  {
+    id: "style",
+    label: "Mode & Pflege",
+    categoryIds: ["clothing", "accessories", "beauty", "wellness"],
   },
   {
     id: "culture",
@@ -39,14 +39,14 @@ export const GROUPS: CategoryGroup[] = [
     categoryIds: ["games", "creative", "learning", "handmade"],
   },
   {
-    id: "home",
-    label: "Zuhause & Garten",
-    categoryIds: ["home", "garden", "pets"],
-  },
-  {
     id: "active",
     label: "Sport & Draußen",
     categoryIds: ["fitness", "outdoor"],
+  },
+  {
+    id: "food",
+    label: "Essen & Trinken",
+    categoryIds: ["sweets", "delicatessen", "drinks", "cooking"],
   },
   {
     id: "experiences",

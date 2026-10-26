@@ -49,7 +49,7 @@ export default async function PersonWishlistPage({
 
       {isEmpty && (
         <Card>
-          <p className="text-center text-cream/60">
+          <p className="text-center text-cream/80">
             {person.name} hat noch nichts eingetragen.
           </p>
         </Card>
@@ -98,12 +98,11 @@ export default async function PersonWishlistPage({
                   className="flex flex-col gap-2 rounded-2xl bg-pine/15 p-3 ring-1 ring-pine/40"
                 >
                   <span className="flex items-center gap-3 font-bold">
-                    <span className="grid place-items-center w-9 h-9 shrink-0 rounded-xl bg-pine">
-                      <CategoryIcon
-                        categoryId={category.id}
-                        className="w-5 h-5"
-                      />
-                    </span>
+                    <img
+                      src={`/images/catalog/${category.id}.jpg`}
+                      alt=""
+                      className="w-9 h-9 shrink-0 rounded-xl object-cover"
+                    />
                     {category.label}
                   </span>
                   {tagLabels.length > 0 && (
@@ -134,7 +133,7 @@ export default async function PersonWishlistPage({
                 key={group.id}
                 className="rounded-2xl bg-gold/10 p-3 text-sm ring-1 ring-gold/30"
               >
-                <span className="block text-xs font-extrabold uppercase tracking-wider text-gold-soft/80">
+                <span className="block text-xs font-extrabold uppercase tracking-wider text-gold-soft">
                   {group.label}
                 </span>
                 <span className="whitespace-pre-line text-gold-soft">
@@ -155,7 +154,7 @@ export default async function PersonWishlistPage({
               return (
                 <span
                   key={choice.categoryId}
-                  className="flex items-center gap-2 rounded-full bg-berry/20 px-3 py-1 text-sm font-semibold text-red-200 ring-1 ring-berry/40"
+                  className="flex items-center gap-2 rounded-full bg-berry/20 px-3 py-1 text-sm font-semibold text-red-100 ring-1 ring-berry/40"
                 >
                   <CategoryIcon categoryId={category.id} className="w-4 h-4" />
                   {category.label}

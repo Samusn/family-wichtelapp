@@ -146,41 +146,34 @@ export default function DrawReveal({
             initial={{ scale: 0.4, opacity: 0, y: 40 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 180, damping: 14 }}
-            className="flex w-full flex-col items-center gap-3"
+            className="flex w-full flex-col items-center"
           >
-            <p className="text-sm font-semibold text-gold-soft/80">
+            <p className="text-sm font-semibold text-gold-soft/80 mb-2">
               Du beschenkst dieses Jahr
             </p>
-            <div className="relative grid h-40 w-full place-items-center overflow-hidden rounded-3xl bg-gradient-to-b from-berry to-berry-deep px-6 ring-4 ring-gold shadow-[0_0_40px_rgb(248_201_74/0.5)]">
-              <div
-                className="absolute inset-x-0 top-1/2 h-3 -translate-y-1/2 bg-gold/80"
-                aria-hidden
-              />
-              <div
-                className="absolute inset-y-0 left-1/2 w-3 -translate-x-1/2 bg-gold/80"
-                aria-hidden
-              />
-              <p
-                className={`relative line-clamp-2 text-center font-display font-bold text-4xl leading-tight text-gold-soft drop-shadow-[0_0_14px_rgb(248_201_74/0.8)] transition duration-500 break-words ${
-                  visible ? "" : "blur-[5px] select-none"
-                }`}
-                aria-hidden={!visible}
-              >
-                <span className="rounded-2xl bg-berry-deep/90 px-4 py-1 box-decoration-clone">
+            <div className="relative flex flex-col items-center w-full max-w-[280px]">
+              <Animation name="snow-globe" className="w-56 h-56" />
+              <div className="relative -mt-3 flex w-full justify-center items-center rounded-t-[50%] rounded-b-2xl bg-gradient-to-b from-berry to-berry-deep px-6 py-5 border-2 border-gold shadow-[0_0_30px_rgb(248_201_74/0.4)]">
+                <p
+                  className={`text-center font-display font-bold text-3xl leading-tight text-gold-soft drop-shadow-[0_0_14px_rgb(248_201_74/0.8)] transition duration-500 break-words ${
+                    visible ? "" : "blur-[6px] select-none"
+                  }`}
+                  aria-hidden={!visible}
+                >
                   {drawnName}
-                </span>
-              </p>
-              {visible && (
-                <motion.div
-                  initial={{ scaleX: 1 }}
-                  animate={{ scaleX: 0 }}
-                  transition={{ duration: VISIBLE_MS / 1000, ease: "linear" }}
-                  className="absolute inset-x-0 bottom-0 h-1.5 origin-left bg-gold-soft"
-                  aria-hidden
-                />
-              )}
+                </p>
+                {visible && (
+                  <motion.div
+                    initial={{ scaleX: 1 }}
+                    animate={{ scaleX: 0 }}
+                    transition={{ duration: VISIBLE_MS / 1000, ease: "linear" }}
+                    className="absolute inset-x-0 bottom-0 h-1 origin-left rounded-b-2xl bg-gold-soft"
+                    aria-hidden
+                  />
+                )}
+              </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={visible ? hide : show}>
+            <Button variant="ghost" size="sm" onClick={visible ? hide : show} className="mt-3">
               {visible ? (
                 <EyeOff className="w-4 h-4" aria-hidden />
               ) : (

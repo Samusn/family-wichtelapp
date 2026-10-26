@@ -38,7 +38,7 @@ export default async function OwnWishlistPage({
           <CardTitle icon={<ScrollText aria-hidden />}>
             Konkrete Wünsche
           </CardTitle>
-          <p className="text-sm text-cream/70">
+          <p className="text-sm text-cream/80">
             Etwas Bestimmtes im Kopf? Füge es mit Bild oder Link hinzu.
           </p>
         </div>
@@ -50,9 +50,9 @@ export default async function OwnWishlistPage({
           <CardTitle icon={<CandyCane aria-hidden />}>
             Worüber ich mich freue
           </CardTitle>
-          <p className="text-sm text-cream/70">
-            Öffne einen Bereich und markiere, was dir gefällt oder was du lieber
-            nicht möchtest.
+          <p className="text-sm text-cream/80">
+            Öffne eine Kategorie und markiere Unterkategorien, die dir gefallen
+            oder die du lieber nicht möchtest.
           </p>
         </div>
         <CatalogEditor

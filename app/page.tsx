@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Link2 } from "lucide-react";
 import Animation from "@components/ui/Animation";
 import Card from "@components/ui/Card";
@@ -17,6 +18,12 @@ export default function IndexPage() {
           Wichtel-Los zu sehen und deinen Wunschkatalog auszufüllen.
         </p>
       </Card>
+      <Link
+        href="/impressum"
+        className="text-sm text-cream/50 transition-colors hover:text-cream/80"
+      >
+        Impressum
+      </Link>
     </Page>
   );
 }
