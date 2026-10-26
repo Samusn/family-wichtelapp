@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { ImagePlus, Pencil, Plus, Trash2, X } from "lucide-react";
 import {
   addWish,
@@ -9,11 +10,14 @@ import {
   updateWish,
   type Wish,
 } from "@/app/actions/wishes";
-import WishContent from "@components/WishContent";
+import WishCard from "@components/WishCard";
 import Button from "@components/ui/Button";
 import Card from "@components/ui/Card";
 import Input from "@components/ui/Input";
 import { resizeImage } from "./resizeImage";
+
+const ICON_BUTTON =
+  "grid h-11 w-11 place-items-center rounded-full bg-night/60 text-cream ring-1 ring-white/20 backdrop-blur-md transition hover:bg-night/80 active:scale-95 disabled:opacity-40";
 
 export default function WishEditor({
   token,
@@ -26,6 +30,7 @@ export default function WishEditor({
 }) {
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
+  const form = useRef<HTMLFormElement>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Wish | null>(null);
   const [title, setTitle] = useState("");
@@ -34,6 +39,11 @@ export default function WishEditor({
   const [removeImage, setRemoveImage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (editing)
+      form.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [editing]);
 
   function resetForm() {
     setFormOpen(false);
@@ -98,57 +108,80 @@ export default function WishEditor({
 
   return (
     <Card holly className="flex flex-col gap-4">
-      {wishes.length === 0 && !formOpen && (
+      {wishes.length === 0 && !formOpen && !isEditable && (
         <p className="text-center text-cream/60">Noch keine Wünsche.</p>
       )}
 
-      {wishes.length > 0 && (
-        <ul className="flex flex-col gap-2">
-          {wishes.map((wish) => (
-            <li
-              key={wish.id}
-              className="flex items-center gap-2 rounded-2xl bg-white/5 p-2 ring-1 ring-white/10"
-            >
-              <WishContent wish={wish} />
-              {isEditable && (
-                <div className="flex shrink-0 flex-col">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => startEditing(wish)}
-                    disabled={loading}
-                    aria-label={`${wish.title} bearbeiten`}
-                  >
-                    <Pencil className="w-4 h-4" aria-hidden />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(wish)}
-                    disabled={loading}
-                    aria-label={`${wish.title} löschen`}
-                    className="text-red-300 hover:text-red-200"
-                  >
-                    <Trash2 className="w-4 h-4" aria-hidden />
-                  </Button>
-                </div>
-              )}
-            </li>
-          ))}
+      {(wishes.length > 0 || (isEditable && !formOpen)) && (
+        <ul className="flex flex-col gap-3">
+          <AnimatePresence initial={false}>
+            {wishes.map((wish, index) => (
+              <motion.li
+                key={wish.id}
+                layout
+                initial={{ opacity: 0, scale: 0.85, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              >
+                <WishCard
+                  wish={wish}
+                  index={index}
+                  highlighted={editing?.id === wish.id}
+                  actions={
+                    isEditable && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => startEditing(wish)}
+                          disabled={loading}
+                          aria-label={`${wish.title} bearbeiten`}
+                          className={ICON_BUTTON}
+                        >
+                          <Pencil className="w-4 h-4" aria-hidden />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(wish)}
+                          disabled={loading}
+                          aria-label={`${wish.title} löschen`}
+                          className={`${ICON_BUTTON} text-red-200`}
+                        >
+                          <Trash2 className="w-4 h-4" aria-hidden />
+                        </button>
+                      </>
+                    )
+                  }
+                />
+              </motion.li>
+            ))}
+            {isEditable && !formOpen && (
+              <motion.li key="add" layout>
+                <button
+                  type="button"
+                  onClick={() => setFormOpen(true)}
+                  className="group flex min-h-20 w-full items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-gold/40 bg-gold/5 p-4 text-gold-soft transition hover:border-gold/70 hover:bg-gold/10 active:scale-[0.98]"
+                >
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-b from-pine to-pine-deep text-cream shadow-lg shadow-pine-deep/30 transition-transform group-hover:rotate-90">
+                    <Plus className="w-6 h-6" aria-hidden />
+                  </span>
+                  <span className="text-sm font-bold">
+                    {wishes.length === 0
+                      ? "Ersten Wunsch hinzufügen"
+                      : "Wunsch hinzufügen"}
+                  </span>
+                </button>
+              </motion.li>
+            )}
+          </AnimatePresence>
         </ul>
-      )}
-
-      {isEditable && !formOpen && (
-        <Button variant="pine" onClick={() => setFormOpen(true)}>
-          <Plus className="w-5 h-5" aria-hidden />
-          Wunsch hinzufügen
-        </Button>
       )}
 
       {isEditable && formOpen && (
         <form
+          ref={form}
           onSubmit={handleSubmit}
-          className="flex flex-col gap-3 rounded-2xl bg-white/5 p-3 ring-1 ring-white/10"
+          className="flex flex-col gap-3 rounded-3xl bg-white/5 p-4 ring-1 ring-gold/30"
         >
           <div className="flex items-center justify-between">
             <span className="font-bold">

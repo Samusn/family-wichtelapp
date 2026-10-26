@@ -5,9 +5,11 @@ import { useRef } from "react";
 export default function ImagePreview({
   src,
   alt,
+  className = "w-14 h-14 shrink-0 rounded-2xl border border-white/12",
 }: {
   src: string;
   alt: string;
+  className?: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -17,7 +19,7 @@ export default function ImagePreview({
         src={src}
         alt={alt}
         onClick={() => dialogRef.current?.showModal()}
-        className="w-14 h-14 shrink-0 rounded-2xl object-cover border border-white/12 cursor-pointer"
+        className={`object-cover cursor-pointer ${className}`}
       />
       <dialog
         ref={dialogRef}
