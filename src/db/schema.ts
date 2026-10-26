@@ -7,6 +7,8 @@ import {
   text,
   timestamp,
   primaryKey,
+  uniqueIndex,
+  check,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
@@ -132,22 +134,36 @@ export const wishItemsRelations = relations(wishItems, ({ one }) => ({
   }),
 }));
 
-export const draws = pgTable("draws", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  sessionId: uuid("session_id")
-    .references(() => sessions.id, { onDelete: "cascade" })
-    .notNull(),
-  giverId: uuid("giver_id")
-    .references(() => participants.id, { onDelete: "cascade" })
-    .notNull(),
-  receiverId: uuid("receiver_id")
-    .references(() => participants.id, { onDelete: "cascade" })
-    .notNull(),
-  revealedAt: timestamp("revealed_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const draws = pgTable(
+  "draws",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sessionId: uuid("session_id")
+      .references(() => sessions.id, { onDelete: "cascade" })
+      .notNull(),
+    giverId: uuid("giver_id")
+      .references(() => participants.id, { onDelete: "cascade" })
+      .notNull(),
+    receiverId: uuid("receiver_id")
+      .references(() => participants.id, { onDelete: "cascade" })
+      .notNull(),
+    revealedAt: timestamp("revealed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("draws_session_giver_unique").on(
+      table.sessionId,
+      table.giverId,
+    ),
+    uniqueIndex("draws_session_receiver_unique").on(
+      table.sessionId,
+      table.receiverId,
+    ),
+    check("draws_no_self_draw", sql`${table.giverId} <> ${table.receiverId}`),
+  ],
+);
 
 export const adminSessions = pgTable("admin_sessions", {
   id: uuid("id").defaultRandom().primaryKey(),
