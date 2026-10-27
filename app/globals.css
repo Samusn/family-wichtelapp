@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @theme inline {
   --font-sans: var(--font-nunito);
@@ -13,6 +14,23 @@
   --color-pine-deep: #116343;
   --color-cream: #fff8ec;
   --color-night: #140a07;
+
+  --color-background: #22160f;
+  --color-foreground: var(--color-cream);
+  --color-popover: #22160f;
+  --color-popover-foreground: var(--color-cream);
+  --color-primary: var(--color-gold);
+  --color-primary-foreground: var(--color-night);
+  --color-secondary: rgb(255 255 255 / 0.08);
+  --color-secondary-foreground: var(--color-cream);
+  --color-accent: rgb(255 255 255 / 0.1);
+  --color-accent-foreground: var(--color-cream);
+  --color-muted: rgb(255 255 255 / 0.06);
+  --color-muted-foreground: rgb(255 248 236 / 0.5);
+  --color-destructive: var(--color-berry);
+  --color-border: rgb(255 255 255 / 0.12);
+  --color-input: rgb(255 255 255 / 0.12);
+  --color-ring: var(--color-gold);
 }
 
 html {

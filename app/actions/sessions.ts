@@ -5,15 +5,31 @@ import { sessions } from "@db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { requireAdmin } from "@/lib/adminAuth";
 
-export async function createSession(name: string, year: number) {
+function parseDate(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export async function createSession(
+  name: string,
+  celebrationAt: string,
+): Promise<{ error: string | null }> {
   await requireAdmin();
 
-  const [session] = await db
-    .insert(sessions)
-    .values({ name, year, isActive: true, isArchived: false })
-    .returning();
+  const date = parseDate(celebrationAt);
+  if (!date) {
+    return { error: "Bitte Datum und Uhrzeit der Feier angeben." };
+  }
 
-  return session;
+  await db.insert(sessions).values({
+    name,
+    year: date.getFullYear(),
+    celebrationAt: date,
+    isActive: true,
+    isArchived: false,
+  });
+
+  return { error: null };
 }
 
 export async function getSession(sessionId: string) {
@@ -32,6 +48,25 @@ export async function getAllSessions() {
     orderBy: [desc(sessions.year)],
     with: { participants: true },
   });
+}
+
+export async function updateCelebration(
+  sessionId: string,
+  celebrationAt: string,
+): Promise<{ error: string | null }> {
+  await requireAdmin();
+
+  const date = parseDate(celebrationAt);
+  if (!date) {
+    return { error: "Bitte Datum und Uhrzeit der Feier angeben." };
+  }
+
+  await db
+    .update(sessions)
+    .set({ celebrationAt: date, year: date.getFullYear() })
+    .where(eq(sessions.id, sessionId));
+
+  return { error: null };
 }
 
 export async function archiveSession(sessionId: string) {

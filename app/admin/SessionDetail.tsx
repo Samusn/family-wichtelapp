@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { getSession, archiveSession } from "@/app/actions/sessions";
+import {
+  getSession,
+  archiveSession,
+  updateCelebration,
+} from "@/app/actions/sessions";
 import { addParticipant, removeParticipant } from "@/app/actions/participants";
 import {
   performDraw,
@@ -12,6 +16,7 @@ import {
 import {
   Archive,
   ArrowRight,
+  CalendarClock,
   Check,
   ChevronLeft,
   Copy,
@@ -28,6 +33,7 @@ import {
 } from "lucide-react";
 import Button from "@components/ui/Button";
 import Card, { CardTitle } from "@components/ui/Card";
+import DateTimePicker from "@components/ui/DateTimePicker";
 import Input from "@components/ui/Input";
 import Page from "@components/ui/Page";
 import Title from "@components/ui/Title";
@@ -52,8 +58,14 @@ type Session = {
   year: number;
   isActive: boolean;
   isArchived: boolean;
+  celebrationAt: Date;
   participants: Participant[];
 };
+
+function toLocalInput(date: Date) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
 
 export default function SessionDetail({
   sessionId,
@@ -69,6 +81,7 @@ export default function SessionDetail({
   );
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [newParticipantName, setNewParticipantName] = useState("");
+  const [celebrationAt, setCelebrationAt] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -76,6 +89,7 @@ export default function SessionDetail({
     const data = await getSession(sessionId);
     if (data) {
       setSession(data as unknown as Session);
+      setCelebrationAt(toLocalInput(data.celebrationAt));
       setDraws(await getDrawStatusForSession(sessionId));
     }
   }, [sessionId]);
@@ -153,6 +167,19 @@ export default function SessionDetail({
     setLoading(false);
   }
 
+  async function handleCelebration(e: React.FormEvent) {
+    e.preventDefault();
+    if (!session || !celebrationAt) return;
+    setLoading(true);
+    const { error } = await updateCelebration(
+      session.id,
+      new Date(celebrationAt).toISOString(),
+    );
+    showMessage(error ?? "Datum gespeichert!");
+    await loadData();
+    setLoading(false);
+  }
+
   async function handleArchive() {
     if (!session) return;
     if (
@@ -203,7 +230,7 @@ export default function SessionDetail({
         {session.isArchived && (
           <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-sm text-gold-soft ring-1 ring-white/15">
             <Lock className="w-4 h-4" aria-hidden />
-            Archiviert
+            Archiviert · {session.year}
           </span>
         )}
       </header>
@@ -330,6 +357,29 @@ export default function SessionDetail({
               )}
             </div>
           ))}
+        </Card>
+      )}
+
+      {isEditable && (
+        <Card className="flex flex-col gap-4">
+          <CardTitle icon={<CalendarClock aria-hidden />}>
+            Weihnachtsfeier
+          </CardTitle>
+          <p className="text-sm text-cream/60">
+            Bis zu diesem Zeitpunkt läuft der Countdown auf der Startseite.
+            Danach steht dort „Frohe Weihnachten!“.
+          </p>
+          <form onSubmit={handleCelebration} className="flex flex-col gap-3">
+            <DateTimePicker value={celebrationAt} onChange={setCelebrationAt} />
+            <Button
+              type="submit"
+              variant="pine"
+              disabled={loading || !celebrationAt}
+            >
+              <Check className="w-5 h-5" aria-hidden />
+              Speichern
+            </Button>
+          </form>
         </Card>
       )}
 

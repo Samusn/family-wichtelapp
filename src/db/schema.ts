@@ -18,6 +18,9 @@ export const sessions = pgTable("sessions", {
   year: integer("year").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   isArchived: boolean("is_archived").default(false).notNull(),
+  celebrationAt: timestamp("celebration_at", {
+    withTimezone: true,
+  }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
