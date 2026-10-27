@@ -29,6 +29,7 @@ import { GROUPS, NOTE_MAX_LENGTH, getCategory } from "@/lib/catalog";
 import CategoryIcon from "@/app/components/CategoryIcon";
 import Card from "@components/ui/Card";
 import { Textarea } from "@components/ui/Input";
+import { useSetLikes } from "./LiveWishCount";
 
 type Selection = Record<string, { sentiment: Sentiment; tags: string[] }>;
 
@@ -67,6 +68,7 @@ export default function CatalogEditor({
     toSelection(preferences),
   );
   const [notes, setNotes] = useState(preferences.notes);
+  const setLikes = useSetLikes();
   const [openGroups, setOpenGroups] = useState<string[]>([]);
   const [status, setStatus] = useState<
     "idle" | "saving" | "saved" | "retrying" | "error"
@@ -153,6 +155,9 @@ export default function CatalogEditor({
   }, [save]);
 
   function updateSelection(next: Selection) {
+    setLikes(
+      Object.values(next).filter((entry) => entry.sentiment === "like").length,
+    );
     latest.current.selection = next;
     dirty.current = true;
     setSelection(next);
