@@ -4,7 +4,8 @@ import { getParticipantByToken } from "@/app/actions/participants";
 import { getSessionPreferences } from "@/app/actions/catalog";
 import { GROUPS, getCategory } from "@/lib/catalog";
 import CategoryIcon from "@components/CategoryIcon";
-import WishContent from "@components/WishContent";
+import WishCard from "@components/WishCard";
+import WishStats from "@components/WishStats";
 import BackLink from "@components/ui/BackLink";
 import Card, { CardTitle } from "@components/ui/Card";
 import Page from "@components/ui/Page";
@@ -43,13 +44,14 @@ export default async function PersonWishlistPage({
     <Page>
       <BackLink href={`/p/${token}/wunschlisten`} />
 
-      <header className="text-center">
+      <header className="flex flex-col items-center gap-3 text-center">
         <Title>{person.name}</Title>
+        {!isEmpty && <WishStats count={person.wishes.length + likes.length} />}
       </header>
 
       {isEmpty && (
         <Card>
-          <p className="text-center text-cream/60">
+          <p className="text-center text-cream/80">
             {person.name} hat noch nichts eingetragen.
           </p>
         </Card>
@@ -58,23 +60,25 @@ export default async function PersonWishlistPage({
       {person.wishes.length > 0 && (
         <Card holly className="flex flex-col gap-4">
           <CardTitle icon={<ScrollText aria-hidden />}>Wünscht sich</CardTitle>
-          <ul className="flex flex-col gap-2">
-            {person.wishes.map((wish) => (
-              <li
-                key={wish.id}
-                className={`flex items-center gap-2 rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 ${
-                  wish.reservation === "taken" ? "opacity-60" : ""
-                }`}
-              >
-                <WishContent wish={wish} />
-                <div className="shrink-0 pr-1">
-                  <ReserveButton
-                    token={token}
-                    wishId={wish.id}
-                    reservation={wish.reservation}
-                    isEditable={isEditable}
-                  />
-                </div>
+          <ul className="flex flex-col gap-3">
+            {person.wishes.map((wish, index) => (
+              <li key={wish.id}>
+                <WishCard
+                  wish={wish}
+                  index={index}
+                  taken={wish.reservation === "taken"}
+                  highlighted={wish.reservation === "mine"}
+                  footer={
+                    wish.reservation !== "taken" && (
+                      <ReserveButton
+                        token={token}
+                        wishId={wish.id}
+                        reservation={wish.reservation}
+                        isEditable={isEditable}
+                      />
+                    )
+                  }
+                />
               </li>
             ))}
           </ul>
@@ -86,7 +90,7 @@ export default async function PersonWishlistPage({
           <CardTitle icon={<CandyCane aria-hidden />}>
             Freut sich über
           </CardTitle>
-          <ul className="flex flex-col gap-2">
+          <ul className="grid grid-cols-2 gap-3">
             {likes.map((choice) => {
               const category = getCategory(choice.categoryId)!;
               const tagLabels = category.tags
@@ -95,28 +99,30 @@ export default async function PersonWishlistPage({
               return (
                 <li
                   key={choice.categoryId}
-                  className="flex flex-col gap-2 rounded-2xl bg-pine/15 p-3 ring-1 ring-pine/40"
+                  className="flex flex-col overflow-hidden rounded-3xl bg-pine/10 ring-1 ring-pine/40"
                 >
-                  <span className="flex items-center gap-3 font-bold">
-                    <span className="grid place-items-center w-9 h-9 shrink-0 rounded-xl bg-pine">
-                      <CategoryIcon
-                        categoryId={category.id}
-                        className="w-5 h-5"
-                      />
+                  <span className="relative block aspect-[4/3]">
+                    <img
+                      src={`/images/catalog/${category.id}.jpg`}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                    <span className="absolute inset-0 bg-gradient-to-t from-night/90 via-night/20 to-transparent" />
+                    <span className="absolute inset-x-3 bottom-2 font-bold leading-tight text-cream">
+                      {category.label}
                     </span>
-                    {category.label}
                   </span>
                   {tagLabels.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pl-12">
+                    <span className="flex flex-wrap gap-1.5 p-2.5">
                       {tagLabels.map((label) => (
                         <span
                           key={label}
-                          className="rounded-full bg-gold px-3 py-1 text-sm font-semibold text-night"
+                          className="rounded-full bg-gold px-2.5 py-0.5 text-[12px] font-semibold text-night"
                         >
                           {label}
                         </span>
                       ))}
-                    </div>
+                    </span>
                   )}
                 </li>
               );
@@ -134,7 +140,7 @@ export default async function PersonWishlistPage({
                 key={group.id}
                 className="rounded-2xl bg-gold/10 p-3 text-sm ring-1 ring-gold/30"
               >
-                <span className="block text-xs font-extrabold uppercase tracking-wider text-gold-soft/80">
+                <span className="block text-xs font-extrabold uppercase tracking-wider text-gold-soft">
                   {group.label}
                 </span>
                 <span className="whitespace-pre-line text-gold-soft">
@@ -155,7 +161,7 @@ export default async function PersonWishlistPage({
               return (
                 <span
                   key={choice.categoryId}
-                  className="flex items-center gap-2 rounded-full bg-berry/20 px-3 py-1 text-sm font-semibold text-red-200 ring-1 ring-berry/40"
+                  className="flex items-center gap-2 rounded-full bg-berry/20 px-3 py-1 text-sm font-semibold text-red-100 ring-1 ring-berry/40"
                 >
                   <CategoryIcon categoryId={category.id} className="w-4 h-4" />
                   {category.label}

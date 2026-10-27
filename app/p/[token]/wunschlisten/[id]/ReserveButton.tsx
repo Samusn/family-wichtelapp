@@ -48,10 +48,10 @@ export default function ReserveButton({
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div className="flex flex-col items-stretch gap-1">
       {reservation === "mine" ? (
         <>
-          <span className="flex items-center gap-1.5 text-sm font-bold text-pine">
+          <span className="flex items-center justify-center gap-1.5 rounded-full bg-pine/20 py-1.5 text-sm font-bold text-emerald-200 ring-1 ring-pine/50">
             <Check className="w-4 h-4" aria-hidden />
             Von dir reserviert
           </span>
@@ -59,6 +59,7 @@ export default function ReserveButton({
             <Button
               variant="ghost"
               size="sm"
+              className="w-full"
               onClick={() => run(() => unreserveWish(token, wishId))}
               disabled={loading}
             >
@@ -71,6 +72,7 @@ export default function ReserveButton({
           <Button
             variant="pine"
             size="sm"
+            className="w-full"
             onClick={() => run(() => reserveWish(token, wishId))}
             disabled={loading}
           >
@@ -79,7 +81,9 @@ export default function ReserveButton({
           </Button>
         )
       )}
-      {error && <span className="text-xs text-orange-300">{error}</span>}
+      {error && (
+        <span className="text-center text-xs text-orange-300">{error}</span>
+      )}
     </div>
   );
 }

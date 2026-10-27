@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getParticipantByToken } from "@/app/actions/participants";
-import { getDrawForParticipant } from "@/app/actions/draws";
+import { getDrawForToken } from "@/app/actions/draws";
 import ParticipantView from "./ParticipantView";
 
 export default async function ParticipantPage({
@@ -15,19 +15,16 @@ export default async function ParticipantPage({
     redirect("/");
   }
 
-  const draw = await getDrawForParticipant(
-    participant.session.id,
-    participant.id,
-  );
+  const draw = await getDrawForToken(token);
 
   return (
     <ParticipantView
       participant={{ token }}
       session={{ isArchived: participant.session.isArchived }}
       draw={
-        draw?.receiver
+        draw
           ? {
-              drawnName: draw.receiver.name,
+              drawnName: draw.receiverName,
               isRevealed: draw.revealedAt !== null,
             }
           : null

@@ -6,6 +6,7 @@ import { isIPv6 } from "net";
 import { db } from "@db/index";
 import { adminSessions, loginAttempts } from "@db/schema";
 import { eq, sql } from "drizzle-orm";
+import { isAdmin } from "@/lib/adminAuth";
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
@@ -124,25 +125,7 @@ export async function verifyAdminPassword(password: string) {
 }
 
 export async function checkAdminSession() {
-  const cookieStore = await cookies();
-  const cookie = cookieStore.get("admin_session");
-  if (!cookie?.value) return false;
-
-  const session = await db.query.adminSessions.findFirst({
-    where: eq(adminSessions.token, cookie.value),
-  });
-
-  if (!session || session.expiresAt < new Date()) {
-    if (session) {
-      await db
-        .delete(adminSessions)
-        .where(eq(adminSessions.id, session.id));
-    }
-    cookieStore.delete("admin_session");
-    return false;
-  }
-
-  return true;
+  return isAdmin();
 }
 
 export async function logoutAdmin() {
@@ -150,9 +133,7 @@ export async function logoutAdmin() {
   const cookie = cookieStore.get("admin_session");
 
   if (cookie?.value) {
-    await db
-      .delete(adminSessions)
-      .where(eq(adminSessions.token, cookie.value));
+    await db.delete(adminSessions).where(eq(adminSessions.token, cookie.value));
   }
 
   cookieStore.delete("admin_session");
