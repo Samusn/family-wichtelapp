@@ -13,6 +13,7 @@ import {
 import SessionDetail from "./SessionDetail";
 import Button from "@components/ui/Button";
 import Card, { CardTitle } from "@components/ui/Card";
+import DateTimePicker from "@components/ui/DateTimePicker";
 import Input from "@components/ui/Input";
 import Page from "@components/ui/Page";
 import Title from "@components/ui/Title";
@@ -36,8 +37,9 @@ export default function SessionOverview({
     null,
   );
   const [newName, setNewName] = useState("");
-  const [newYear, setNewYear] = useState(new Date().getFullYear());
+  const [newCelebrationAt, setNewCelebrationAt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const loadSessions = useCallback(async () => {
     const data = await getAllSessions();
@@ -50,10 +52,17 @@ export default function SessionOverview({
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!newName.trim()) return;
+    if (!newName.trim() || !newCelebrationAt) return;
     setLoading(true);
-    await createSession(newName.trim(), newYear);
-    setNewName("");
+    const result = await createSession(
+      newName.trim(),
+      new Date(newCelebrationAt).toISOString(),
+    );
+    setError(result.error ?? "");
+    if (!result.error) {
+      setNewName("");
+      setNewCelebrationAt("");
+    }
     await loadSessions();
     setLoading(false);
   }
@@ -85,25 +94,29 @@ export default function SessionOverview({
 
       <Card className="flex flex-col gap-4">
         <CardTitle icon={<Sparkles aria-hidden />}>Neue Session</CardTitle>
-        <form
-          onSubmit={handleCreate}
-          className="flex flex-col gap-3 sm:flex-row"
-        >
+        <form onSubmit={handleCreate} className="flex flex-col gap-3">
           <Input
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="z. B. Weihnachten 2026"
-            className="sm:flex-1"
+            required
           />
-          <Input
-            type="number"
-            value={newYear}
-            onChange={(e) => setNewYear(Number(e.target.value))}
-            aria-label="Jahr"
-            className="sm:w-28"
-          />
-          <Button type="submit" variant="pine" disabled={loading}>
+          <div className="flex flex-col gap-1.5">
+            <span className="px-1 text-sm text-cream/70">
+              Weihnachtsfeier (Datum und Uhrzeit)
+            </span>
+            <DateTimePicker
+              value={newCelebrationAt}
+              onChange={setNewCelebrationAt}
+            />
+          </div>
+          {error && <p className="text-sm text-red-300">{error}</p>}
+          <Button
+            type="submit"
+            variant="pine"
+            disabled={loading || !newName.trim() || !newCelebrationAt}
+          >
             Erstellen
           </Button>
         </form>

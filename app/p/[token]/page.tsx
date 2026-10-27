@@ -51,7 +51,9 @@ export default async function StartPage({
           <Title className="text-7xl">{participant.name}!</Title>
         </div>
         <Animation name="christmas-tenten" className="w-100 h-100 -mt-4" />
-        <Countdown />
+        <Countdown
+          celebrationAt={participant.session.celebrationAt.toISOString()}
+        />
         <h2 className="mt-6 -mb-3 text-lg font-bold text-gold">So funktioniert’s</h2>
       </header>
 
