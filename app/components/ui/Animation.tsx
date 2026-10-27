@@ -12,7 +12,7 @@ export default function Animation({
   lottieRef,
   onComplete,
 }: {
-  name: "gift-box" | "santa" | "snow-globe" | "christmas-tenten" | "reindeer";
+  name: "gift-box" | "santa" | "snow-globe" | "christmas-tenten" | "reindeer" | "cats-christmas";
   className?: string;
   loop?: boolean;
   autoplay?: boolean;
