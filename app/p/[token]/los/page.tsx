@@ -25,6 +25,7 @@ export default async function ParticipantPage({
         draw
           ? {
               drawnName: draw.receiverName,
+              wishlistHref: `/p/${token}/wunschlisten/${draw.receiverId}`,
               isRevealed: draw.revealedAt !== null,
             }
           : null

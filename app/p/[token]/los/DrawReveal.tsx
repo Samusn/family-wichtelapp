@@ -1,48 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import confetti from "canvas-confetti";
-import { Eye, EyeOff, Sparkles } from "lucide-react";
+import { Eye, EyeOff, ScrollText, Sparkles } from "lucide-react";
 import { markDrawRevealed } from "@/app/actions/draws";
+import { celebrate } from "@components/celebrate";
 import Animation from "@components/ui/Animation";
 import Button from "@components/ui/Button";
 
-const CONFETTI_COLORS = ["#f8c94a", "#ffe7a0", "#e0313f", "#22a06b", "#fff8ec"];
 const VISIBLE_MS = 5000;
 const SHAKE_MS = 2600;
 const FLAKE_COUNT = 32;
-
-function celebrate() {
-  const defaults = {
-    colors: CONFETTI_COLORS,
-    disableForReducedMotion: true,
-    zIndex: 60,
-  };
-  confetti({
-    ...defaults,
-    particleCount: 120,
-    spread: 80,
-    origin: { y: 0.55 },
-  });
-  setTimeout(() => {
-    confetti({
-      ...defaults,
-      particleCount: 60,
-      angle: 60,
-      spread: 60,
-      origin: { x: 0, y: 0.7 },
-    });
-    confetti({
-      ...defaults,
-      particleCount: 60,
-      angle: 120,
-      spread: 60,
-      origin: { x: 1, y: 0.7 },
-    });
-  }, 250);
-}
 
 type Flake = {
   left: number;
@@ -71,10 +41,12 @@ function createFlakes(): Flake[] {
 export default function DrawReveal({
   token,
   drawnName,
+  wishlistHref,
   isRevealed,
 }: {
   token: string;
   drawnName: string;
+  wishlistHref: string;
   isRevealed: boolean;
 }) {
   const [stage, setStage] = useState<"closed" | "shaking" | "open">(
@@ -133,7 +105,7 @@ export default function DrawReveal({
   const shaking = stage === "shaking";
 
   return (
-    <div className="flex h-[28rem] w-full flex-col items-center justify-center">
+    <div className="flex h-[32rem] w-full flex-col items-center justify-center">
       <p className="text-sm font-semibold text-gold-soft/80">
         {closed
           ? "Wen beschenkst du dieses Jahr?"
@@ -259,16 +231,25 @@ export default function DrawReveal({
           />
         )}
       </div>
-      <div className="mt-3 flex h-14 items-center">
+      <div className="mt-3 flex h-28 flex-col items-center justify-center gap-2">
         {stage === "open" ? (
-          <Button variant="ghost" size="sm" onClick={visible ? hide : show}>
-            {visible ? (
-              <EyeOff className="w-4 h-4" aria-hidden />
-            ) : (
-              <Eye className="w-4 h-4" aria-hidden />
-            )}
-            {visible ? "Name verbergen" : "Name zeigen"}
-          </Button>
+          <>
+            <Link
+              href={wishlistHref}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-pine to-pine-deep px-6 py-3 font-bold text-cream shadow-lg shadow-pine-deep/30 transition-all duration-200 hover:shadow-xl active:scale-[0.97] active:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+            >
+              <ScrollText className="w-5 h-5" aria-hidden />
+              Wunschliste ansehen
+            </Link>
+            <Button variant="ghost" size="sm" onClick={visible ? hide : show}>
+              {visible ? (
+                <EyeOff className="w-4 h-4" aria-hidden />
+              ) : (
+                <Eye className="w-4 h-4" aria-hidden />
+              )}
+              {visible ? "Name verbergen" : "Name zeigen"}
+            </Button>
+          </>
         ) : (
           <Button
             variant="festive"

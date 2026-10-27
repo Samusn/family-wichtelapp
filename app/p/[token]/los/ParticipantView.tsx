@@ -8,7 +8,11 @@ import Title from "@components/ui/Title";
 type Props = {
   participant: { token: string };
   session: { isArchived: boolean };
-  draw: { drawnName: string; isRevealed: boolean } | null;
+  draw: {
+    drawnName: string;
+    wishlistHref: string;
+    isRevealed: boolean;
+  } | null;
 };
 
 export default function ParticipantView({ participant, session, draw }: Props) {
@@ -25,15 +29,19 @@ export default function ParticipantView({ participant, session, draw }: Props) {
         </p>
       )}
 
-      <Card holly className="flex flex-1 flex-col items-center justify-center gap-5">
+      <Card
+        holly
+        className="flex flex-1 flex-col items-center justify-center gap-5"
+      >
         {draw ? (
           <DrawReveal
             token={participant.token}
             drawnName={draw.drawnName}
+            wishlistHref={draw.wishlistHref}
             isRevealed={draw.isRevealed}
           />
         ) : (
-          <div className="flex h-[28rem] flex-col items-center justify-center gap-2 text-center">
+          <div className="flex h-[32rem] flex-col items-center justify-center gap-2 text-center">
             <Animation name="snow-globe" className="w-48 h-48" />
             <p className="text-cream/80">
               Die Ziehung hat noch nicht stattgefunden.
