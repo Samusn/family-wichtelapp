@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CalendarPlus } from "lucide-react";
+import { celebrate } from "@components/celebrate";
 
 type Time = {
   days: number;
@@ -21,6 +23,29 @@ function calc(target: number): Time {
   };
 }
 
+function celebrateOnce(celebrationAt: string) {
+  const key = `celebrated:${celebrationAt}`;
+  try {
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, "1");
+  } catch {}
+  celebrate();
+}
+
+function formatCelebration(celebrationAt: string) {
+  const date = new Date(celebrationAt);
+  const day = date.toLocaleDateString("de-CH", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  const time = date.toLocaleTimeString("de-CH", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${day} · ${time} Uhr`;
+}
+
 const UNITS = [
   { key: "days", label: "Tage" },
   { key: "hours", label: "Std" },
@@ -30,8 +55,10 @@ const UNITS = [
 
 export default function Countdown({
   celebrationAt,
+  calendarHref,
 }: {
   celebrationAt: string;
+  calendarHref: string;
 }) {
   const [time, setTime] = useState<Time | null>(null);
 
@@ -40,7 +67,10 @@ export default function Countdown({
     const tick = () => {
       const next = calc(target);
       setTime(next);
-      if (next.done) clearInterval(id);
+      if (next.done) {
+        clearInterval(id);
+        celebrateOnce(celebrationAt);
+      }
     };
     const id = setInterval(tick, 1000);
     tick();
@@ -71,6 +101,14 @@ export default function Countdown({
           </div>
         ))}
       </div>
+      <a
+        href={calendarHref}
+        aria-label={`${formatCelebration(celebrationAt)} – zum Kalender hinzufügen`}
+        className="glass mt-2 flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold text-gold-soft transition active:scale-[0.97] hover:bg-white/12"
+      >
+        <CalendarPlus className="w-4 h-4 shrink-0 text-gold" aria-hidden />
+        {formatCelebration(celebrationAt)}
+      </a>
     </div>
   );
 }

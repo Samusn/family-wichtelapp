@@ -53,6 +53,7 @@ export default async function StartPage({
         <Animation name="christmas-tenten" className="w-100 h-100 -mt-4" />
         <Countdown
           celebrationAt={participant.session.celebrationAt.toISOString()}
+          calendarHref={`${base}/kalender`}
         />
         <h2 className="mt-6 -mb-3 text-lg font-bold text-gold">So funktioniert’s</h2>
       </header>

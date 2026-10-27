@@ -114,11 +114,15 @@ export async function getDrawForToken(token: string) {
       eq(draws.giverId, participant.id),
     ),
     columns: { revealedAt: true },
-    with: { receiver: { columns: { name: true } } },
+    with: { receiver: { columns: { id: true, name: true } } },
   });
 
   return draw
-    ? { receiverName: draw.receiver.name, revealedAt: draw.revealedAt }
+    ? {
+        receiverId: draw.receiver.id,
+        receiverName: draw.receiver.name,
+        revealedAt: draw.revealedAt,
+      }
     : null;
 }
 

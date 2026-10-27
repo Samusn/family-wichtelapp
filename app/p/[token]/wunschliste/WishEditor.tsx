@@ -39,6 +39,29 @@ export default function WishEditor({
   const [removeImage, setRemoveImage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!image) {
+      setPreview(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(image);
+    setPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [image]);
+
+  const shownImage =
+    preview ?? (editing?.imageUrl && !removeImage ? editing.imageUrl : null);
+
+  function clearImage() {
+    if (image) {
+      setImage(null);
+      if (fileInput.current) fileInput.current.value = "";
+    } else {
+      setRemoveImage(true);
+    }
+  }
 
   useEffect(() => {
     if (editing)
@@ -209,33 +232,45 @@ export default function WishEditor({
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Link (optional)"
           />
-          <label className="flex cursor-pointer items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/20 transition hover:bg-white/15">
-            <ImagePlus
-              className="w-5 h-5 shrink-0 text-gold-soft"
-              aria-hidden
-            />
-            <span className="truncate text-cream/80">
-              {image ? image.name : "Bild hinzufügen (optional)"}
-            </span>
-            <input
-              ref={fileInput}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              onChange={(e) => setImage(e.target.files?.[0] ?? null)}
-              className="sr-only"
-            />
-          </label>
-          {editing?.imageUrl && !image && (
-            <label className="flex items-center gap-2 text-sm text-cream/70">
+          <div className="flex items-center gap-3 rounded-2xl bg-white/10 py-2 pl-2 pr-2 ring-1 ring-white/20 transition hover:bg-white/15">
+            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
+              {shownImage ? (
+                <img
+                  src={shownImage}
+                  alt=""
+                  className="h-12 w-12 shrink-0 rounded-xl object-cover"
+                />
+              ) : (
+                <span className="grid h-12 w-12 shrink-0 place-items-center">
+                  <ImagePlus className="w-5 h-5 text-gold-soft" aria-hidden />
+                </span>
+              )}
+              <span className="truncate text-cream/80">
+                {image
+                  ? image.name
+                  : shownImage
+                    ? "Bild ändern"
+                    : "Bild hinzufügen (optional)"}
+              </span>
               <input
-                type="checkbox"
-                checked={removeImage}
-                onChange={(e) => setRemoveImage(e.target.checked)}
-                className="accent-berry"
+                ref={fileInput}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+                className="sr-only"
               />
-              Aktuelles Bild entfernen
             </label>
-          )}
+            {shownImage && (
+              <button
+                type="button"
+                onClick={clearImage}
+                aria-label="Bild entfernen"
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-cream/70 transition hover:bg-white/10 hover:text-cream active:scale-95"
+              >
+                <X className="w-5 h-5" aria-hidden />
+              </button>
+            )}
+          </div>
           {error && <p className="text-sm text-orange-300">{error}</p>}
           <Button type="submit" disabled={loading || !title.trim()}>
             {loading ? "Speichern…" : editing ? "Speichern" : "Hinzufügen"}
