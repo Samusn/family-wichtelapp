@@ -4,11 +4,7 @@ import { db } from "@db/index";
 import { sessions } from "@db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { requireAdmin } from "@/lib/adminAuth";
-
-function parseDate(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
+import { parseDate } from "./sessions.pure";
 
 export async function createSession(
   name: string,

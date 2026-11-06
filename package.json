@@ -7,6 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "firestore:deploy-indexes": "firebase deploy --only firestore:indexes",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
@@ -55,6 +57,7 @@
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.1.0"
   }
 }
