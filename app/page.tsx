@@ -1,25 +1,29 @@
-import Link from 'next/link'
-import GlowTitle from '@components/GlowTitle'
-import Countdown from '@components/Countdown'
-import SantaLottie from '@components/SantaLottie'
+import Link from "next/link";
+import { Link2 } from "lucide-react";
+import Animation from "@components/ui/Animation";
+import Card from "@components/ui/Card";
+import Page from "@components/ui/Page";
+import Title from "@components/ui/Title";
 
 export default function IndexPage() {
   return (
-    <main className='flex flex-col items-center justify-center min-h-screen p-8 gap-10'>
-      <GlowTitle
-        text='Frohes Wichteln!'
-        size='text-5xl sm:text-5xl'
-      />
-      <div className='w-[300px]'>
-        <SantaLottie />
-      </div>
-      <Countdown variant='boxed' />
+    <Page className="items-center justify-center text-center">
+      <Animation name="santa" className="w-56 h-56 -mb-6" />
+      <Title className="text-6xl">Wichtel4family</Title>
+      <p className="text-lg text-cream/80">Wichteln mit der ganzen Familie</p>
+      <Card holly className="flex items-start gap-3 text-left">
+        <Link2 className="w-5 h-5 shrink-0 mt-0.5 text-gold" aria-hidden />
+        <p className="text-cream/80">
+          Du hast einen persönlichen Link bekommen? Öffne ihn, um dein
+          Wichtel-Los zu sehen und deinen Wunschkatalog auszufüllen.
+        </p>
+      </Card>
       <Link
-        href='/login'
-        className='inline-block bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white font-semibold w-[85%] px-6 py-3 text-lg rounded-2xl shadow-lg transition-all hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-700 text-center'
+        href="/impressum"
+        className="text-sm text-cream/50 transition-colors hover:text-cream/80"
       >
-        Hier geht’s weiter →
+        Impressum
       </Link>
-    </main>
-  )
+    </Page>
+  );
 }
