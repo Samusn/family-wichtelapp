@@ -194,7 +194,7 @@ export default function SessionDetail({
   }
 
   function getParticipantLink(urlToken: string) {
-    return `https://wichtel4family.ch/p/${urlToken}`;
+    return `${window.location.origin}/p/${urlToken}`;
   }
 
   function showCopied(id: string) {
