@@ -209,7 +209,7 @@ export default function SessionDetail({
 
   async function copyMessage(participantId: string, name: string, urlToken: string) {
     const link = getParticipantLink(urlToken);
-    const text = `Liebe/r ${name},\n\nSchön, machst du beim diesjährigen Wichteln mit! 🤶🎄\n\nHier ist dein persönlicher Link. Da kannst du dein Los ziehen, deine Wunschliste füllen und die Wünsche anderer sehen:\n\n${link}\n\nBitte teile diesen Link mit niemandem – er ist nur für dich! 😁🎁`;
+    const text = `Liebe/r ${name},\n\nSchön, machst du beim diesjährigen Wichteln mit! 🎅🎄\n\nHier ist dein persönlicher Link. Da kannst du dein Los ziehen, deine Wunschliste füllen und die Wünsche anderer sehen:\n\n${link}\n\nBitte teile diesen Link mit niemandem – er ist nur für dich! 😁🎁`;
     await navigator.clipboard.writeText(text);
     showCopied(`${participantId}-text`);
   }
