@@ -20,7 +20,6 @@ import {
   Check,
   ChevronLeft,
   Copy,
-  Link as LinkIcon,
   Eye,
   EyeOff,
   Gift,
@@ -85,7 +84,6 @@ export default function SessionDetail({
   const [celebrationAt, setCelebrationAt] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     const data = await getSession(sessionId);
@@ -194,24 +192,12 @@ export default function SessionDetail({
   }
 
   function getParticipantLink(urlToken: string) {
-    return `https://wichtel4family.ch/p/${urlToken}`;
+    return `${window.location.origin}/p/${urlToken}`;
   }
 
-  function showCopied(id: string) {
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  }
-
-  async function copyLink(participantId: string, urlToken: string) {
+  async function copyLink(urlToken: string) {
     await navigator.clipboard.writeText(getParticipantLink(urlToken));
-    showCopied(`${participantId}-link`);
-  }
-
-  async function copyMessage(participantId: string, name: string, urlToken: string) {
-    const link = getParticipantLink(urlToken);
-    const text = `Liebe/r ${name},\n\nSchön, machst du beim diesjährigen Wichteln mit! 🤶🎄\n\nHier ist dein persönlicher Link. Da kannst du dein Los ziehen, deine Wunschliste füllen und die Wünsche anderer sehen:\n\n${link}\n\nBitte teile diesen Link mit niemandem – er ist nur für dich! 😁🎁`;
-    await navigator.clipboard.writeText(text);
-    showCopied(`${participantId}-text`);
+    showMessage("Link kopiert!");
   }
 
   function showMessage(msg: string) {
@@ -298,26 +284,10 @@ export default function SessionDetail({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => copyLink(p.id, p.urlToken)}
-                  aria-label={`Link für ${p.name} kopieren`}
+                  onClick={() => copyLink(p.urlToken)}
                 >
-                  {copiedId === `${p.id}-link` ? (
-                    <><Check className="w-4 h-4 text-pine" aria-hidden />Kopiert!</>
-                  ) : (
-                    <><LinkIcon className="w-4 h-4" aria-hidden />Link</>
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyMessage(p.id, p.name, p.urlToken)}
-                  aria-label={`Nachricht für ${p.name} kopieren`}
-                >
-                  {copiedId === `${p.id}-text` ? (
-                    <><Check className="w-4 h-4 text-pine" aria-hidden />Kopiert!</>
-                  ) : (
-                    <><Copy className="w-4 h-4" aria-hidden />Text</>
-                  )}
+                  <Copy className="w-4 h-4" aria-hidden />
+                  Link
                 </Button>
                 {isEditable && draws.length === 0 && (
                   <Button

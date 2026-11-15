@@ -7,6 +7,7 @@ import {
   Check,
   ChevronDown,
   CircleAlert,
+  UtensilsCrossed,
   Dices,
   Dumbbell,
   Gamepad2,
@@ -33,6 +34,7 @@ import { useSetLikes } from "./LiveWishCount";
 type Selection = Record<string, { sentiment: Sentiment; tags: string[] }>;
 
 const GROUP_ICONS: Record<string, LucideIcon> = {
+  food: UtensilsCrossed,
   style: Shirt,
   tech: Gamepad2,
   culture: Music,
