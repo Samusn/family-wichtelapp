@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { Gift, House, ScrollText, Users } from "lucide-react";
 
 export default function BottomNav({ token }: { token: string }) {
@@ -35,14 +36,20 @@ export default function BottomNav({ token }: { token: string }) {
     <nav className="fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 px-[max(1rem,env(safe-area-inset-left),env(safe-area-inset-right))]">
       <ul className="glass relative mx-auto flex max-w-md rounded-full p-1.5">
         {tabs.map(({ href, label, icon: Icon, active }) => (
-          <li key={href} className="flex-1">
+          <li key={href} className="relative flex-1">
+            {active && (
+              <motion.span
+                layoutId="nav-pill"
+                className="absolute inset-0 rounded-full bg-white/15 shadow-[inset_1px_1px_1px_rgb(255_255_255/0.3),0_2px_10px_rgb(0_0_0/0.2)]"
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              />
+            )}
             <Link
               href={href}
+              prefetch
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-bold transition duration-300 active:scale-95 ${
-                active
-                  ? "bg-white/15 text-gold shadow-[inset_1px_1px_1px_rgb(255_255_255/0.3),0_2px_10px_rgb(0_0_0/0.2)]"
-                  : "text-cream/70 hover:text-cream"
+              className={`relative z-10 flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-bold transition-colors duration-200 active:scale-95 ${
+                active ? "text-gold" : "text-cream/70 hover:text-cream"
               }`}
             >
               <Icon

@@ -1,8 +1,6 @@
 import {
   Bath,
   BookOpen,
-  Candy,
-  ChefHat,
   Clapperboard,
   CreditCard,
   Dices,
@@ -11,29 +9,22 @@ import {
   Gem,
   Gift,
   GraduationCap,
-  HandHeart,
   Lamp,
   Luggage,
   Mountain,
   Music,
   Palette,
   PawPrint,
-  Sandwich,
   Shirt,
   Smartphone,
   Sparkles,
   Sprout,
   Ticket,
-  Wine,
   type LucideIcon,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
   books: BookOpen,
-  sweets: Candy,
-  delicatessen: Sandwich,
-  drinks: Wine,
-  cooking: ChefHat,
   experiences: Ticket,
   travel: Luggage,
   tech: Smartphone,
@@ -53,7 +44,6 @@ const ICONS: Record<string, LucideIcon> = {
   learning: GraduationCap,
   pets: PawPrint,
   vouchers: CreditCard,
-  handmade: HandHeart,
 };
 
 export default function CategoryIcon({
