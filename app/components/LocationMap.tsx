@@ -24,7 +24,7 @@ export default function LocationMap() {
         Hier feiern wir Weihnachten
       </h2>
 
-      <div className="w-full overflow-hidden rounded-[20px] border border-white/12 shadow-lg">
+      <div className="relative z-0 w-full overflow-hidden rounded-[20px] border border-white/12 shadow-lg">
         <MapContainer
           center={[LOCATION.lat, LOCATION.lng]}
           zoom={16}
